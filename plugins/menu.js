@@ -4,7 +4,7 @@ const { cmd, commands } = require("../command");
 cmd(
   {
     pattern: "menu",
-    alise: ["getmenu"],
+    alise: ["getmenu","list,ranulist"],
     desc: "get cmd list",
     category: "main",
     filename: __filename,
@@ -84,7 +84,7 @@ ${menu.group}
 ${menu.search}
 
 
-🥶𝐌𝐚𝐝𝐞 𝐛𝐲 𝐒_𝐈_𝐇_𝐈_𝐋_𝐄_𝐋🥶
+🥶𝐌𝐚𝐝𝐞 𝐛𝐲 RANUMITHA🥶
 
 > ROBIN MENU MSG
 `;
@@ -92,7 +92,7 @@ ${menu.search}
         from,
         {
           image: {
-            url: "https://raw.githubusercontent.com/Dark-Robin/Bot-Helper/refs/heads/main/autoimage/Bot%20robin%20menu.jpg",
+            url: "https://raw.githubusercontent.com/Ranumithaofc/RANU-FILE-S-/refs/heads/main/images/IMG-20250711-WA0010.jpg",
           },
           caption: madeMenu,
         },
