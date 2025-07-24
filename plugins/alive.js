@@ -3,6 +3,7 @@ const {cmd , commands} = require('../command')
 
 cmd({
     pattern: "alive",
+    alias: ["list","ranu"],
     desc: "Check bot online or no.",
     category: "main",
     filename: __filename
