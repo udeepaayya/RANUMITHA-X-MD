@@ -86,7 +86,7 @@ ${menu.search}
 
 🥶𝐌𝐚𝐝𝐞 𝐛𝐲 RANUMITHA🥶
 
-> ROBIN MENU MSG
+> RANUMITHA X MD MENU
 `;
       await robin.sendMessage(
         from,
