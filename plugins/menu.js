@@ -99,7 +99,6 @@ ${menu.group}
         ▫️.img <reply sticker>
         ▫️.url <img/video/audio>
         ▫️.tts <text>
-${menu.search}
 
 > 𝐏𝐨𝐰𝐞𝐫𝐝 𝐛𝐲 𝗥𝗔𝗡𝗨𝗠𝗜𝗧𝗛𝗔-𝗫-𝗠𝗗 💎
 `;
