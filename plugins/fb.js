@@ -19,12 +19,12 @@ async(conn, mek, m, {
     from, prefix, q, reply
 }) => {
   try {
-  if (!q) return reply("*🚩 Please give me a facebook url🐼*");
+  if (!q) return reply("*🚩 Please give me a facebook url..🐼*");
 
   const fb = await fetchJson(`${api}/download/fbdown?url=${encodeURIComponent(q)}`);
   
   if (!fb.result || (!fb.result.sd && !fb.result.hd)) {
-    return reply("I couldn't find anything :(");
+    return reply("*❌ Invalid Facebook link.*");
   }
 
   let caption = `𝗥𝗔𝗡𝗨𝗠𝗜𝗧𝗛𝗔-𝗫-𝗠𝗗
