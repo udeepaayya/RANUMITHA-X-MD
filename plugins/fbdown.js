@@ -10,7 +10,7 @@ cmd({
       return reply("*Please provide a valid Facebook video URL!* 🌚❤️");
     }
 
-    await conn.sendMessage(from, { react: { text: '⏳', key: m.key } });
+    await conn.sendMessage(from, { react: { text: '🐋', key: m.key } });
 
     const apiUrl = `https://lance-frank-asta.onrender.com/api/downloader?url=${encodeURIComponent(q)}`;
     const { data } = await axios.get(apiUrl);
