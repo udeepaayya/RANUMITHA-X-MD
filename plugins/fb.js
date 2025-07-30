@@ -19,7 +19,7 @@ async(conn, mek, m, {
     from, prefix, q, reply
 }) => {
   try {
-  if (!q) return reply("🚩 Please give me a facebook url");
+  if (!q) return reply("*🚩 Please give me a facebook url🐼*");
 
   const fb = await fetchJson(`${api}/download/fbdown?url=${encodeURIComponent(q)}`);
   
@@ -27,10 +27,10 @@ async(conn, mek, m, {
     return reply("I couldn't find anything :(");
   }
 
-  let caption = `*WHITESHADOW-MD*
+  let caption = `𝗥𝗔𝗡𝗨𝗠𝗜𝗧𝗛𝗔-𝗫-𝗠𝗗
 
 📝 ᴛɪᴛʟᴇ : Facebook video
-🦸‍♀️ ᴘᴏᴡᴇʀᴇᴅ ʙʏ : WHITESHADOW-MD
+🦸‍♀️ ᴘᴏᴡᴇʀᴇᴅ ʙʏ : 𝗥𝗔𝗡𝗨𝗠𝗜𝗧𝗛𝗔-𝗫-𝗠𝗗
 🔗 ᴜʀʟ : ${q}`;
 
 
@@ -59,6 +59,6 @@ if (fb.result.hd) {
 
 } catch (err) {
   console.error(err);
-  reply("*ERROR*");
+  reply("*Failed to download video💔 Please try again later...* 🐼");
   }
 });
