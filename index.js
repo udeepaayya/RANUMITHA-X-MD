@@ -126,6 +126,7 @@ async function connectToWA() {
       config.AUTO_READ_STATUS === "true"
       ) {
         await robin.readMessages([mek.key]); 
+    }
     
     const m = sms(robin, mek);
     const type = getContentType(mek.message);
