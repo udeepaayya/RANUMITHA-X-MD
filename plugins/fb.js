@@ -45,7 +45,7 @@ async(conn, mek, m, {
       await conn.sendMessage(from, {
         video: { url: fb.result.sd },
         mimetype: "video/mp4",
-        caption: `*SD-Quality*`
+        caption: `*SD-Quality*🪫`
       }, { quoted: mek });
     }
 
@@ -53,7 +53,7 @@ if (fb.result.hd) {
       await conn.sendMessage(from, {
         video: { url: fb.result.hd },
         mimetype: "video/mp4",
-        caption: `*HD-Quality*`
+        caption: `*HD-Quality*🔋`
       }, { quoted: mek });
     }
 
