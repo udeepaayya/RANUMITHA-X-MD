@@ -48,30 +48,29 @@ cmd(
         return reply("*Invalid Facebook URL! Please check and try again.* 🌚");
 
       // Fetch video details
-      reply("*Downloading your video...* 🌚❤️");
+      reply("*🫧Downloading your video... ⬇️*");
 
       const result = await getFbVideoInfo(q);
 
       if (!result || (!result.sd && !result.hd)) {
-        return reply("*Failed to download video. Please try again later.* 🌚");
+        return reply("*Failed to download video💔 Please try again later...* 🐼");
       }
 
       const { title, sd, hd } = result;
 
       // Prepare and send the message with video details
       let desc = `
-*❤️ ROBIN FB VIDEO DOWNLOADER ❤️*
+*❤️ RANUMITHA-X-MD FB VIDEO DOWNLOADER ❤️*
 
-👻 *Title*: ${title || "Unknown"}
 👻 *Quality*: ${hd ? "HD Available" : "SD Only"}
 
-𝐌𝐚𝐝𝐞 𝐛𝐲 𝐒_𝐈_𝐇_𝐈_𝐋_𝐄_𝐋
+> *© OWN BY 𝗥𝗔𝗡𝗨𝗠𝗜𝗧𝗛𝗔-𝗫-𝗠𝗗* 
         `;
       await robin.sendMessage(
         from,
         {
           image: {
-            url: "https://raw.githubusercontent.com/Dark-Robin/Bot-Helper/refs/heads/main/autoimage/Bot%20fb-1.jpg",
+            url: "https://files.catbox.moe/ebcvj0.jpg",
           },
           caption: desc,
         },
@@ -96,10 +95,10 @@ cmd(
           { quoted: mek }
         );
       } else {
-        return reply("*No downloadable video found!* 🌚");
+        return reply("*No downloadable video found!❌*");
       }
 
-      return reply("*Thanks for using my bot* 🌚❤️");
+      return reply("*𝗗one ✅*");
     } catch (e) {
       console.error(e);
       reply(`*Error:* ${e.message || e}`);
