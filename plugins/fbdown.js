@@ -1,107 +1,46 @@
-const { cmd, commands } = require("../command");
-const getFbVideoInfo = require("fb-downloader-scrapper");
-
-cmd(
-  {
-    pattern: "fb",
-    alias: ["facebook"],
-    react: "💀",
-    desc: "Download Facebook Video",
-    category: "download",
-    filename: __filename,
-  },
-  async (
-    robin,
-    mek,
-    m,
-    {
-      from,
-      quoted,
-      body,
-      isCmd,
-      command,
-      args,
-      q,
-      isGroup,
-      sender,
-      senderNumber,
-      botNumber2,
-      botNumber,
-      pushname,
-      isMe,
-      isOwner,
-      groupMetadata,
-      groupName,
-      participants,
-      groupAdmins,
-      isBotAdmins,
-      isAdmins,
-      reply,
+cmd({
+  pattern: "fb",
+  alias: ["facebook2", "fbdl2"],
+  desc: "Download Facebook videos",
+  category: "download",
+  filename: __filename
+}, async (conn, m, store, { from, q, reply }) => {
+  try {
+    if (!q || !q.startsWith("https://")) {
+      return reply("*Please provide a valid Facebook video URL!* 🌚❤️");
     }
-  ) => {
-    try {
-      if (!q) return reply("*Please provide a valid Facebook video URL!* 🌚❤️");
 
-      // Validate the Facebook URL format
-      const fbRegex = /(https?:\/\/)?(www\.)?(facebook|fb)\.com\/.+/;
-      if (!fbRegex.test(q))
-        return reply("*Invalid Facebook URL! Please check and try again.* 🌚");
+    await conn.sendMessage(from, { react: { text: '⏳', key: m.key } });
 
-      // Fetch video details
-      reply("*🫧Downloading your video... ⬇️*");
+    const apiUrl = `https://lance-frank-asta.onrender.com/api/downloader?url=${encodeURIComponent(q)}`;
+    const { data } = await axios.get(apiUrl);
 
-      const result = await getFbVideoInfo(q);
-
-      if (!result || (!result.sd && !result.hd)) {
-        return reply("*Failed to download video💔 Please try again later...* 🐼");
-      }
-
-      const { title, sd, hd } = result;
-
-      // Prepare and send the message with video details
-      let desc = `
-*❤️ RANUMITHA-X-MD FB VIDEO DOWNLOADER ❤️*
-
-👻 *Quality*: ${hd ? "HD Available" : "SD Only"}
-
-> *© OWN BY 𝗥𝗔𝗡𝗨𝗠𝗜𝗧𝗛𝗔-𝗫-𝗠𝗗* 
-        `;
-      await robin.sendMessage(
-        from,
-        {
-          image: {
-            url: "https://files.catbox.moe/ebcvj0.jpg",
-          },
-          caption: desc,
-        },
-        { quoted: mek }
-      );
-      // Send the video if available
-      if (hd) {
-        await robin.sendMessage(
-          from,
-          { video: { url: hd }, caption: "----------HD VIDEO----------" },
-          { quoted: mek }
-        );
-        await robin.sendMessage(
-          from,
-          { video: { url: sd }, caption: "----------SD VIDEO----------" },
-          { quoted: mek }
-        );
-      } else if (sd) {
-        await robin.sendMessage(
-          from,
-          { video: { url: sd }, caption: "----------SD VIDEO----------" },
-          { quoted: mek }
-        );
-      } else {
-        return reply("*No downloadable video found!❌*");
-      }
-
-      return reply("*𝗗one ✅*");
-    } catch (e) {
-      console.error(e);
-      reply(`*Error:* ${e.message || e}`);
+    if (!data?.content?.status || !data?.content?.data?.result?.length) {
+      throw new Error("Invalid API response or no video found.");
     }
+
+    let videoData = data.content.data.result.find(v => v.quality === "HD") || 
+                    data.content.data.result.find(v => v.quality === "SD");
+
+    if (!videoData) {
+      throw new Error("No valid video URL found.");
+    }
+
+    await conn.sendMessage(from, {
+      video: { url: videoData.url },
+      caption: `📥 *FB DOWNLOADER..🚀*\n\n*QUAILTY•${videoData.quality}\n\n> ꜰᴏʀᴡᴀʀᴅ ʙʏ ꜱᴜᴘᴜɴ ᴍᴅ*`
+    }, { quoted: m });
+
+  } catch (error) {
+    console.error("FB Download Error:", error);
+
+    // Send error details to bot owner
+    const ownerNumber = conn.user.id.split(":")[0] + "@s.whatsapp.net";
+    await conn.sendMessage(ownerNumber, {
+      text: `⚠️ *FB Downloader Error!*\n\n📍 *Group/User:* ${from}\n💬 *Query:* ${q}\n❌ *Error:* ${error.message || error}`
+    });
+
+    // Notify the user
+    reply("❌ *Error:* Unable to process the request. Please try again later.");
   }
-);
+});
