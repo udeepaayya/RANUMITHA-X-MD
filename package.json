@@ -26,6 +26,7 @@
     "api-dylux": "^1.8.5",
     "mongoose": "latest",
     "fb-downloader-scrapper": "latest",
-    "canvas": "^3.1.2"
+    "canvas": "^3.1.2",
+    "wa-sticker-formatter": "^4.4.4"
   }
 }
