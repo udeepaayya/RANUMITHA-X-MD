@@ -1,6 +1,8 @@
 {
-  "hi": "",
-  "mk": "",
-  "gn": "",
-  "gm": ""
+  "hi": "https://github.com/Ranumithaofc/RANU-FILE-S-/raw/refs/heads/main/Audio/Hi.mp3",
+  "mk": "https://github.com/Ranumithaofc/RANU-FILE-S-/raw/refs/heads/main/Audio/Mk.mp3",
+  "gn": "https://github.com/Ranumithaofc/RANU-FILE-S-/raw/refs/heads/main/Audio/Gn.mp3",
+  "gm": "https://github.com/Ranumithaofc/RANU-FILE-S-/raw/refs/heads/main/Audio/Gm.mp3",
+  "I love you": "https://github.com/Ranumithaofc/RANU-FILE-S-/raw/refs/heads/main/Audio/I%20love%20you.mp3",
+  "hm": "https://github.com/Ranumithaofc/RANU-FILE-S-/raw/refs/heads/main/Audio/Hm.mp3",
   }
