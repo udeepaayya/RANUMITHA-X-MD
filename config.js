@@ -9,4 +9,8 @@ module.exports = {
   SESSION_ID: process.env.SESSION_ID || "l3dhnSbK#S5ppfxiKNhwrd82cpLtXSINjsuFU5T05fZUUPAkyNnU",
   OWNER_NUM: process.env.OWNER_NUM || "94762095304",
   PREFIX: process.env.PREFIX || ".",
+  ALIVE_IMG: process.env.ALIVE_IMG || "https://raw.githubusercontent.com/Ranumithaofc/RANU-FILE-S-/refs/heads/main/images/GridArt_20250726_193256660.jpg",
+  ALIVE_MSG: process.env.ALIVE_MSG || "*👋 Hello, I am alive now !!*\n\n> 𝐌𝐚𝐝𝐞 𝐛𝐲 𝗥𝗔𝗡𝗨𝗠𝗜𝗧𝗛𝗔 🥶",
+  AUTO_READ_STATUS: process.env.AUTO_READ_STATUS || "true",
+  MODE: process.env.MODE || "public",
 };
