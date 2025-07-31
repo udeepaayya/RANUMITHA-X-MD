@@ -10,6 +10,6 @@ module.exports = {
   MONGODB: process.env.MONGODB || "mongodb://mongo:zeeNflUdMhsBAvsFyxNLhUjZPjhuHMko@caboose.proxy.rlwy.net:46999",
   OWNER_NUM: process.env.OWNER_NUM || "94762095304",
   PREFIX: process.env.PREFIX || ".",
-  AUTO_READ_STATUS: process.env.AUTO_READ_STATUS || "true",
+  AUTO_READ_STATUS: process.env.AUTO_READ_STATUS || "false",
   MODE: process.env.MODE || "public",
 };
