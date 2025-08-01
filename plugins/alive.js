@@ -44,7 +44,19 @@ async (robin, mek, m, {
         await robin.sendMessage(from, {
             image: {
                 url: "https://telegra.ph/file/32f84a39c9cd47a2e35f1.jpg" // You can replace this with your own ALIVE_IMG URL
-            },{quoted: mek })
+            },
+            caption: status,
+            contextInfo: {
+                mentionedJid: [sender],
+                forwardingScore: 999,
+                isForwarded: true,
+                forwardedNewsletterMessageInfo: {
+                    newsletterJid: '120363317972190466@newsletter',
+                    newsletterName: '👾ᏔᎻᎥᏆᎬՏᎻᎪᎠᎾᏇ ᎷᎠ👾',
+                    serverMessageId: 143
+                }
+            }
+        }, { quoted: mek });
 
     } catch (e) {
         console.log("Alive Error:", e);
