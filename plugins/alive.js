@@ -41,22 +41,8 @@ async (robin, mek, m, {
 ╰─────────────────────────────⊷`;
 
         // Send Image + Caption
-        await robin.sendMessage(from, {
-            image: {
-                url: "https://raw.githubusercontent.com/Ranumithaofc/RANU-FILE-S-/refs/heads/main/images/GridArt_20250726_193256660.jpg" // You can replace this with your own ALIVE_IMG URL
-            },
-            caption: status,
-            contextInfo: {
-                mentionedJid: [sender],
-                forwardingScore: 999,
-                isForwarded: true,
-                forwardedNewsletterMessageInfo: {
-                    newsletterJid: '120363317972190466@newsletter',
-                    newsletterName: '👾ᏔᎻᎥᏆᎬՏᎻᎪᎠᎾᏇ ᎷᎠ👾',
-                    serverMessageId: 143
-                }
-            }
-        }, { quoted: mek });
+        await robin.sendMessage(from,{image: {url: config.ALIVE_IMG},caption: config.ALIVE_MSG},{quoted: mek})
+         },
 
     } catch (e) {
         console.log("Alive Error:", e);
