@@ -41,8 +41,10 @@ async (robin, mek, m, {
 ╰─────────────────────────────⊷`;
 
         // Send Image + Caption
-        await robin.sendMessage(from,{image: {url: config.ALIVE_IMG},caption: config.ALIVE_MSG},{quoted: mek})
-         },
+        await robin.sendMessage(from, {
+            image: {
+                url: "https://telegra.ph/file/32f84a39c9cd47a2e35f1.jpg" // You can replace this with your own ALIVE_IMG URL
+            },{quoted: mek });
 
     } catch (e) {
         console.log("Alive Error:", e);
