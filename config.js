@@ -15,5 +15,15 @@ module.exports = {
   AUTO_STICKER: process.env.AUTO_STICKER || "true",
   AUTO_REPLY: process.env.AUTO_REPLY || "true",
   ALIVE_IMG: process.env.ALIVE_IMG || "https://raw.githubusercontent.com/Ranumithaofc/RANU-FILE-S-/refs/heads/main/images/GridArt_20250726_193256660.jpg",
-  ALIVE_MSG: process.env.ALIVE_MSG || "*👋 Hello, I am alive now !!*\n\n> 𝐌𝐚𝐝𝐞 𝐛𝐲 𝗥𝗔𝗡𝗨𝗠𝗜𝗧𝗛𝗔 🥶"
+  ALIVE_MSG: process.env.ALIVE_MSG || "*👋 Hello ${pushname}, I am alive now !!*
+
+*╭─「 ALIVE STATUS 」*
+*│* 🐼 *Bot*: *𝐑𝐀𝐍𝐔𝐌𝐈𝐓𝐇𝐀-𝐗-𝐌𝐃*
+*│* 👤 *User*: ${pushname}
+*│* 🤵‍♂ Owner: *ᴴᴵᴿᵁᴷᴬ ᴿᴬᴺᵁᴹᴵᵀᴴᴬ*
+*│* ⏰ Uptime: ${runtime(process.uptime())}
+*│* ⏳ Ram: ${(process.memoryUsage().heapUsed / 1024 / 1024).toFixed(2)}MB / ${(os.totalmem() / 1024 / 1024).toFixed(2)}MB
+*│* 🖊️ Prefix: ${config.PREFIX}
+╰──────────●●► 
+\n> 𝐌𝐚𝐝𝐞 𝐛𝐲 𝗥𝗔𝗡𝗨𝗠𝗜𝗧𝗛𝗔 🥶"
 };
