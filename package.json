@@ -33,7 +33,6 @@
     "@ffmpeg-installer/ffmpeg": "^1.1.0",
     "@vitalets/google-translate-api": "^9.2.1",
     "@dark-yasiya/scrap":"1.0.1",
-    "jimp": "^1.6.0",
     "moment-timezone": "^0.6.0",
     "crypto-digest-sync": "^1.0.0",
     "crypto-js": "latest",
