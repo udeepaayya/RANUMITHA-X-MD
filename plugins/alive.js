@@ -1,7 +1,6 @@
 const { cmd } = require('../command');
 const os = require("os");
 const { runtime } = require('../lib/functions');
-const config = require('../config');
 
 cmd({
     pattern: "alive",
@@ -12,10 +11,7 @@ cmd({
     filename: __filename
 },
 async (robin, mek, m, {
-    from, quoted, body, isCmd, command, args, q,
-    isGroup, sender, senderNumber, botNumber2, botNumber,
-    pushname, isMe, isOwner, groupMetadata, groupName,
-    participants, groupAdmins, isBotAdmins, isAdmins, reply
+    from, quoted, reply, sender
 }) => {
     try {
         await robin.sendPresenceUpdate('recording', from);
@@ -31,30 +27,32 @@ async (robin, mek, m, {
 
         // Stylish Alive Caption
         const status = `
-╭─〔 *💠 ${config.BOT_NAME} IS ONLINE 💠* 〕─◉
+╭─〔 *💠 WHITESHADOW-MD IS ONLINE 💠* 〕─◉
 │
 │📌 *Bot Status:* ✅ Active & Working!
-│👤 *Owner:* ${config.OWNER_NAME}
+│👤 *Owner:* Hiruka Ranumitha
 │🌀 *Version:* 4.0.0
-│🔧 *Prefix:* [ ${config.PREFIX} ]
-│🛠 *Mode:* [ ${config.MODE} ]
+│🔧 *Prefix:* [ . ]
+│🛠 *Mode:* [ Public ]
 │💻 *RAM:* ${(process.memoryUsage().heapUsed / 1024 / 1024).toFixed(2)}MB / ${(os.totalmem() / 1024 / 1024).toFixed(2)}MB
 │🖥 *Host:* ${os.hostname()}
 │⏳ *Uptime:* ${runtime(process.uptime())}
-│📬 *Newsletter:* 👾 RANUMITHA X ᎷᎠ 👾
+│📬 *Newsletter:* 👾 ᏔᎻᎥᏆᎬՏᎻᎪᎠᎾᏇ ᎷᎠ 👾
 ╰─────────────────────────────⊷`;
 
         // Send Image + Caption
         await robin.sendMessage(from, {
-            image: { url: config.ALIVE_IMG },
+            image: {
+                url: "https://raw.githubusercontent.com/Ranumithaofc/RANU-FILE-S-/refs/heads/main/images/GridArt_20250726_193256660.jpg" // You can replace this with your own ALIVE_IMG URL
+            },
             caption: status,
             contextInfo: {
-                mentionedJid: [m.sender],
+                mentionedJid: [sender],
                 forwardingScore: 999,
                 isForwarded: true,
                 forwardedNewsletterMessageInfo: {
-                    newsletterJid: '120363401868132010@newsletter',
-                    newsletterName: '👾RANUMITHA X ᎷᎠ👾',
+                    newsletterJid: '120363317972190466@newsletter',
+                    newsletterName: '👾ᏔᎻᎥᏆᎬՏᎻᎪᎠᎾᏇ ᎷᎠ👾',
                     serverMessageId: 143
                 }
             }
