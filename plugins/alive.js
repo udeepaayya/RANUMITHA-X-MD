@@ -1,18 +1,19 @@
-const { cmd } = require('../command');
-const { runtime } = require('../lib/functions');
+const {cmd , commands} = require('../command')
 const config = require('../config');
 
 cmd({
     pattern: "alive",
-    alias: ["status", "online", "a"],
-    desc: "Check bot is alive or not",
+    alias: ["hyranu","ranu"],
+    react: "🌝",
+    desc: "Check bot online or no.",
     category: "main",
-    react: "⚡",
     filename: __filename
 },
-async (conn, mek, m, { from, sender, reply }) => {
-    try {
-        const status = `
+async(robin, mek, m,{from, quoted, body, isCmd, command, args, q, isGroup, sender, senderNumber, botNumber2, botNumber, pushname, isMe, isOwner, groupMetadata, groupName, participants, groupAdmins, isBotAdmins, isAdmins, reply}) => {
+try{
+    await robin.sendPresenceUpdate('recording', from);
+    await robin.sendMessage(from, { audio: { url: "https://github.com/Ranumithaofc/RANU-FILE-S-/raw/refs/heads/main/Audio/Amor%20Na%20Praia%20(Slowed)%20edited.mp3" }, mimetype: 'audio/mpeg', ptt: true }, { quoted: mek });
+return await robin.sendMessage(from,{image: {url: config.ALIVE_IMG},caption: const status = `
 ╭───〔 *🤖 ${config.BOT_NAME} STATUS* 〕───◉
 │✨ *Bot is Active & Online!*
 │
@@ -23,26 +24,11 @@ async (conn, mek, m, { from, sender, reply }) => {
 │💾 *RAM:* ${(process.memoryUsage().heapUsed / 1024 / 1024).toFixed(2)}MB / ${(os.totalmem() / 1024 / 1024).toFixed(2)}MB
 │🖥️ *Host:* ${os.hostname()}
 │⌛ *Uptime:* ${runtime(process.uptime())}
-╰────────────────────◉
-> ${config.DESCRIPTION}`;
+╰────────────────────◉ config.ALIVE_MSG},{quoted: mek})
+    
+}catch(e){
+console.log(e)
+reply(`${e}`)
+}
+})
 
-        await conn.sendMessage(from, {
-            image: { url: config.MENU_IMAGE_URL },
-            caption: status,
-            contextInfo: {
-                mentionedJid: [m.sender],
-                forwardingScore: 1000,
-                isForwarded: true,
-                forwardedNewsletterMessageInfo: {
-                    newsletterJid: '120363401868132010@newsletter',
-                    newsletterName: '𝚁𝙰𝙽𝚄𝙼𝙸𝚃𝙷𝙰-𝚇-𝙼𝙳',
-                    serverMessageId: 143
-                }
-            }
-        }, { quoted: mek });
-
-    } catch (e) {
-        console.error("Alive Error:", e);
-        reply(`An error occurred: ${e.message}`);
-    }
-});
