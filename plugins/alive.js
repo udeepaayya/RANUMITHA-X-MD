@@ -1,4 +1,6 @@
-const { cmd, commands } = require("../command");
+const { cmd } = require('../command');
+const os = require("os");
+const { runtime } = require('../lib/functions');
 const config = require('../config');
 
 cmd({
@@ -9,33 +11,7 @@ cmd({
     react: "⚡",
     filename: __filename
 },
-async (robin,
-    mek,
-    m,
-    {
-      from,
-      quoted,
-      body,
-      isCmd,
-      command,
-      args,
-      q,
-      isGroup,
-      sender,
-      senderNumber,
-      botNumber2,
-      botNumber,
-      pushname,
-      isMe,
-      isOwner,
-      groupMetadata,
-      groupName,
-      participants,
-      groupAdmins,
-      isBotAdmins,
-      isAdmins,
-      reply,
-    }) => {
+async (conn, mek, m, { from, sender, reply }) => {
     try {
         const status = `
 ╭───〔 *🤖 ${config.BOT_NAME} STATUS* 〕───◉
