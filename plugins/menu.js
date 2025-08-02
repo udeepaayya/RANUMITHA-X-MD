@@ -63,9 +63,9 @@ let madeMenu = `👋 *ʜᴇʟʟᴏ* ${pushname}
 *│* 🐼 *Bot*: *𝐑𝐀𝐍𝐔𝐌𝐈𝐓𝐇𝐀-𝐗-𝐌𝐃*
 *│* 👤 *User*: ${pushname}
 *│* 🤵‍♂ Owner: *ᴴᴵᴿᵁᴷᴬ ᴿᴬᴺᵁᴹᴵᵀᴴᴬ*
-*│* ⏰ Uptime: 14 minutes, 15 seconds
-*│* ⏳ Ram: 363.24MB/63276.48MB
-*│* 🖊️ Prefix: .
+*│* ⏰ Uptime: ${runtime(process.uptime())}
+*│* ⏳ Ram: ${(process.memoryUsage().heapUsed / 1024 / 1024).toFixed(2)}MB / ${(os.totalmem() / 1024 / 1024).toFixed(2)}MB
+*│* 🖊️ Prefix: ${config.PREFIX}
 ╰──────────●●► 
 
 👾 Ξ *MAIN COMMANDS:* Ξ
