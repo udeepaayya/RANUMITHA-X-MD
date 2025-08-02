@@ -35,8 +35,8 @@ async (robin, mek, m, {
 │🤵‍♂ Owner: ᴴᴵᴿᵁᴷᴬ ᴿᴬᴺᵁᴹᴵᵀᴴᴬ
 │⏰ Uptime: ${runtime(process.uptime())}
 │⏳ Ram: ${(process.memoryUsage().heapUsed / 1024 / 1024).toFixed(2)}MB / ${(os.totalmem() / 1024 / 1024).toFixed(2)}MB
-│🖊 Prefix: [ ${config.PREFIX} ]
-│🛠 Mode: [ ${config.MODE} ]
+│🖊 Prefix: [ . ]
+│🛠 Mode: [ Public ]
 │🖥 Host: ${os.hostname()}
 │🌀 Version: 1.5.3
 ╰─────────────────────────────⊷
