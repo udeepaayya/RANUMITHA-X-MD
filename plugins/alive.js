@@ -5,7 +5,7 @@ const { runtime } = require('../lib/functions');
 cmd({
     pattern: "alive",
     alias: ["hyranu", "ranu", "status", "a"],
-    react: "⚡",
+    react: "🌝",
     desc: "Check bot online or no.",
     category: "main",
     filename: __filename
