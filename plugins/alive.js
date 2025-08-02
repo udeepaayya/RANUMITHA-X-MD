@@ -26,13 +26,13 @@ async (robin, mek, m, {
         }, { quoted: mek });
 
         // Stylish Alive Caption
-       let const status = `
-👋 Hello ${pushname}, I am alive now !!
+       const status = `
+👋 Hello ${pushname()}, I am alive now !!
 
 ╭─〔 💠 ALIVE STATUS 💠 〕─◉
 │
 │🐼 Bot: 𝐑𝐀𝐍𝐔𝐌𝐈𝐓𝐇𝐀-𝐗-𝐌𝐃
-│👤 User: ${pushname}
+│👤 User: ${pushname()}
 │🤵‍♂ Owner: ᴴᴵᴿᵁᴷᴬ ᴿᴬᴺᵁᴹᴵᵀᴴᴬ
 │⏰ Uptime: ${runtime(process.uptime())}
 │⏳ Ram: ${(process.memoryUsage().heapUsed / 1024 / 1024).toFixed(2)}MB / ${(os.totalmem() / 1024 / 1024).toFixed(2)}MB
