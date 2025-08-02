@@ -16,6 +16,16 @@ async (robin, mek, m, {
     try {
         await robin.sendPresenceUpdate('recording', from);
 
+        // Voice Note
+        await robin.sendMessage(from, {
+            audio: {
+                url: "https://github.com/Ranumithaofc/RANU-FILE-S-/raw/refs/heads/main/Audio/Amor%20Na%20Praia%20(Slowed)%20edited.mp3"
+            },
+            mimetype: 'audio/mpeg',
+            ptt: true
+        }, { quoted: mek });
+
+        // Stylish Alive Caption
        const status = `
 👋 Hello ${pushname}, I am alive now !!
 
