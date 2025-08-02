@@ -27,18 +27,25 @@ async (robin, mek, m, {
 
         // Stylish Alive Caption
         const status = `
-╭─〔 *💠 WHITESHADOW-MD IS ONLINE 💠* 〕─◉
+👋 Hello ${pushname}, I am alive now !!
+
+╭─〔 💠 ALIVE STATUS 💠 〕─◉
 │
-│📌 *Bot Status:* ✅ Active & Working!
-│👤 *Owner:* Hiruka Ranumitha
-│🌀 *Version:* 4.0.0
-│🔧 *Prefix:* [ . ]
-│🛠 *Mode:* [ Public ]
-│💻 *RAM:* ${(process.memoryUsage().heapUsed / 1024 / 1024).toFixed(2)}MB / ${(os.totalmem() / 1024 / 1024).toFixed(2)}MB
-│🖥 *Host:* ${os.hostname()}
-│⏳ *Uptime:* ${runtime(process.uptime())}
-│📬 *Newsletter:* 👾 ᏔᎻᎥᏆᎬՏᎻᎪᎠᎾᏇ ᎷᎠ 👾
-╰─────────────────────────────⊷`;
+│🐼 Bot: 𝐑𝐀𝐍𝐔𝐌𝐈𝐓𝐇𝐀-𝐗-𝐌𝐃
+│👤 User: ${pushname}
+│🤵‍♂ Owner: ᴴᴵᴿᵁᴷᴬ ᴿᴬᴺᵁᴹᴵᵀᴴᴬ
+│⏰ Uptime: ${runtime(process.uptime())}
+│⏳ Ram: ${(process.memoryUsage().heapUsed / 1024 / 1024).toFixed(2)}MB / ${(os.totalmem() / 1024 / 1024).toFixed(2)}MB
+│🖊 Prefix: [ ${config.PREFIX} ]
+│🛠 Mode: [ ${config.MODE} ]
+│🖥 Host: ${os.hostname()}
+│🌀 Version: 1.5.3
+╰─────────────────────────────⊷
+     
+      ☘ ʙᴏᴛ ᴍᴇɴᴜ  - .menu
+      🔥 ʙᴏᴛ ꜱᴘᴇᴇᴅ - .ping
+
+> 𝐌𝐚𝐝𝐞 𝐛𝐲 𝗥𝗔𝗡𝗨𝗠𝗜𝗧𝗛𝗔 🥶`;
 
         // Send Image + Caption
         await robin.sendMessage(from, {
