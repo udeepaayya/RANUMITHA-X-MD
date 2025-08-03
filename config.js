@@ -21,7 +21,7 @@ module.exports = {
   AUTO_REACT: process.env.AUTO_REACT || "false",
   STICKER_NAME: process.env.STICKER_NAME || "RANUMITHA-X-MD",
   BOT_NAME: process.env.BOT_NAME || "RANUMITHA-X-MD",
-  DESCRIPTION: process.env.DESCRIPTION || "*© Powerd by 𝗥𝗔𝗡𝗨𝗠𝗜𝗧𝗛𝗔-𝗫-𝗠𝗗 🌛*",
+  DESCRIPTION: process.env.DESCRIPTION || "© Powerd by 𝗥𝗔𝗡𝗨𝗠𝗜𝗧𝗛𝗔-𝗫-𝗠𝗗 🌛",
   ALIVE_IMG: process.env.ALIVE_IMG || "https://raw.githubusercontent.com/Ranumithaofc/RANU-FILE-S-/refs/heads/main/images/GridArt_20250726_193256660.jpg",
   ALIVE_MSG: process.env.ALIVE_MSG || "> 𝐌𝐚𝐝𝐞 𝐛𝐲 𝗥𝗔𝗡𝗨𝗠𝗜𝗧𝗛𝗔 🥶"
 };
