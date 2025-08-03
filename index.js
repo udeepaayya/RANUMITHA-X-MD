@@ -92,7 +92,7 @@ async function connectToWA() {
       console.log("❤‍🔥 RANUMITHA ❤️ connected to whatsapp ✅");
 
       let up = `❤‍🔥 RANUMITHA 🌍 connected successful ✅`;
-      let up1 = `Hello RANUMITHA, I made bot successful`;
+      let up1 = `Hello RANUMITHA, I made bot successful ☑️✅`;
 
       robin.sendMessage(ownerNumber + "@s.whatsapp.net", {
         image: {
