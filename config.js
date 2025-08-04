@@ -22,11 +22,14 @@ module.exports = {
   AUTO_REACT: process.env.AUTO_REACT || "false",
   READ_CMD: process.env.READ_CMD || "false",
   ANTI_VV: process.env.ANTI_VV || "true",
+  CUSTOM_REACT: process.env.CUSTOM_REACT || "false",
   ANTI_DEL_PATH: process.env.ANTI_DEL_PATH || "log",
   STICKER_NAME: process.env.STICKER_NAME || "RANUMITHA-X-MD",
   OWNER_NUMBER: process.env.OWNER_NUMBER || "94762095304",
   BOT_NAME: process.env.BOT_NAME || "RANUMITHA-X-MD",
+  MENU_IMAGE_URL: process.env.MENU_IMAGE_URL || "https://files.catbox.moe/ebcvj0.jpg",
   DESCRIPTION: process.env.DESCRIPTION || "© Powerd by 𝗥𝗔𝗡𝗨𝗠𝗜𝗧𝗛𝗔-𝗫-𝗠𝗗 🌛",
   ALIVE_IMG: process.env.ALIVE_IMG || "https://raw.githubusercontent.com/Ranumithaofc/RANU-FILE-S-/refs/heads/main/images/GridArt_20250726_193256660.jpg",
+  CUSTOM_REACT_EMOJIS: process.env.CUSTOM_REACT_EMOJIS || "💝,💖,💗,❤️‍🩹,❤️,🧡,💛,💚,💙,💜,🤎,🖤,🤍",
   ALIVE_MSG: process.env.ALIVE_MSG || "> 𝐌𝐚𝐝𝐞 𝐛𝐲 𝗥𝗔𝗡𝗨𝗠𝗜𝗧𝗛𝗔 🥶"
 };
