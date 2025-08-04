@@ -13,7 +13,7 @@ module.exports = {
   AUTO_READ_STATUS: process.env.AUTO_READ_STATUS || "true",
   MODE: process.env.MODE || "public",   // make bot public-private-inbox-group 
   AUTO_VOICE: process.env.AUTO_VOICE || "true",
-  AUTO_STICKER: process.env.AUTO_STICKER || "true",
+  AUTO_STICKER: process.env.AUTO_STICKER || "false",
   AUTO_REPLY: process.env.AUTO_REPLY || "true",
   ALWAYS_ONLINE: process.env.ALWAYS_ONLINE || "true",
   AUTO_RECORDING: process.env.AUTO_RECORDING || "false",
