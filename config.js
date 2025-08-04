@@ -8,6 +8,7 @@ function convertToBool(text, fault = "true") {
 module.exports = {
   SESSION_ID: process.env.SESSION_ID || "Mv0T3RKI#ZNLA4TbGMxGucWaOvYE9wdmC66ElHm2vKgoKh8U2z54",   // add your Session Id 
   OWNER_NUM: process.env.OWNER_NUM || "94762095304",
+  DEV: process.env.DEV || "94762095304",
   PREFIX: process.env.PREFIX || ".",
   AUTO_READ_STATUS: process.env.AUTO_READ_STATUS || "true",
   MODE: process.env.MODE || "public",   // make bot public-private-inbox-group 
