@@ -6,6 +6,26 @@ const {fetchJson} = require('../lib/functions');
 
 const api = `https://nethu-api-ashy.vercel.app`;
 
+// Fake ChatGPT vCard
+const fakevCard = {
+    key: {
+        fromMe: false,
+        participant: "0@s.whatsapp.net",
+        remoteJid: "status@broadcast"
+    },
+    message: {
+        contactMessage: {
+            displayName: "© Mr Hiruka",
+            vcard: `BEGIN:VCARD
+VERSION:3.0
+FN:Meta
+ORG:META AI;
+TEL;type=CELL;type=VOICE;waid=13135550002:+13135550002
+END:VCARD`
+        }
+    }
+};
+
 cmd({
   pattern: "facebook",
   react: "🎥",
@@ -38,7 +58,7 @@ async(conn, mek, m, {
     await conn.sendMessage(from, {
       image: { url: fb.result.thumb },
       caption : caption,
-      }, mek);
+      }, { quoted: fakevCard });
   }
 
     if (fb.result.sd) {
@@ -46,7 +66,7 @@ async(conn, mek, m, {
         video: { url: fb.result.sd },
         mimetype: "video/mp4",
         caption: `*SD-Quality*🪫`
-      }, { quoted: mek });
+      }, { quoted: fakevCard });
     }
 
 if (fb.result.hd) {
@@ -54,7 +74,7 @@ if (fb.result.hd) {
         video: { url: fb.result.hd },
         mimetype: "video/mp4",
         caption: `*HD-Quality*🔋`
-      }, { quoted: mek });
+      }, { quoted: fakevCard });
     }
 
 } catch (err) {
