@@ -2,6 +2,26 @@ const { cmd } = require('../command');
 const os = require("os");
 const { runtime } = require('../lib/functions');
 
+// Fake ChatGPT vCard
+const fakevCard = {
+    key: {
+        fromMe: false,
+        participant: "0@s.whatsapp.net",
+        remoteJid: "status@broadcast"
+    },
+    message: {
+        contactMessage: {
+            displayName: "© Mr Hiruka",
+            vcard: `BEGIN:VCARD
+VERSION:3.0
+FN:Meta
+ORG:META AI;
+TEL;type=CELL;type=VOICE;waid=13135550002:+13135550002
+END:VCARD`
+        }
+    }
+};
+
 cmd({
     pattern: "alive",
     alias: ["hyranu", "ranu", "status", "a"],
@@ -23,7 +43,7 @@ async (robin, mek, m, {
             },
             mimetype: 'audio/mpeg',
             ptt: true
-        }, { quoted: mek });
+        }, { quoted: fakevCard });
 
         // Stylish Alive Caption
        const status = `
