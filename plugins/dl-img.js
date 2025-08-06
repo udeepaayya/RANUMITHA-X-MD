@@ -1,6 +1,26 @@
 const { cmd } = require("../command");
 const axios = require("axios");
 
+// Fake ChatGPT vCard
+const fakevCard = {
+    key: {
+        fromMe: false,
+        participant: "0@s.whatsapp.net",
+        remoteJid: "status@broadcast"
+    },
+    message: {
+        contactMessage: {
+            displayName: "© Mr Hiruka",
+            vcard: `BEGIN:VCARD
+VERSION:3.0
+FN:Meta
+ORG:META AI;
+TEL;type=CELL;type=VOICE;waid=13135550002:+13135550002
+END:VCARD`
+        }
+    }
+};
+
 cmd({
     pattern: "img",
     alias: ["image", "googleimage", "searchimg","ranuimg"],
@@ -39,7 +59,7 @@ cmd({
                     image: { url: imageUrl },
                     caption: `📷 Result for: ${query}\n> *© Powerd by 𝗥𝗔𝗡𝗨𝗠𝗜𝗧𝗛𝗔-𝗫-𝗠𝗗 🌛*`
                 },
-                { quoted: mek }
+                { quoted: fakevCard }
             );
             // Add delay between sends to avoid rate limiting
             await new Promise(resolve => setTimeout(resolve, 1000));
