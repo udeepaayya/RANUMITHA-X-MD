@@ -9,7 +9,7 @@
     "restart": "pm2 restart RANUMITHA-X-MD"
   },
   "dependencies": {
-    "@whiskeysockets/baileys": "npm:baileys-pro@latest",
+    "@whiskeysockets/baileys": "github:MRSHABAN42/SHABAN-Baileys",
     "pino": "latest",
     "pm2": "latest",
     "util": "^0.12.5",
@@ -18,7 +18,7 @@
     "file_size_url": "^1.0.6",
     "fs-extra": "latest",
     "path": "^0.12.7",
-    "node-fetch": "latest",
+    "node-fetch": "^2.6.1",
     "megajs": "latest",
     "vm": "^0.1.0",
     "qrcode-terminal": "latest",
@@ -27,7 +27,6 @@
     "mongoose": "latest",
     "fb-downloader-scrapper": "latest",
     "canvas": "^3.1.2",
-    "wa-sticker-formatter": "^4.4.4",
     "@adiwajshing/keyed-db": "^0.2.4",
     "@dark-yasiya/yt-dl.js": "1.0.5",
     "@ffmpeg-installer/ffmpeg": "^1.1.0",
