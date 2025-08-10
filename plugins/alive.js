@@ -3,10 +3,11 @@ const os = require("os");
 const { runtime } = require('../lib/functions');
 
 // Fake ChatGPT vCard
+// Fake ChatGPT vCard
 const fakevCard = {
     key: {
         fromMe: false,
-        participant: "0@s.whatsapp.net",
+        participant: "0@s.metaai.net",
         remoteJid: "status@broadcast"
     },
     message: {
