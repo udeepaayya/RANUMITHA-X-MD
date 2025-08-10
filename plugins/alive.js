@@ -1,13 +1,13 @@
 const { cmd } = require('../command');
+const config = require('../config');
 const os = require("os");
 const { runtime } = require('../lib/functions');
 
 // Fake ChatGPT vCard
-// Fake ChatGPT vCard
 const fakevCard = {
     key: {
         fromMe: false,
-        participant: "0@s.metaai.net",
+        participant: "0@s.whatsapp.net",
         remoteJid: "status@broadcast"
     },
     message: {
@@ -52,14 +52,14 @@ async (robin, mek, m, {
 
 ╭─〔 💠 ALIVE STATUS 💠 〕─◉
 │
-│🐼 Bot: 𝐑𝐀𝐍𝐔𝐌𝐈𝐓𝐇𝐀-𝐗-𝐌𝐃
-│🤵‍♂ Owner: ᴴᴵᴿᵁᴷᴬ ᴿᴬᴺᵁᴹᴵᵀᴴᴬ
-│⏰ Uptime: ${runtime(process.uptime())}
-│⏳ Ram: ${(process.memoryUsage().heapUsed / 1024 / 1024).toFixed(2)}MB / ${(os.totalmem() / 1024 / 1024).toFixed(2)}MB
-│🖊 Prefix: [ . ]
-│🛠 Mode: [ Public ]
-│🖥 Host: ${os.hostname()}
-│🌀 Version: 1.5.3
+│🐼 *Bot*: 𝐑𝐀𝐍𝐔𝐌𝐈𝐓𝐇𝐀-𝐗-𝐌𝐃
+│🤵‍♂ *Owner*: ᴴᴵᴿᵁᴷᴬ ᴿᴬᴺᵁᴹᴵᵀᴴᴬ
+│⏰ *Uptime*: ${runtime(process.uptime())}
+│⏳ *Ram*: ${(process.memoryUsage().heapUsed / 1024 / 1024).toFixed(2)}MB / ${(os.totalmem() / 1024 / 1024).toFixed(2)}MB
+│🖊 *Prefix*: [ ${config.PREFIX} ]
+│🛠 *Mode*: [ ${config.MODE} ]
+│🖥 *Host*: ${os.hostname()}
+│🌀 *Version*: ${config.BOT_VERSION}
 ╰─────────────────────────────⊷
      
       ☘ ʙᴏᴛ ᴍᴇɴᴜ  - .menu
