@@ -35,7 +35,7 @@ async (robin, mek, m, {
     from, quoted, reply, sender
 }) => {
     try {
-        await robin.sendPresenceUpdate('recording', from);
+        
 
         // Stylish System info Caption
        const status = `╭─〔 *🍷 SYSTEM INFO 🍷*〕─◉
