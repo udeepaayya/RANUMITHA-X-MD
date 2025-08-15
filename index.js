@@ -65,7 +65,7 @@ const clearTempDir = () => {
   setInterval(clearTempDir, 5 * 60 * 1000);
 
 //===================SESSION-AUTH============================
-if (!fs.existsSync(__dirname + "/auth_info_baileys/creds.json")) {
+if (!fs.existsSync(__dirname + "/sessions/creds.json")) {
   if (!config.SESSION_ID)
     return console.log("Please add your session to SESSION_ID env !!");
   const sessdata = config.SESSION_ID.replace("ranu~", '');
