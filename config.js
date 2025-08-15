@@ -64,9 +64,8 @@ DEV: process.env.DEV || "94762095304",
 //replace with your whatsapp number
 OWNER_NAME: process.env.OWNER_NAME || "HIRUKA RANUMITHA",
 // add bot owner name
-CUSTOM_REACT_EMOJIS: process.env.CUSTOM_REACT_EMOJIS || "💚,💚",
+CUSTOM_REACT_EMOJIS: process.env.CUSTOM_REACT_EMOJIS || "💝,💖,💗,❤️‍🩹,❤️,🧡,💛,💚,💙,💜,🤎,🖤,🤍",
 // chose custom react emojis by yourself 
-// make true if you want auto reply on status 
 AUTO_STATUS_MSG: process.env.AUTO_STATUS_MSG || "*SEEN YOUR STATUS BY RANUMITHA-X-MD 🌛*",
 // set the auto reply massage on status reply  
 BOT_NAME: process.env.BOT_NAME || "RANUMITHA-X-MD",
