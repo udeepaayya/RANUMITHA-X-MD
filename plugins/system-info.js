@@ -35,9 +35,7 @@ async (robin, mek, m, {
     from, quoted, reply, sender
 }) => {
     try {
-        
-
-        // Stylish System info Caption
+            // Stylish Alive Caption
        const status = `╭─〔 *🍷 SYSTEM INFO 🍷*〕─◉
 │
 │⏰ *Uptime*: ${runtime(process.uptime())}
@@ -50,10 +48,26 @@ async (robin, mek, m, {
 ╰─────────────────────────────⊷
 > © Powerd by 𝗥𝗔𝗡𝗨𝗠𝗜𝗧𝗛𝗔-𝗫-𝗠𝗗 🌛`;
 
-await robin.sendMessage(from, { text: status }, { quoted: fakevCard });
+        // Send Image + Caption
+        await robin.sendMessage(from, {
+            image: {
+                url: "https://files.catbox.moe/pgt57n.jpg" // You can replace this with your own ALIVE_IMG URL
+            },
+            caption: status,
+            contextInfo: {
+                mentionedJid: [sender],
+                forwardingScore: 999,
+                isForwarded: false,
+                forwardedNewsletterMessageInfo: {
+                    newsletterJid: '',
+                    newsletterName: '',
+                    serverMessageId: 143
+                }
+            }
+        }, { quoted: fakevCard });
 
     } catch (e) {
-        console.log("System Info Error:", e);
+        console.log("Alive Error:", e);
         reply(`⚠️ Error: ${e.message}`);
     }
 });
