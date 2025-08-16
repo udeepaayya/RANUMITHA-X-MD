@@ -175,11 +175,10 @@ conn.ev.on('creds.update', saveCreds)
     }
   if (mek.key && mek.key.remoteJid === 'status@broadcast' && config.AUTO_STATUS_REACT === "true"){
     const jawadlike = await conn.decodeJid(conn.user.id);
-    const emojis = [ '💚','💚'];
-    const randomEmoji = emojis[Math.floor(Math.random() * emojis.length)];
+    const emoji = ['💚'];
     await conn.sendMessage(mek.key.remoteJid, {
       react: {
-        text: randomEmoji,
+        text: emoji,
         key: mek.key,
       } 
     }, { statusJidList: [mek.key.participant, jawadlike] });
