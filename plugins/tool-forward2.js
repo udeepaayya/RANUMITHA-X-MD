@@ -4,12 +4,12 @@ const { cmd } = require("../command");
 const SAFETY = {
   MAX_JIDS: 20,
   BASE_DELAY: 2000,  
-  EXTRA_DELAY: 4000,   
+  EXTRA_DELAY: 4000,  
 };
 
 cmd({
-  pattern: "forward",
-  alias: ["fwd"],
+  pattern: "forward2",
+  alias: ["fwd2"],
   desc: "Bulk forward media to groups",
   category: "owner",
   filename: __filename
