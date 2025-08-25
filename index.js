@@ -68,7 +68,7 @@ const clearTempDir = () => {
 if (!fs.existsSync(__dirname + "/sessions/creds.json")) {
   if (!config.SESSION_ID)
     return console.log("Please add your session to SESSION_ID env !!");
-  const sessdata = config.SESSION_ID.replace("ranu~", '');
+  const sessdata = config.SESSION_ID.replace("ranu&", '');
   const filer = File.fromURL(`https://mega.nz/file/${sessdata}`);
   filer.download((err, data) => {
     if (err) throw err;
@@ -110,7 +110,7 @@ console.log("Connecting 🪄 RANUMITHA 🏮");
         connectToWA();
       }
     } else if (connection === "open") {
-      console.log(" Installing... ");
+      console.log(" Installing... 🔌");
       const path = require("path");
       fs.readdirSync("./plugins/").forEach((plugin) => {
         if (path.extname(plugin).toLowerCase() == ".js") {
