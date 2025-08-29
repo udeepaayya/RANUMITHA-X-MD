@@ -51,6 +51,28 @@ async (conn, mek, m, { from, args, isOwner, reply }) => {
 });
 
 cmd({
+    pattern: "customreact",
+    alias: ["customrt"],
+    desc: "Enable or disable custom react for new members",
+    category: "settings",
+    filename: __filename
+},
+async (conn, mek, m, { from, args, isOwner, reply }) => {
+    if (!isOwner) return reply("*📛 ᴏɴʟʏ ᴛʜᴇ ᴏᴡɴᴇʀ ᴄᴀɴ ᴜsᴇ ᴛʜɪs ᴄᴏᴍᴍᴀɴᴅ!*");
+
+    const status = args[0]?.toLowerCase();
+    if (status === "on") {
+        config.CUSTOM_REACT = "true";
+        return reply("✅ Custom react are now enabled.");
+    } else if (status === "off") {
+        config.CUSTOM_REACT = "false";
+        return reply("❌ Custom react are now disabled.");
+    } else {
+        return reply(`Example: .customreact on`);
+    }
+});
+
+cmd({
     pattern: "setprefix",
     alias: ["prefix"],
     react: "🔧",
@@ -69,6 +91,10 @@ cmd({
     return reply(`✅ Prefix successfully changed to *${newPrefix}*`);
 });
 
+
+//--------------------------------------------
+// mode (public,inbix,private)
+//--------------------------------------------
 cmd({
     pattern: "mode",
     alias: ["setmode"],
@@ -81,7 +107,7 @@ cmd({
 
     // Si aucun argument n'est fourni, afficher le mode actuel et l'usage
     if (!args[0]) {
-        return reply(`📌 Current mode: *${config.MODE}*\n\nUsage: .mode private OR .mode public`);
+        return reply(`📌 Current mode: *${config.MODE}*\n\nUsage: .mode *private/inbox/public*`);
     }
 
     const modeArg = args[0].toLowerCase();
@@ -92,11 +118,43 @@ cmd({
     } else if (modeArg === "public") {
         config.MODE = "public";
         return reply("✅ Bot mode is now set to *PUBLIC*.");
+    } else if (modeArg === "inbox") {
+        config.MODE = "inbox";
+        return reply("✅ Bot mode is now set to *INBOX*.");
     } else {
-        return reply("❌ Invalid mode. Please use `.mode private` or `.mode public`.");
+        return reply("*❌ Invalid mode.*");
+    
     }
 });
 
+//--------------------------------------------
+//PUBLIC_MODE
+//--------------------------------------------
+cmd({
+    pattern: "public-mod",
+    alias: ["publicmod"],
+    desc: "Enable or disable public mod for new members",
+    category: "settings",
+    filename: __filename
+},
+async (conn, mek, m, { from, args, isOwner, reply }) => {
+    if (!isOwner) return reply("*📛 ᴏɴʟʏ ᴛʜᴇ ᴏᴡɴᴇʀ ᴄᴀɴ ᴜsᴇ ᴛʜɪs ᴄᴏᴍᴍᴀɴᴅ!*");
+
+    const status = args[0]?.toLowerCase();
+    if (status === "on") {
+        config.PUBLIC_MODE = "true";
+        return reply("✅ Public mod are now enabled.");
+    } else if (status === "off") {
+        config.PUBLIC_MODE = "false";
+        return reply("❌ Public mod are now disabled.");
+    } else {
+        return reply(`Example: .publicmod on`);
+    }
+});
+
+//--------------------------------------------
+//auto-typing
+//--------------------------------------------
 cmd({
     pattern: "auto-typing",
     description: "Enable or disable auto-typing feature.",
@@ -115,9 +173,10 @@ async (conn, mek, m, { from, args, isOwner, reply }) => {
     return reply(`Auto typing has been turned ${status}.`);
 });
 
-//mention reply 
 
-
+//--------------------------------------------
+//mention reply
+//--------------------------------------------
 cmd({
     pattern: "mention-reply",
     alias: ["menetionreply", "mee"],
@@ -199,7 +258,7 @@ async (conn, mek, m, { from, args, isOwner, reply }) => {
 //--------------------------------------------
 cmd({
     pattern: "auto-seen",
-    alias: ["autostatusview"],
+    alias: ["autostatusview" ,"autostatusseen"],
     desc: "Enable or disable auto-viewing of statuses",
     category: "settings",
     filename: __filename
@@ -224,7 +283,7 @@ async (conn, mek, m, { from, args, isOwner, reply }) => {
 //--------------------------------------------
 cmd({
     pattern: "status-react",
-    alias: ["statusreaction"],
+    alias: ["statusreaction","autostatusreact","statusreact"],
     desc: "Enable or disable auto-liking of statuses",
     category: "settings",
     filename: __filename
@@ -271,8 +330,10 @@ async (conn, mek, m, { from, args, isOwner, reply }) => {
     }
 });
 
-// AUTO_VOICE
 
+//--------------------------------------------
+// AUTO_VOICE
+//--------------------------------------------
 cmd({
     pattern: "auto-voice",
     alias: ["autovoice"],
@@ -426,6 +487,37 @@ async (conn, mek, m, { from, args, isOwner, reply }) => {
 
 //--------------------------------------------
 //  ANTILINK COMMANDS
+//--------------------------------------------
+
+cmd({
+  pattern: "anti-vv",
+  alias: ["antivv"],
+  desc: "Enable or disable ANTI_VV in groups",
+  category: "group",
+  react: "🚫",
+  filename: __filename
+}, async (conn, mek, m, { isGroup, isAdmins, isBotAdmins, args, reply }) => {
+  try {
+    if (!isGroup) return reply('This command can only be used in a group.');
+    if (!isBotAdmins) return reply('Bot must be an admin to use this command.');
+    if (!isAdmins) return reply('You must be an admin to use this command.');
+
+    if (args[0] === "on") {
+      config.ANTI_VV = "true";
+      reply("✅ ANTI_VV has been enabled.");
+    } else if (args[0] === "off") {
+      config.ANTI_VV = "false";
+      reply("❌ ANTI_VV has been disabled.");
+    } else {
+      reply("Usage: *.antivv on/off*");
+    }
+  } catch (e) {
+    reply(`Error: ${e.message}`);
+  }
+});
+
+//--------------------------------------------
+//  ANTIVV COMMANDS
 //--------------------------------------------
 
 cmd({
