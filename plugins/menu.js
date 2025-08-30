@@ -26,18 +26,18 @@ END:VCARD`
 
 cmd({
     pattern: "menu",
-    alise: ["getmenu","list","ranulist","ranumenu"],
+    alias: ["getmenu","list","ranulist","ranumenu"],
     desc: "Show interactive menu system",
     category: "menu",
     react: "📂",
     filename: __filename
 }, async (conn, mek, m, { from, pushname, reply }) => {
     try {
-
-        // Count total commands
+    
+            // Count total commands
         const totalCommands = Object.keys(commands).length;
         
-        const menuCaption = `👋 *𝘏𝘌𝘓𝘓𝘖𝘞* ${pushname} 
+        const info = `👋 *𝘏𝘌𝘓𝘓𝘖𝘞* ${pushname} 
 
  🎀 𝗪elcome to RANUMITHA-X-MD🎗️
 
@@ -66,86 +66,117 @@ cmd({
 *12.│ ⚙️ -* Setting Menu
 
 > © Powerd by 𝗥𝗔𝗡𝗨𝗠𝗜𝗧𝗛𝗔-𝗫-𝗠𝗗 🌛`;
+        const image = "https://raw.githubusercontent.com/Ranumithaofc/RANU-FILE-S-/refs/heads/main/images/IMG-20250711-WA0010.jpg"; // define image url
+        const audioUrl = "https://github.com/Ranumithaofc/RANU-FILE-S-/raw/refs/heads/main/Audio/menujs-audio.mp3"; // audio url / local file
 
-        const contextInfo = {
-            mentionedJid: [m.sender],
-            forwardingScore: 999,
-            isForwarded: false,
-            forwardedNewsletterMessageInfo: {
-                newsletterJid: '120363401868132010@newsletter',
-                newsletterName: config.OWNER_NAME,
-                serverMessageId: 143
-            }
-        };
+        // Send image
+        const sentMsg = await conn.sendMessage(
+            from,
+            { image: { url: image }, caption: info },
+            { quoted: fakevCard }
+        );
 
-        // Function to send menu image with timeout
-        const sendMenuImage = async () => {
-            try {
-                return await conn.sendMessage(
-                    from,
-                    {
-                        image: { url: config.MENU_IMAGE_URL || 'https://raw.githubusercontent.com/Ranumithaofc/RANU-FILE-S-/refs/heads/main/images/IMG-20250711-WA0010.jpg' },
-                        caption: menuCaption,
-                        contextInfo: contextInfo
-                    },
-                    { quoted: fakevCard }
-                );
-            } catch (e) {
-                console.log('Image send failed, falling back to text');
-                return await conn.sendMessage(
-                    from,
-                    { text: menuCaption, contextInfo: contextInfo },
-                    { quoted: mek }
-                );
-            }
-        };
+        const messageID = sentMsg.key.id; // get sent message ID
 
-        // Function to send menu audio with timeout
-        const sendMenuAudio = async () => {
-            try {
-                await new Promise(resolve => setTimeout(resolve, 250)); // Small delay after image
-                await conn.sendMessage(from, {
-                    audio: { url: 'https://github.com/Ranumithaofc/RANU-FILE-S-/raw/refs/heads/main/Audio/menujs-audio.mp3' },
-                    mimetype: 'audio/mp4',
-                    ptt: true,
-                }, { quoted: mek });
-            } catch (e) {
-                console.log('Audio send failed, continuing without it');
-            }
-        };
+        // Send audio (voice note style)
+        await conn.sendMessage(
+            from,
+            { audio: { url: audioUrl }, mimetype: 'audio/mp4', ptt: true },
+            { quoted: mek }
+        );
 
-        // Send image first, then audio sequentially
-        let sentMsg;
-        try {
-            // Send image with 10s timeout
-            sentMsg = await Promise.race([
-                sendMenuImage(),
-                new Promise((_, reject) => setTimeout(() => reject(new Error('Image send timeout')), 2500))
-            ]);
-            
-            // Then send audio with 1s delay and 8s timeout
-            await Promise.race([
-                sendMenuAudio(),
-                new Promise((_, reject) => setTimeout(() => reject(new Error('Audio send timeout')), 2000))
-            ]);
-        } catch (e) {
-            console.log('Menu send error:', e);
-            if (!sentMsg) {
-                sentMsg = await conn.sendMessage(
-                    from,
-                    { text: menuCaption, contextInfo: contextInfo },
-                    { quoted: mek }
-                );
-            }
-        }
-        
-        const messageID = sentMsg.key.id;
+        // Listen for user reply
+conn.ev.on('messages.upsert', async (msgUpdate) => {
+    const mekInfo = msgUpdate?.messages[0];
+    if (!mekInfo?.message) return;
 
-        // Menu data (complete version)
-        const menuData = {
-            '1': {
-                title: "📥 *Download Menu* 📥",
-                content: `╭━━━〔 *Download Menu* 〕━━━┈⊷
+    const fromUser = mekInfo.key.remoteJid;
+    const textMsg =
+        mekInfo.message.conversation ||
+        mekInfo.message.extendedTextMessage?.text;
+
+    const quotedId =
+        mekInfo.message?.extendedTextMessage?.contextInfo?.stanzaId;
+
+    // check user replied to menu message
+    if (quotedId !== messageID) return;
+
+    let userReply = textMsg?.trim();
+
+    if (/^(1|2|3|4|5|6|7|8|9|10|11|12)$/.test(userReply)) {
+        // ✅ react
+        await conn.sendMessage(fromUser, {
+            react: { text: '✅', key: mekInfo.key }
+        });
+
+        // menu image url එක
+        const menuImage = "https://raw.githubusercontent.com/Ranumithaofc/RANU-FILE-S-/refs/heads/main/images/IMG-20250711-WA0010.jpg";
+
+        // send reply with image + caption
+        let captionText = "";
+        switch (userReply) {
+            case "1":
+                captionText = `╭━━━〔 *🤵‍♂ Owner Menu 🤵‍♂* 〕━━━┈⊷
+┃★╭──────────────
+┃★│ ⚠️ *Restricted*
+┃★│ • block @user
+┃★│ • unblock @user
+┃★│ • fullpp [img]
+┃★│ • setpp [img]
+┃★│ • restart
+┃★│ • shutdown
+┃★│ • updatecmd
+┃★╰───────────���──
+┃★╭──────────────
+┃★│ ℹ️ *Info Tools*
+┃★│ • gjid
+┃★│ • jid @user
+┃★│ • listcmd
+┃★│ • allmenu
+┃★╰──────────────
+╰━━━━━━━━━━━━━━━┈⊷
+> © Powerd by 𝗥𝗔𝗡𝗨𝗠𝗜𝗧𝗛𝗔-𝗫-𝗠𝗗 🌛`;
+                break;
+            case "2":
+                captionText = `╭━━━〔 *🤖 Ai Menu 🤖* 〕━━━┈⊷
+┃★╭──────────────
+┃★│ • ai
+┃★│ • deepseek
+┃★│ • gemini
+┃★│ • gemini2
+┃★│ • openai
+┃★╰──────────────
+╰━━━━━━━━━━━━━━┈⊷
+> © Powerd by 𝗥𝗔𝗡𝗨𝗠𝗜𝗧𝗛𝗔-𝗫-𝗠𝗗 🌛`;
+                break;
+            case "3":
+                captionText = `╭━━━〔 *🔍 Search Menu 🔍* 〕━━━┈⊷
+┃★╭──────────────      
+┃★│ • check
+┃★│ • cid
+┃★│ • country
+┃★│ • chinfo
+┃★│ • define
+┃★│ • fancy 
+┃★│ • githubstalk
+┃★│ • npm
+┃★│ • news
+┃★│ • mvdetail
+┃★│ • praytime
+┃★│ • sss
+┃★│ • srepo
+┃★│ • ttstalk
+┃★│ • twtstalk
+┃★│ • yts
+┃★│ • ytpost
+┃★│ • ytstalk
+┃★│ • weather
+┃★╰──────────────
+╰━━━━━━━━━━━━━━┈⊷
+> © Powerd by 𝗥𝗔𝗡𝗨𝗠𝗜𝗧𝗛𝗔-𝗫-𝗠𝗗 🌛`;
+                break;
+            case "4":
+                captionText = `╭━━━〔 *📥 Download Menu 📥* 〕━━━┈⊷
 ┃★╭──────────────
 ┃★│ 🌐 *Social Media*
 ┃★│ • facebook [url]
@@ -175,12 +206,263 @@ cmd({
 ┃★│ • darama [name]
 ┃★╰──────────────
 ╰━━━━━━━━━━━━━━━┈⊷
-> ${config.DESCRIPTION}`,
-                image: true
-            },
-            '2': {
-                title: "👥 *Group Menu* 👥",
-                content: `╭━━━〔 *Group Menu* 〕━━━┈⊷
+> © Powerd by 𝗥𝗔𝗡𝗨𝗠𝗜𝗧𝗛𝗔-𝗫-𝗠𝗗 🌛`;
+                break;
+            case "5":
+                captionText = `╭━━━〔 *😁 Fun Menu 😁* 〕━━━┈⊷
+┃★╭──────────────
+┃★│ 🎭 *Interactive*
+┃★│ • shapar
+┃★│ • rate @user
+┃★│ • insult @user
+┃★│ • hack @user
+┃★│ • ship @user1 @user2
+┃★│ • character
+┃★│ • pickup
+┃★│ • joke
+┃★╰──────────────
+┃★╭──────────────
+┃★│ 😂 *Reactions*
+┃★│ • hrt
+┃★│ • hpy
+┃★│ • syd
+┃★│ • anger
+┃★│ • shy
+┃★│ • kiss
+┃★│ • mon
+┃★│ • cunfuzed
+┃★╰──────────────
+╰━━━━━━━━━━━━━━━┈⊷
+> © Powerd by 𝗥𝗔𝗡𝗨𝗠𝗜𝗧𝗛𝗔-𝗫-𝗠𝗗 🌛`;
+                break;
+            case "6":
+                captionText = `╭━━━〔 *📂  Main Menu  📂* 〕━━━┈⊷
+┃★╭──────────────
+┃★│ ℹ️ *Bot Info*
+┃★│ • ping
+┃★│ • live
+┃★│ • alive
+┃★│ • runtime
+┃★│ • uptime
+┃★│ • repo
+┃★│ • owner
+┃★╰──────────────
+┃★╭──────────────
+┃★│ 🛠️ *Controls*
+┃★│ • menu
+┃★│ • menu2
+┃★│ • restart
+┃★╰──────────────
+╰━━━━━━━━━━━━━━━┈⊷
+> © Powerd by 𝗥𝗔𝗡𝗨𝗠𝗜𝗧𝗛𝗔-𝗫-𝗠𝗗 🌛`;
+                break;
+            case "7":
+                captionText = `╭━━━〔 *🔄 Convert Menu 🔄* 〕━━━┈⊷
+┃★╭──────────────
+┃★│ 🖼️ *Media*
+┃★│ • sticker [img]
+┃★│ • sticker2 [img]
+┃★│ • emojimix 😎+😂
+┃★│ • take [name,text]
+┃★│ • tomp3 [video]
+┃★╰──────────────
+┃★╭──────────────
+┃★│ 📝 *Text*
+┃★│ • fancy [text]
+┃★│ • tts [text]
+┃★│ • trt [text]
+┃★│ • base64 [text]
+┃★│ • unbase64 [text]
+┃★╰──────────────
+╰━━━━━━━━━━━━━━━┈⊷
+> © Powerd by 𝗥𝗔𝗡𝗨𝗠𝗜𝗧𝗛𝗔-𝗫-𝗠𝗗 🌛`;
+                break;
+            case "8":
+                captionText = `╭━━━〔 *📌 Other Menu 📌* 〕━━━┈⊷
+┃★╭──────────────
+┃★│ 🕒 *Utilities*
+┃★│ • timenow
+┃★│ • date
+┃★│ • count [num]
+┃★│ • calculate [expr]
+┃★│ • countx
+┃★╰──────────────
+┃★╭──────────────
+┃★│ 🎲 *Random*
+┃★│ • flip
+┃★│ • coinflip
+┃★│ • rcolor
+┃★│ • roll
+┃★│ • fact
+┃★╰──────────────
+┃★╭──────────────
+┃★│ 🔍 *Search*
+┃★│ • define [word]
+┃★│ • news [query]
+┃★│ • movie [name]
+┃★│ • weather [loc]
+┃★╰──────────────
+┃★╭──────────────
+┃★│ ❤️ *Affection*
+┃★│ • cuddle @user
+┃★│ • hug @user
+┃★│ • kiss @user
+┃★│ • lick @user
+┃★│ • pat @user
+┃★╰──────────────
+┃★╭──────────────
+┃★│ 😂 *Funny*
+┃★│ • bully @user
+┃★│ • bonk @user
+┃★│ • yeet @user
+┃★│ • slap @user
+┃★│ • kill @user
+┃★╰──────────────
+┃★╭──────────────
+┃★│ 😊 *Expressions*
+┃★│ • blush @user
+┃★│ • smile @user
+┃★│ • happy @user
+┃★│ • wink @user
+┃★│ • poke @user
+┃★╰──────────────
+┃★╭──────────────
+┃★│ 🖼️ *Images*
+┃★│ • fack
+┃★│ • dog
+┃★│ • awoo
+┃★│ • garl
+┃★│ • waifu
+┃★│ • neko
+┃★│ • megnumin
+┃★│ • maid
+┃★│ • loli
+┃★╰──────────────
+┃★╭──────────────
+┃★│ 🎭 *Characters*
+┃★│ • animegirl
+┃★│ • animegirl1-5
+┃★│ • anime1-5
+┃★│ • foxgirl
+┃★│ • naruto
+┃★╰──────────────
+╰━━━━━━━━━━━━━━━┈⊷
+> © Powerd by 𝗥𝗔𝗡𝗨𝗠𝗜𝗧𝗛𝗔-𝗫-𝗠𝗗 🌛`;
+                break;
+            case "9":
+                captionText = `╭━━━〔 *🎨 Logo Menu 🎨* 〕━━━┈⊷
+┃★╭──────────────
+┃★│ • 3dcomic
+┃★│ • 3dpaper
+┃★│ • america
+┃★│ • angelwings
+┃★│ • bear
+┃★│ • bulb
+┃★│ • boom
+┃★│ • birthday
+┃★│ • blackpink
+┃★│ • cat
+┃★│ • clouds
+┃★│ • castle
+┃★│ • deadpool
+┃★│ • dragonball
+┃★│ • devilwings
+┃★│ • eraser
+┃★│ • frozen
+┃★│ • futuristic
+┃★│ • galaxy
+┃★│ • hacker
+┃★│ • leaf
+┃★│ • luxury
+┃★│ • naruto
+┃★│ • nigeria
+┃★│ • neonlight
+┃★│ • paint
+┃★│ • por*hub
+┃★│ • sans
+┃★│ • sunset
+┃★│ • sadgirl
+┃★│ • thor
+┃★│ • tatoo
+┃★│ • typography
+┃★│ • valorant
+┃★│ • zodiac
+┃★╰──────────────
+╰━━━━━━━━━━━━━━┈⊷
+> © Powerd by 𝗥𝗔𝗡𝗨𝗠𝗜𝗧𝗛𝗔-𝗫-𝗠𝗗 🌛`;
+                break;
+            case "10":
+                captionText = `╭━━━〔  *🖼️ Imagine Menu 🖼️*  〕━━━┈⊷
+┃★╭──────────────
+┃★│ • awoo
+┃★│ • dog
+┃★│ • imgloli
+┃★│ • maid
+┃★│ • megumin
+┃★│ • waifu
+┃★│ • neko
+┃★│ • anime
+┃★│ • anime1
+┃★│ • anime2
+┃★│ • anime3
+┃★│ • anime4
+┃★│ • anime5
+┃★│ • animegirl
+┃★│ • animegirl1
+┃★│ • animegirl2
+┃★│ • animegirl3
+┃★│ • animegirl4
+┃★│ • animegirl5
+┃★│ • imagine
+┃★│ • imagine2
+┃★│ • imagine3
+┃★│ • wallpaper
+┃★│ • randomwall
+┃★│ • getimage
+┃★│ • imgscan
+┃★│ • image
+┃★│ • adedit
+┃★│ • bluredit
+┃★│ • greyedit
+┃★│ • invertedit
+┃★│ • jailedit
+┃★│ • jokeedit
+┃★│ • nokiaedit
+┃★│ • wantededit
+┃★│ • removebg
+┃★│ • couplepp
+┃★│ • bonk
+┃★│ • bully
+┃★│ • blush
+┃★│ • bite
+┃★│ • cry
+┃★│ • cuddle
+┃★│ • cringe
+┃★│ • dance
+┃★│ • glomp
+┃★│ • hug
+┃★│ • happy
+┃★│ • handhold
+┃★│ • highfive
+┃★│ • kill
+┃★│ • kiss
+┃★│ • lick
+┃★│ • nom
+┃★│ • pat
+┃★│ • poke
+┃★│ • smug
+┃★│ • slay
+┃★│ • smile
+┃★│ • marige
+┃★│ • wave
+┃★│ • wink
+┃★│ • yeet
+┃★╰──────────────
+╰━━━━━━━━━━━━━━┈⊷
+> © Powerd by 𝗥𝗔𝗡𝗨𝗠𝗜𝗧𝗛𝗔-𝗫-𝗠𝗗 🌛`;
+                break;
+            case "11":
+                captionText = `╭━━━〔 *👥 Group Menu 👥* 〕━━━┈⊷
 ┃★╭──────────────
 ┃★│ 🛠️ *Management*
 ┃★│ • grouplink
@@ -211,308 +493,57 @@ cmd({
 ┃★│ • invite
 ┃★╰──────────────
 ╰━━━━━━━━━━━━━━━┈⊷
-> ${config.DESCRIPTION}`,
-                image: true
-            },
-            '3': {
-                title: "😄 *Fun Menu* 😄",
-                content: `╭━━━〔 *Fun Menu* 〕━━━┈⊷
-┃★╭──────────────
-┃★│ 🎭 *Interactive*
-┃★│ • shapar
-┃★│ • rate @user
-┃★│ • insult @user
-┃★│ • hack @user
-┃★│ • ship @user1 @user2
-┃★│ • character
-┃★│ • pickup
-┃★│ • joke
+> © Powerd by 𝗥𝗔𝗡𝗨𝗠𝗜𝗧𝗛𝗔-𝗫-𝗠𝗗 🌛`;
+                break;
+            case "12":
+                captionText = `╭━━━〔  *⚙️ Setting Menu ⚙️* 〕━━━┈⊷
+┃★╭──────────────      
+┃★│ • mode pravite/inbox/public
+┃★│ • setprefix !,@,#,$,/ 
+┃★│ • admin-events on/off
+┃★│ • welcome on/off
+┃★│ • auto-typing on/off
+┃★│ • mention-reply on/off
+┃★│ • always-online on/off
+┃★│ • auto-recoding on/off
+┃★│ • auto-seen on/off
+┃★│ • status-react on/off
+┃★│ • read-messages on/off 
+┃★│ • auto-voice on/off
+┃★│ • auto-reply on/off
+┃★│ • auto-sticker on/off
+┃★│ • auto-react on/off
+┃★│ • status-reply on/off
+┃★│ • anti-bad on/off
+┃★│ • antilink on/off
+┃★│ • antikick on/off
+┃★│ • kicklink on/off
+┃★│ • deletelink on/off
+┃★│ • antibad on/off
+┃★│ • antidelete on/off
+┃★│ • anticall on/off
+┃★│ • heartreact on/off
+┃★│ • .use on/off
 ┃★╰──────────────
-┃★╭──────────────
-┃★│ 😂 *Reactions*
-┃★│ • hrt
-┃★│ • hpy
-┃★│ • syd
-┃★│ • anger
-┃★│ • shy
-┃★│ • kiss
-┃★│ • mon
-┃★│ • cunfuzed
-┃★╰──────────────
-╰━━━━━━━━━━━━━━━┈⊷
-> ${config.DESCRIPTION}`,
-                image: true
-            },
-            '4': {
-                title: "👑 *Owner Menu* 👑",
-                content: `╭━━━〔 *Owner Menu* 〕━━━┈⊷
-┃★╭──────────────
-┃★│ ⚠️ *Restricted*
-┃★│ • block @user
-┃★│ • unblock @user
-┃★│ • fullpp [img]
-┃★│ • setpp [img]
-┃★│ • restart
-┃★│ • shutdown
-┃★│ • updatecmd
-┃★╰───────────���──
-┃★╭──────────────
-┃★│ ℹ️ *Info Tools*
-┃★│ • gjid
-┃★│ • jid @user
-┃★│ • listcmd
-┃★│ • allmenu
-┃★╰──────────────
-╰━━━━━━━━━━━━━━━┈⊷
-> ${config.DESCRIPTION}`,
-                image: true
-            },
-            '5': {
-                title: "🤖 *AI Menu* 🤖",
-                content: `╭━━━〔 *AI Menu* 〕━━━┈⊷
-┃★╭──────────────
-┃★│ 💬 *Chat AI*
-┃★│ • ai [query]
-┃★│ • gpt3 [query]
-┃★│ • gpt2 [query]
-┃★│ • gptmini [query]
-┃★│ • gpt [query]
-┃★│ • meta [query]
-┃★╰──────────────
-┃★╭──────────────
-┃★│ 🖼️ *Image AI*
-┃★│ • imagine [text]
-┃★│ • imagine2 [text]
-┃★╰──────────────
-┃★╭──────────────
-┃★│ 🔍 *Specialized*
-┃★│ • blackbox [query]
-┃★│ • luma [query]
-┃★│ • dj [query]
-┃★│ • white [query]
-┃★╰──────────────
-╰━━━━━━━━━━━━━━━┈⊷
-> ${config.DESCRIPTION}`,
-                image: true
-            },
-            '6': {
-                title: "🎎 *Anime Menu* 🎎",
-                content: `╭━━━〔 *Anime Menu* 〕━━━┈⊷
-┃★╭──────────────
-┃★│ 🖼️ *Images*
-┃★│ • fack
-┃★│ • dog
-┃★│ • awoo
-┃★│ • garl
-┃★│ • waifu
-┃★│ • neko
-┃★│ • megnumin
-┃★│ • maid
-┃★│ • loli
-┃★╰──────────────
-┃★╭──────────────
-┃★│ 🎭 *Characters*
-┃★│ • animegirl
-┃★│ • animegirl1-5
-┃★│ • anime1-5
-┃★│ • foxgirl
-┃★│ • naruto
-┃★╰──────────────
-╰━━━━━━━━━━━━━━━┈⊷
-> ${config.DESCRIPTION}`,
-                image: true
-            },
-            '7': {
-                title: "🔄 *Convert Menu* 🔄",
-                content: `╭━━━〔 *Convert Menu* 〕━━━┈⊷
-┃★╭──────────────
-┃★│ 🖼️ *Media*
-┃★│ • sticker [img]
-┃★│ • sticker2 [img]
-┃★│ • emojimix 😎+😂
-┃★│ • take [name,text]
-┃★│ • tomp3 [video]
-┃★╰──────────────
-┃★╭──────────────
-┃★│ 📝 *Text*
-┃★│ • fancy [text]
-┃★│ • tts [text]
-┃★│ • trt [text]
-┃★│ • base64 [text]
-┃★│ • unbase64 [text]
-┃★╰──────────────
-╰━━━━━━━━━━━━━━━┈⊷
-> ${config.DESCRIPTION}`,
-                image: true
-            },
-            '8': {
-                title: "📌 *Other Menu* 📌",
-                content: `╭━━━〔 *Other Menu* 〕━━━┈⊷
-┃★╭──────────────
-┃★│ 🕒 *Utilities*
-┃★│ • timenow
-┃★│ • date
-┃★│ • count [num]
-┃★│ • calculate [expr]
-┃★│ • countx
-┃★╰──────────────
-┃★╭──────────────
-┃★│ 🎲 *Random*
-┃★│ • flip
-┃★│ • coinflip
-┃★│ • rcolor
-┃★│ • roll
-┃★│ • fact
-┃★╰──────────────
-┃★╭──────────────
-┃★│ 🔍 *Search*
-┃★│ • define [word]
-┃★│ • news [query]
-┃★│ • movie [name]
-┃★│ • weather [loc]
-┃★╰──────────────
-╰━━━━━━━━━━━━━━━┈⊷
-> ${config.DESCRIPTION}`,
-                image: true
-            },
-            '9': {
-                title: "💞 *Reactions Menu* 💞",
-                content: `╭━━━〔 *Reactions Menu* 〕━━━┈⊷
-┃★╭──────────────
-┃★│ ❤️ *Affection*
-┃★│ • cuddle @user
-┃★│ • hug @user
-┃★│ • kiss @user
-┃★│ • lick @user
-┃★│ • pat @user
-┃★╰──────────────
-┃★╭──────────────
-┃★│ 😂 *Funny*
-┃★│ • bully @user
-┃★│ • bonk @user
-┃★│ • yeet @user
-┃★│ • slap @user
-┃★│ • kill @user
-┃★╰──────────────
-┃★╭──────────────
-┃★│ 😊 *Expressions*
-┃★│ • blush @user
-┃★│ • smile @user
-┃★│ • happy @user
-┃★│ • wink @user
-┃★│ • poke @user
-┃★╰──────────────
-╰━━━━━━━━━━━━━━━┈⊷
-> ${config.DESCRIPTION}`,
-                image: true
-            },
-            '10': {
-                title: "🏠 *Main Menu* 🏠",
-                content: `╭━━━〔 *Main Menu* 〕━━━┈⊷
-┃★╭──────────────
-┃★│ ℹ️ *Bot Info*
-┃★│ • ping
-┃★│ • live
-┃★│ • alive
-┃★│ • runtime
-┃★│ • uptime
-┃★│ • repo
-┃★│ • owner
-┃★╰──────────────
-┃★╭──────────────
-┃★│ 🛠️ *Controls*
-┃★│ • menu
-┃★│ • menu2
-┃★│ • restart
-┃★╰──────────────
-╰━━━━━━━━━━━━━━━┈⊷
-> ${config.DESCRIPTION}`,
-                image: true
-            }
-        };
-
-        // Message handler with improved error handling
-        const handler = async (msgData) => {
-            try {
-                const receivedMsg = msgData.messages[0];
-                if (!receivedMsg?.message || !receivedMsg.key?.remoteJid) return;
-
-                const isReplyToMenu = receivedMsg.message.extendedTextMessage?.contextInfo?.stanzaId === messageID;
-                
-                if (isReplyToMenu) {
-                    const receivedText = receivedMsg.message.conversation || 
-                                      receivedMsg.message.extendedTextMessage?.text;
-                    const senderID = receivedMsg.key.remoteJid;
-
-                    if (menuData[receivedText]) {
-                        const selectedMenu = menuData[receivedText];
-                        
-                        try {
-                            if (selectedMenu.image) {
-                                await conn.sendMessage(
-                                    senderID,
-                                    {
-                                        image: { url: config.MENU_IMAGE_URL || 'https://files.catbox.moe/ebcvj0.jpg' },
-                                        caption: selectedMenu.content,
-                                        contextInfo: contextInfo
-                                    },
-                                    { quoted: receivedMsg }
-                                );
-                            } else {
-                                await conn.sendMessage(
-                                    senderID,
-                                    { text: selectedMenu.content, contextInfo: contextInfo },
-                                    { quoted: receivedMsg }
-                                );
-                            }
-
-                            await conn.sendMessage(senderID, {
-                                react: { text: '✅', key: receivedMsg.key }
-                            });
-
-                        } catch (e) {
-                            console.log('Menu reply error:', e);
-                            await conn.sendMessage(
-                                senderID,
-                                { text: selectedMenu.content, contextInfo: contextInfo },
-                                { quoted: receivedMsg }
-                            );
-                        }
-
-                    } else {
-                        await conn.sendMessage(
-                            senderID,
-                            {
-                                text: `❌ *Invalid Option!* ❌\n\nPlease reply with a number between 1-10 to select a menu.\n\n*Example:* Reply with "1" for Download Menu\n\n> ${config.DESCRIPTION}`,
-                                contextInfo: contextInfo
-                            },
-                            { quoted: receivedMsg }
-                        );
-                    }
-                }
-            } catch (e) {
-                console.log('Handler error:', e);
-            }
-        };
-
-        // Add listener
-        conn.ev.on("messages.upsert", handler);
-
-        // Remove listener after 5 minutes
-        setTimeout(() => {
-            conn.ev.off("messages.upsert", handler);
-        }, 300000);
-
-    } catch (e) {
-        console.error('Menu Error:', e);
-        try {
-            await conn.sendMessage(
-                from,
-                { text: `❌ Menu system is currently busy. Please try again later.\n\n> ${config.DESCRIPTION}` },
-                { quoted: mek }
-            );
-        } catch (finalError) {
-            console.log('Final error handling failed:', finalError);
+╰━━━━━━━━━━━━━━┈⊷
+> © Powerd by 𝗥𝗔𝗡𝗨𝗠𝗜𝗧𝗛𝗔-𝗫-𝗠𝗗 🌛`;
+                break;
         }
+
+        await conn.sendMessage(fromUser, { 
+            image: { url: menuImage }, 
+            caption: captionText 
+        }, { quoted: mekInfo });
+
+    } else {
+        await conn.sendMessage(fromUser, { 
+            text: "❌ Invalid choice! Reply with 1-12" 
+        }, { quoted: mekInfo });
+    }
+});
+    } catch (error) {
+        console.error(error);
+        await conn.sendMessage(from, { react: { text: '❌', key: mek.key } });
+        await reply(`❌ *Main error:* ${error.message || "Error!"}`);
     }
 });
