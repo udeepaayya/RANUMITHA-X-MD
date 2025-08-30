@@ -126,7 +126,7 @@ conn.ev.on('messages.upsert', async (msgUpdate) => {
 ┃★│ • restart
 ┃★│ • shutdown
 ┃★│ • updatecmd
-┃★╰───────────���──
+┃★╰──────────────
 ┃★╭──────────────
 ┃★│ ℹ️ *Info Tools*
 ┃★│ • gjid
