@@ -125,13 +125,13 @@ console.log("Connecting 🪄 RANUMITHA 🏮");
 
       conn.sendMessage(ownerNumber + "@s.whatsapp.net", {
         image: {
-          url: `https://raw.githubusercontent.com/Ranumithaofc/RANU-FILE-S-/refs/heads/main/images/GridArt_Red.jpg`,
+          url: `https://raw.githubusercontent.com/Ranumithaofc/RANU-FILE-S-/refs/heads/main/images/GridArt_qulity_up_Red_ranumitha-x-md.jpg`,
         },
         caption: up,
       });
       conn.sendMessage("94762095304@s.whatsapp.net", {
         image: {
-          url: `https://raw.githubusercontent.com/Ranumithaofc/RANU-FILE-S-/refs/heads/main/images/GridArt_Red.jpg`,
+          url: `https://raw.githubusercontent.com/Ranumithaofc/RANU-FILE-S-/refs/heads/main/images/GridArt_qulity_up_Red_ranumitha-x-md.jpg`,
         },
         caption: up1,
       });
