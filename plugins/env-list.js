@@ -16,27 +16,158 @@ cmd({
     category: "system",
     react: "⚙️",
     filename: __filename
-}, 
-async (conn, mek, m, { from, quoted, reply, isOwner }) => {
+}, async (conn, mek, m, { from, quoted, reply, isOwner }) => {
     try {
-    
-    // Owner check
+        // --- Owner check ---
         if (!isOwner) {
+            await conn.sendMessage(from, { react: { text: "❌", key: mek.key } });
             return reply("🚫 *Owner Only Command!*");
         }
 
-        // Menu text
+        // --- Menu text ---
         let envSettings = `╭─『 ⚙️ 𝗦𝗘𝗧𝗧𝗜𝗡𝗚𝗦 𝗠𝗘𝗡𝗨 ⚙️ 』───❏
-├─ Name: RANUMITHA-X-MD
-├─ Prefix: ${config.PREFIX}
-├─ Owner: ᴴᴵᴿᵁᴷᴬ ᴿᴬᴺᵁᴹᴵᵀᴴᴬ
-├─ Version: ${config.BOT_VERSION}
-└─ Mode: ${config.MODE.toUpperCase()}
+│
+├─❏ *🔖 BOT INFO*
+├─∘ *Name:* RANUMITHA-X-MD
+├─∘ *Prefix:* ${config.PREFIX}
+├─∘ *Owner:* ᴴᴵᴿᵁᴷᴬ ᴿᴬᴺᵁᴹᴵᵀᴴᴬ
+├─∘ *Number:* ${config.OWNER_NUMBER}
+├─∘ *Version:* ${config.BOT_VERSION}
+└─∘ *Mode:* ${config.MODE.toUpperCase()}
+    
+      ╭─ 🛡️ 𝗦𝗘𝗧𝗧𝗜𝗡𝗚𝗦 🛡️ ─╮
+╭───────────────────╮
+│ SELECT WORK MODE *${config.MODE.toUpperCase()}*  |
+╰───────────────────╯ 
+  ┣ 1.1  Public  
+  ┣ 1.2  Private 
+  ┣ 1.3  Group   
+  ┗ 1.4  Inbox
 
-> Reply with numbers (e.g. 1.1 / 2.1) or type 'exit' to close.`;
+╭──────────────────╮
+│ Auto Recording: ${isEnabled(config.AUTO_RECORDING) ? "✅" : "❌"}                 |
+╰──────────────────╯ 
+  ┣ 2.1  true  ✅ 
+  ┗ 2.2  false ❌
+
+╭──────────────────╮
+│ Auto Typing: ${isEnabled(config.AUTO_TYPING) ? "✅" : "❌"}                        |
+╰──────────────────╯ 
+  ┣ 3.1  true  ✅ 
+  ┗ 3.2  false ❌
+
+╭──────────────────╮
+│ Always Online: ${isEnabled(config.ALWAYS_ONLINE) ? "✅" : "❌"}                    |
+╰──────────────────╯ 
+  ┣ 4.1  true  ✅ 
+  ┗ 4.2  false ❌
+
+╭──────────────────╮
+│ Public Mod: ${isEnabled(config.PUBLIC_MODE) ? "✅" : "❌"}                         |
+╰──────────────────╯ 
+  ┣ 5.1  true  ✅ 
+  ┗ 5.2  false ❌
+
+╭──────────────────╮
+│ Auto Voice: ${isEnabled(config.AUTO_VOICE) ? "✅" : "❌"}                          |
+╰──────────────────╯ 
+  ┣ 6.1  true  ✅ 
+  ┗ 6.2  false ❌
+
+╭──────────────────╮
+│ Auto Sticker: ${isEnabled(config.AUTO_STICKER) ? "✅" : "❌"}                       |
+╰──────────────────╯ 
+  ┣ 7.1  true  ✅ 
+  ┗ 7.2  false ❌
+
+╭──────────────────╮
+│ Auto Reply: ${isEnabled(config.AUTO_REPLY) ? "✅" : "❌"}                          |
+╰──────────────────╯ 
+  ┣ 8.1  true  ✅ 
+  ┗ 8.2  false ❌
+
+╭──────────────────╮
+│ Auto React: ${isEnabled(config.AUTO_REACT) ? "✅" : "❌"}                         |
+╰──────────────────╯ 
+  ┣ 9.1  true  ✅ 
+  ┗ 9.2  false ❌
+
+╭──────────────────╮
+│ Auto Status Seen: ${isEnabled(config.AUTO_STATUS_SEEN) ? "✅" : "❌"}              |
+╰──────────────────╯ 
+  ┣ 10.1  true  ✅ 
+  ┗ 10.2  false ❌
+
+╭──────────────────╮
+│ Auto Status Reply: ${isEnabled(config.AUTO_STATUS_REPLY) ? "✅" : "❌"}             |
+╰──────────────────╯ 
+  ┣ 11.1  true  ✅ 
+  ┗ 11.2  false ❌
+
+╭──────────────────╮
+│ Auto Status React: ${isEnabled(config.AUTO_STATUS_REACT) ? "✅" : "❌"}             |
+╰──────────────────╯ 
+  ┣ 12.1  true  ✅ 
+  ┗ 12.2 false ❌
+
+╭──────────────────╮
+│ Custom React: ${isEnabled(config.CUSTOM_REACT) ? "✅" : "❌"}                   |
+╰──────────────────╯ 
+  ┣ 13.1  true  ✅ 
+  ┗ 13.2  false ❌
+
+╭──────────────────╮
+│ Anti VV: ${isEnabled(config.ANTI_VV) ? "✅" : "❌"}                                |
+╰──────────────────╯ 
+  ┣ 14.1  true  ✅ 
+  ┗ 14.2  false ❌
+
+╭──────────────────╮
+│ Welcome: ${isEnabled(config.WELCOME) ? "✅" : "❌"}                            |
+╰──────────────────╯ 
+  ┣ 15.1  true  ✅ 
+  ┗ 15.2  false ❌
+
+╭──────────────────╮
+│ Admin Events: ${isEnabled(config.ADMIN_EVENTS) ? "✅" : "❌"}                    |
+╰──────────────────╯ 
+  ┣ 16.1  true  ✅ 
+  ┗ 16.2  false ❌
+
+╭──────────────────╮
+│ Anti Link: ${isEnabled(config.ANTI_LINK) ? "✅" : "❌"}                              |
+╰──────────────────╯ 
+  ┣ 17.1  true  ✅ 
+  ┗ 17.2  false ❌
+
+╭──────────────────╮
+│ Read Message: ${isEnabled(config.READ_MESSAGE) ? "✅" : "❌"}                  |
+╰──────────────────╯ 
+  ┣ 18.1  true  ✅ 
+  ┗ 18.2  false ❌
+
+╭──────────────────╮
+│ Anti Bad: ${isEnabled(config.ANTI_BAD) ? "✅" : "❌"}                              |
+╰──────────────────╯ 
+  ┣ 19.1  true  ✅ 
+  ┗ 19.2  false ❌
+
+╭──────────────────╮
+│ Anti Link Kick: ${isEnabled(config.ANTI_LINK_KICK) ? "✅" : "❌"}                     |
+╰──────────────────╯ 
+  ┣ 20.1  true  ✅ 
+  ┗ 20.2  false ❌
+
+╭──────────────────╮
+│ Read CMD: ${isEnabled(config.READ_CMD) ? "✅" : "❌"}                          |
+╰──────────────────╯ 
+  ┣ 21.1  true  ✅ 
+  ┗ 21.2  false ❌
+
+> © Powerd by 𝗥𝗔𝗡𝗨𝗠𝗜𝗧𝗛𝗔-𝗫-𝗠𝗗 🌛`;
 
         // Send menu image
-        const menuMsg = await conn.sendMessage(from, {
+        await conn.sendMessage(from, {
             image: { url: "https://raw.githubusercontent.com/Ranumithaofc/RANU-FILE-S-/refs/heads/main/images/Config%20img%20.jpg" },
             caption: envSettings
         }, { quoted: mek });
@@ -54,21 +185,21 @@ async (conn, mek, m, { from, quoted, reply, isOwner }) => {
                 const msg = msgUpdate.messages[0];
                 if (!msg.message) return;
 
-                // Support conversation + extendedTextMessage
-                let text = msg.message.conversation
-                         || msg.message.extendedTextMessage?.text;
+                let text = msg.message.conversation || msg.message.extendedTextMessage?.text;
                 if (!text) return;
                 text = text.trim();
 
                 const sender = msg.key.participant || msg.key.remoteJid;
 
-            
-                // ✅ react for valid number
-                if (/^(\d{1.1,1.2,1.3,1.4,2.1, 2.2, 3.1, 3.2, 4.1, 4.2, 5.1, 5.2, 6.1, 6.2, 7.1, 7.2, 8.1, 8.2, 9.1, 9.2, 10.1, 10.2,11.1, 11.2, 12.1, 12.2, 13.1, 13.2, 14.1, 14.2, 15.1, 15.2, 16.1, 16.2, 17.1, 17.2, 18.1, 18.2,19.1, 19.2, 20.1, 20.2, 21.1, 21.2}\.\d)$/.test(text)) {
-                    await conn.sendMessage(from, { react: { text: "✅", key: msg.key } });
+                // Only owner can reply numbers
+                if (sender !== mek.key.remoteJid) return;
+
+                // ✅ react first for valid number
+                if (/^(1\.1|1\.2|1\.3|1\.4|2\.1|2\.2|3\.1|3\.2|4\.1|4\.2|5\.1|5\.2|6\.1|6\.2|7\.1|7\.2|8\.1|8\.2|9\.1|9\.2|10\.1|10\.2|11\.1|11\.2|12\.1|12\.2|13\.1|13\.2|14\.1|14\.2|15\.1|15\.2|16\.1|16\.2|17\.1|17\.2|18\.1|18\.2|19\.1|19\.2|20\.1|20\.2|21\.1|21\.2)$/.test(text)) {
+                    await conn.sendMessage(sender, { react: { text: "✅", key: msg.key } });
                 }
 
-                // --- Handle options ---
+                // --- Send corresponding answer ---
                 switch (text) {
                     case '1.1': await reply("✅ Public Mode enabled"); break;
                     case '1.2': await reply("✅ Private Mode enabled"); break;
@@ -114,14 +245,12 @@ async (conn, mek, m, { from, quoted, reply, isOwner }) => {
                     case '20.2': await reply("❌ Anti Link Kick OFF"); break;
                     case '21.1': await reply("✅ Read CMD ON"); break;
                     case '21.2': await reply("❌ Read CMD OFF"); break;
-
                     case 'exit':
                         await reply("✅ Settings menu closed.");
                         conn.ev.off('messages.upsert', handler);
                         return;
-
                     default:
-                        if (/^(\d{1.1,1.2,1.3,1.4,2.1, 2.2, 3.1, 3.2, 4.1, 4.2, 5.1, 5.2, 6.1, 6.2, 7.1, 7.2, 8.1, 8.2, 9.1, 9.2, 10.1, 10.2,11.1, 11.2, 12.1, 12.2, 13.1, 13.2, 14.1, 14.2, 15.1, 15.2, 16.1, 16.2, 17.1, 17.2, 18.1, 18.2,19.1, 19.2, 20.1, 20.2, 21.1, 21.2}\.\d)$/.test(text)) {
+                        if (/^(1\.1|1\.2|1\.3|1\.4|2\.1|2\.2|3\.1|3\.2|4\.1|4\.2|5\.1|5\.2|6\.1|6\.2|7\.1|7\.2|8\.1|8\.2|9\.1|9\.2|10\.1|10\.2|11\.1|11\.2|12\.1|12\.2|13\.1|13\.2|14\.1|14\.2|15\.1|15\.2|16\.1|16\.2|17\.1|17\.2|18\.1|18\.2|19\.1|19\.2|20\.1|20\.2|21\.1|21\.2)$/.test(text)) {
                             await reply("❌ Invalid option, please select correctly.");
                         }
                 }
@@ -131,6 +260,7 @@ async (conn, mek, m, { from, quoted, reply, isOwner }) => {
             }
         };
 
+        // Listen to message updates
         conn.ev.on('messages.upsert', handler);
 
     } catch (error) {
