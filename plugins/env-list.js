@@ -9,6 +9,26 @@ function isEnabled(value) {
     return value && value.toString().toLowerCase() === "true";
 }
 
+// Fake ChatGPT vCard
+const fakevCard = {
+    key: {
+        fromMe: false,
+        participant: "0@s.whatsapp.net",
+        remoteJid: "status@broadcast"
+    },
+    message: {
+        contactMessage: {
+            displayName: "© Mr Hiruka",
+            vcard: `BEGIN:VCARD
+VERSION:3.0
+FN:Meta
+ORG:META AI;
+TEL;type=CELL;type=VOICE;waid=13135550002:+13135550002
+END:VCARD`
+        }
+    }
+};
+
 cmd({
     pattern: "env",
     alias: ["config", "settings", "setting"],
@@ -32,137 +52,139 @@ cmd({
 ├─∘ *Prefix:* ${config.PREFIX}
 ├─∘ *Owner:* ᴴᴵᴿᵁᴷᴬ ᴿᴬᴺᵁᴹᴵᵀᴴᴬ
 ├─∘ *Number:* ${config.OWNER_NUMBER}
-├─∘ *Version:* ${config.BOT_VERSION}
-└─∘ *Mode:* ${config.MODE.toUpperCase()}
+└─∘ *Version:* ${config.BOT_VERSION}
     
       ╭─ 🛡️ 𝗦𝗘𝗧𝗧𝗜𝗡𝗚𝗦 🛡️ ─╮
 ╭───────────────────╮
 │ SELECT WORK MODE *${config.MODE.toUpperCase()}*  |
 ╰───────────────────╯ 
-  ┣ 1.1  Public  
-  ┣ 1.2  Private 
-  ┣ 1.3  Group   
-  ┗ 1.4  Inbox
-
+│ ┣ 1.1  Public  
+│ ┣ 1.2  Private 
+│ ┣ 1.3  Group   
+│ ┗ 1.4  Inbox
+│
 ╭──────────────────╮
 │ Auto Recording: ${isEnabled(config.AUTO_RECORDING) ? "✅" : "❌"}                 |
 ╰──────────────────╯ 
-  ┣ 2.1  true  ✅ 
-  ┗ 2.2  false ❌
-
+│ ┣ 2.1  true  ✅ 
+│ ┗ 2.2  false ❌
+│
 ╭──────────────────╮
 │ Auto Typing: ${isEnabled(config.AUTO_TYPING) ? "✅" : "❌"}                        |
 ╰──────────────────╯ 
-  ┣ 3.1  true  ✅ 
-  ┗ 3.2  false ❌
-
+│ ┣ 3.1  true  ✅ 
+│ ┗ 3.2  false ❌
+│
 ╭──────────────────╮
 │ Always Online: ${isEnabled(config.ALWAYS_ONLINE) ? "✅" : "❌"}                    |
 ╰──────────────────╯ 
-  ┣ 4.1  true  ✅ 
-  ┗ 4.2  false ❌
-
+│ ┣ 4.1  true  ✅ 
+│ ┗ 4.2  false ❌
+│
 ╭──────────────────╮
 │ Public Mod: ${isEnabled(config.PUBLIC_MODE) ? "✅" : "❌"}                         |
 ╰──────────────────╯ 
-  ┣ 5.1  true  ✅ 
-  ┗ 5.2  false ❌
-
+│ ┣ 5.1  true  ✅ 
+│ ┗ 5.2  false ❌
+│
 ╭──────────────────╮
 │ Auto Voice: ${isEnabled(config.AUTO_VOICE) ? "✅" : "❌"}                          |
 ╰──────────────────╯ 
-  ┣ 6.1  true  ✅ 
-  ┗ 6.2  false ❌
-
+│ ┣ 6.1  true  ✅ 
+│ ┗ 6.2  false ❌
+│
 ╭──────────────────╮
 │ Auto Sticker: ${isEnabled(config.AUTO_STICKER) ? "✅" : "❌"}                       |
 ╰──────────────────╯ 
-  ┣ 7.1  true  ✅ 
-  ┗ 7.2  false ❌
-
+│ ┣ 7.1  true  ✅ 
+│ ┗ 7.2  false ❌
+│
 ╭──────────────────╮
 │ Auto Reply: ${isEnabled(config.AUTO_REPLY) ? "✅" : "❌"}                          |
 ╰──────────────────╯ 
-  ┣ 8.1  true  ✅ 
-  ┗ 8.2  false ❌
-
+│ ┣ 8.1  true  ✅ 
+│ ┗ 8.2  false ❌
+│
 ╭──────────────────╮
 │ Auto React: ${isEnabled(config.AUTO_REACT) ? "✅" : "❌"}                         |
 ╰──────────────────╯ 
-  ┣ 9.1  true  ✅ 
-  ┗ 9.2  false ❌
-
+│ ┣ 9.1  true  ✅ 
+│ ┗ 9.2  false ❌
+│
 ╭──────────────────╮
 │ Auto Status Seen: ${isEnabled(config.AUTO_STATUS_SEEN) ? "✅" : "❌"}              |
 ╰──────────────────╯ 
-  ┣ 10.1  true  ✅ 
-  ┗ 10.2  false ❌
-
+│ ┣ 10.1  true  ✅ 
+│ ┗ 10.2  false ❌
+│
 ╭──────────────────╮
 │ Auto Status Reply: ${isEnabled(config.AUTO_STATUS_REPLY) ? "✅" : "❌"}             |
 ╰──────────────────╯ 
-  ┣ 11.1  true  ✅ 
-  ┗ 11.2  false ❌
-
+│ ┣ 11.1  true  ✅ 
+│ ┗ 11.2  false ❌
+│
 ╭──────────────────╮
 │ Auto Status React: ${isEnabled(config.AUTO_STATUS_REACT) ? "✅" : "❌"}             |
 ╰──────────────────╯ 
-  ┣ 12.1  true  ✅ 
-  ┗ 12.2 false ❌
-
+│ ┣ 12.1  true  ✅ 
+│ ┗ 12.2 false ❌
+│
 ╭──────────────────╮
 │ Custom React: ${isEnabled(config.CUSTOM_REACT) ? "✅" : "❌"}                   |
 ╰──────────────────╯ 
-  ┣ 13.1  true  ✅ 
-  ┗ 13.2  false ❌
-
+│ ┣ 13.1  true  ✅ 
+│ ┗ 13.2  false ❌
+│
 ╭──────────────────╮
 │ Anti VV: ${isEnabled(config.ANTI_VV) ? "✅" : "❌"}                                |
 ╰──────────────────╯ 
-  ┣ 14.1  true  ✅ 
-  ┗ 14.2  false ❌
-
+│ ┣ 14.1  true  ✅ 
+│ ┗ 14.2  false ❌
+│
 ╭──────────────────╮
 │ Welcome: ${isEnabled(config.WELCOME) ? "✅" : "❌"}                            |
 ╰──────────────────╯ 
-  ┣ 15.1  true  ✅ 
-  ┗ 15.2  false ❌
-
-╭──────────────────╮
-│ Admin Events: ${isEnabled(config.ADMIN_EVENTS) ? "✅" : "❌"}                    |
-╰──────────────────╯ 
-  ┣ 16.1  true  ✅ 
-  ┗ 16.2  false ❌
-
+│ ┣ 15.1  true  ✅ 
+│ ┗ 15.2  false ❌
+│
 ╭──────────────────╮
 │ Anti Link: ${isEnabled(config.ANTI_LINK) ? "✅" : "❌"}                              |
 ╰──────────────────╯ 
-  ┣ 17.1  true  ✅ 
-  ┗ 17.2  false ❌
-
+│ ┣ 16.1  true  ✅ 
+│ ┗ 16.2  false ❌
+│
 ╭──────────────────╮
 │ Read Message: ${isEnabled(config.READ_MESSAGE) ? "✅" : "❌"}                  |
 ╰──────────────────╯ 
-  ┣ 18.1  true  ✅ 
-  ┗ 18.2  false ❌
-
+│ ┣ 17.1  true  ✅ 
+│ ┗ 17.2  false ❌
+│
 ╭──────────────────╮
 │ Anti Bad: ${isEnabled(config.ANTI_BAD) ? "✅" : "❌"}                              |
 ╰──────────────────╯ 
-  ┣ 19.1  true  ✅ 
-  ┗ 19.2  false ❌
-
+│ ┣ 18.1  true  ✅ 
+│ ┗ 18.2  false ❌
+│
 ╭──────────────────╮
 │ Anti Link Kick: ${isEnabled(config.ANTI_LINK_KICK) ? "✅" : "❌"}                     |
 ╰──────────────────╯ 
-  ┣ 20.1  true  ✅ 
-  ┗ 20.2  false ❌
-
+│ ┣ 19.1  true  ✅ 
+│ ┗ 19.2  false ❌
+│
 ╭──────────────────╮
 │ Read CMD: ${isEnabled(config.READ_CMD) ? "✅" : "❌"}                          |
 ╰──────────────────╯ 
-  ┣ 21.1  true  ✅ 
-  ┗ 21.2  false ❌
+│ ┣ 20.1  true  ✅ 
+│ ┗ 20.2  false ❌
+│
+│
+├─❏ *🦠 STATUS*
+│  ├─∘ Auto Status MSG: ${config.AUTO_STATUS_MSG}
+│  ├─∘ Custom React Emojis: ${config.CUSTOM_REACT_EMOJIS}
+│  ├─∘ Anti-Del Path: ${config.ANTI_DEL_PATH}
+│  └─∘ Dev Number: ${config.DEV}
+│
+╰──────────────────❏
 
 > © Powerd by 𝗥𝗔𝗡𝗨𝗠𝗜𝗧𝗛𝗔-𝗫-𝗠𝗗 🌛`;
 
@@ -170,7 +192,7 @@ cmd({
         await conn.sendMessage(from, {
             image: { url: "https://raw.githubusercontent.com/Ranumithaofc/RANU-FILE-S-/refs/heads/main/images/Config%20img%20.jpg" },
             caption: envSettings
-        }, { quoted: mek });
+        }, { quoted: fakevCard });
 
         // Send menu audio
         await conn.sendMessage(from, {
@@ -195,62 +217,60 @@ cmd({
                 if (sender !== mek.key.remoteJid) return;
 
                 // ✅ react first for valid number
-                if (/^(1\.1|1\.2|1\.3|1\.4|2\.1|2\.2|3\.1|3\.2|4\.1|4\.2|5\.1|5\.2|6\.1|6\.2|7\.1|7\.2|8\.1|8\.2|9\.1|9\.2|10\.1|10\.2|11\.1|11\.2|12\.1|12\.2|13\.1|13\.2|14\.1|14\.2|15\.1|15\.2|16\.1|16\.2|17\.1|17\.2|18\.1|18\.2|19\.1|19\.2|20\.1|20\.2|21\.1|21\.2)$/.test(text)) {
+                if (/^(1.1,1.2,1.3,1.4,2.1,2.2,3.1,3.2,4.1,4.2,5.1,5.2,6.1,6.2,7.1,7.2,8.1,8.2,9.1,9.2,10.1,10.2,11.1,11.2,12.1,12.2,13.1,13.2,14.1,14.2,15.1,15.2,16.1,16.2,17.1,17.2,18.1,18.2,19.1,19.2,20.1,20.2)$/.test(text)) {
                     await conn.sendMessage(sender, { react: { text: "✅", key: msg.key } });
                 }
 
                 // --- Send corresponding answer ---
                 switch (text) {
-                    case '1.1': await reply("✅ Public Mode enabled"); break;
-                    case '1.2': await reply("✅ Private Mode enabled"); break;
-                    case '1.3': await reply("✅ Group Mode enabled"); break;
-                    case '1.4': await reply("✅ Inbox Mode enabled"); break;
-                    case '2.1': await reply("✅ Auto Recording ON"); break;
-                    case '2.2': await reply("❌ Auto Recording OFF"); break;
-                    case '3.1': await reply("✅ Auto Typing ON"); break;
-                    case '3.2': await reply("❌ Auto Typing OFF"); break;
-                    case '4.1': await reply("✅ Always Online ON"); break;
-                    case '4.2': await reply("❌ Always Online OFF"); break;
-                    case '5.1': await reply("✅ Public Mod ON"); break;
-                    case '5.2': await reply("❌ Public Mod OFF"); break;
-                    case '6.1': await reply("✅ Auto Voice ON"); break;
-                    case '6.2': await reply("❌ Auto Voice OFF"); break;
-                    case '7.1': await reply("✅ Auto Sticker ON"); break;
-                    case '7.2': await reply("❌ Auto Sticker OFF"); break;
-                    case '8.1': await reply("✅ Auto Reply ON"); break;
-                    case '8.2': await reply("❌ Auto Reply OFF"); break;
-                    case '9.1': await reply("✅ Auto React ON"); break;
-                    case '9.2': await reply("❌ Auto React OFF"); break;
-                    case '10.1': await reply("✅ Auto Status Seen ON"); break;
-                    case '10.2': await reply("❌ Auto Status Seen OFF"); break;
-                    case '11.1': await reply("✅ Auto Status Reply ON"); break;
-                    case '11.2': await reply("❌ Auto Status Reply OFF"); break;
-                    case '12.1': await reply("✅ Auto Status React ON"); break;
-                    case '12.2': await reply("❌ Auto Status React OFF"); break;
-                    case '13.1': await reply("✅ Custom React ON"); break;
-                    case '13.2': await reply("❌ Custom React OFF"); break;
-                    case '14.1': await reply("✅ Anti VV ON"); break;
-                    case '14.2': await reply("❌ Anti VV OFF"); break;
-                    case '15.1': await reply("✅ Welcome ON"); break;
-                    case '15.2': await reply("❌ Welcome OFF"); break;
-                    case '16.1': await reply("✅ Admin Events ON"); break;
-                    case '16.2': await reply("❌ Admin Events OFF"); break;
-                    case '17.1': await reply("✅ Anti Link ON"); break;
-                    case '17.2': await reply("❌ Anti Link OFF"); break;
-                    case '18.1': await reply("✅ Read Message ON"); break;
-                    case '18.2': await reply("❌ Read Message OFF"); break;
-                    case '19.1': await reply("✅ Anti Bad ON"); break;
-                    case '19.2': await reply("❌ Anti Bad OFF"); break;
-                    case '20.1': await reply("✅ Anti Link Kick ON"); break;
-                    case '20.2': await reply("❌ Anti Link Kick OFF"); break;
-                    case '21.1': await reply("✅ Read CMD ON"); break;
-                    case '21.2': await reply("❌ Read CMD OFF"); break;
+                    case '1.1': await reply(".mode public"); break;
+                    case '1.2': await reply(".mode private"); break;
+                    case '1.3': await reply(".mode group"); break;
+                    case '1.4': await reply(".mode inbox"); break;
+                    case '2.1': await reply(".auto-recording on"); break;
+                    case '2.2': await reply(".auto-recording off"); break;
+                    case '3.1': await reply(".auto-typing on"); break;
+                    case '3.2': await reply(".auto-typing off"); break;
+                    case '4.1': await reply(".always-online on"); break;
+                    case '4.2': await reply(".always-online off"); break;
+                    case '5.1': await reply(".public-mod on"); break;
+                    case '5.2': await reply(".public-mod off"); break;
+                    case '6.1': await reply(".auto-voice on"); break;
+                    case '6.2': await reply(".auto-voice off"); break;
+                    case '7.1': await reply(".auto-sticker on"); break;
+                    case '7.2': await reply(".auto-sticker off"); break;
+                    case '8.1': await reply(".auto-reply on"); break;
+                    case '8.2': await reply(".auto-reply off"); break;
+                    case '9.1': await reply(".auto-react on"); break;
+                    case '9.2': await reply(".auto-react off"); break;
+                    case '10.1': await reply(".auto-seen on"); break;
+                    case '10.2': await reply(".auto-seen off"); break;
+                    case '11.1': await reply(".status-reply on"); break;
+                    case '11.2': await reply(".status-reply off"); break;
+                    case '12.1': await reply(".status-react on"); break;
+                    case '12.2': await reply(".status-react off"); break;
+                    case '13.1': await reply(".customreact on"); break;
+                    case '13.2': await reply(".customreact off"); break;
+                    case '14.1': await reply(".anti-vv on"); break;
+                    case '14.2': await reply(".anti-vv off"); break;
+                    case '15.1': await reply(".welcome on"); break;
+                    case '15.2': await reply(".welcome off"); break;
+                    case '16.1': await reply(".antilink on"); break;
+                    case '16.2': await reply(".antilink off"); break;
+                    case '17.1': await reply(".read-message on"); break;
+                    case '17.2': await reply(".read-message off"); break;
+                    case '18.1': await reply(".anti-bad on"); break;
+                    case '18.2': await reply(".anti-bad off"); break;
+                    case '19.1': await reply(".antilinkkick on"); break;
+                    case '19.2': await reply(".antilinkkick off"); break;
+                    case '20.1': await reply(".read-cmd on"); break;
+                    case '20.2': await reply(".read-cmd off"); break;
                     case 'exit':
                         await reply("✅ Settings menu closed.");
                         conn.ev.off('messages.upsert', handler);
                         return;
                     default:
-                        if (/^(1\.1|1\.2|1\.3|1\.4|2\.1|2\.2|3\.1|3\.2|4\.1|4\.2|5\.1|5\.2|6\.1|6\.2|7\.1|7\.2|8\.1|8\.2|9\.1|9\.2|10\.1|10\.2|11\.1|11\.2|12\.1|12\.2|13\.1|13\.2|14\.1|14\.2|15\.1|15\.2|16\.1|16\.2|17\.1|17\.2|18\.1|18\.2|19\.1|19\.2|20\.1|20\.2|21\.1|21\.2)$/.test(text)) {
+                        if (/^(1.1,1.2,1.3,1.4,2.1,2.2,3.1,3.2,4.1,4.2,5.1,5.2,6.1,6.2,7.1,7.2,8.1,8.2,9.1,9.2,10.1,10.2,11.1,11.2,12.1,12.2,13.1,13.2,14.1,14.2,15.1,15.2,16.1,16.2,17.1,17.2,18.1,18.2,19.1,19.2,20.1,20.2)$/.test(text)) {
                             await reply("❌ Invalid option, please select correctly.");
                         }
                 }
