@@ -51,7 +51,7 @@ async (robin, mek, m, {
         // Send Image + Caption
         await robin.sendMessage(from, {
             image: {
-                url: "https://files.catbox.moe/pgt57n.jpg" // You can replace this with your own ALIVE_IMG URL
+                url: "https://raw.githubusercontent.com/Ranumithaofc/RANU-FILE-S-/refs/heads/main/images/Config%20img%20.jpg" // You can replace this with your own ALIVE_IMG URL
             },
             caption: status,
             contextInfo: {
