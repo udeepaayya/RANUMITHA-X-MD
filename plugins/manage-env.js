@@ -330,6 +330,32 @@ async (conn, mek, m, { from, args, isOwner, reply }) => {
     }
 });
 
+//--------------------------------------------
+//  READ-MESSAGE COMMANDS
+//--------------------------------------------
+cmd({
+    pattern: "read-cmd",
+    alias: ["readcmd"],
+    desc: "enable or disable readmessage.",
+    category: "settings",
+    filename: __filename
+},    
+async (conn, mek, m, { from, args, isOwner, reply }) => {
+    if (!isOwner) return reply("*📛 ᴏɴʟʏ ᴛʜᴇ ᴏᴡɴᴇʀ ᴄᴀɴ ᴜsᴇ ᴛʜɪs ᴄᴏᴍᴍᴀɴᴅ!*");
+
+    const status = args[0]?.toLowerCase();
+    // Check the argument for enabling or disabling the anticall feature
+    if (args[0] === "on") {
+        config.READ_CMD = "true";
+        return reply("readmessage feature is now enabled.");
+    } else if (args[0] === "off") {
+        config.READ_CMD = "false";
+        return reply("readmessage feature is now disabled.");
+    } else {
+        return reply(`_example:  .readcmd on_`);
+    }
+});
+
 
 //--------------------------------------------
 // AUTO_VOICE
