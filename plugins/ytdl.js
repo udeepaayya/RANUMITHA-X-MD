@@ -31,7 +31,7 @@ END:VCARD`
 
 cmd({
     pattern: "play1",
-    alias: ["mp3", "ytmp3", "song1"],
+    alias: ["mp3", "ytmp3", "song1", "song2"],
     react: "🎵",
     desc: "Download Ytmp3",
     category: "download",
@@ -62,8 +62,8 @@ cmd({
             `👤 *Author:* ${author?.name || "Unknown"}\n` +
             `🖇 *Url:* ${url || "Unknown"}\n\n` +
             `🔽 *Reply with your choice:*\n` +
-            `1.1 *Audio Type* 🎵\n` +
-            `1.2 *Document Type* 📁\n\n` +
+            `1. *Audio Type* 🎵\n` +
+            `2. *Document Type* 📁\n\n` +
             `${config.FOOTER || "𓆩RANUMITHA-X-MD𓆪"}`;
 
         const sentMsg = await conn.sendMessage(from, { image: { url: image }, caption: info }, { quoted: fakevCard });
@@ -86,14 +86,14 @@ cmd({
                 let type;
                 let response;
                 
-                if (userReply === "1.1") {
+                if (userReply === "1") {
                     msg = await conn.sendMessage(from, { text: "⏳ Processing..." }, { quoted: fakevCard });
                     response = await dy_scrap.ytmp3(`https://youtube.com/watch?v=${id}`);
                     let downloadUrl = response?.result?.download?.url;
                     if (!downloadUrl) return await reply("❌ Download link not found!");
                     type = { audio: { url: downloadUrl }, mimetype: "audio/mpeg" };
                     
-                } else if (userReply === "1.2") {
+                } else if (userReply === "2") {
                     msg = await conn.sendMessage(from, { text: "⏳ Processing..." }, { quoted: fakevCard });
                     const response = await dy_scrap.ytmp3(`https://youtube.com/watch?v=${id}`);
                     let downloadUrl = response?.result?.download?.url;
@@ -101,11 +101,11 @@ cmd({
                     type = { document: { url: downloadUrl }, fileName: `${title}.mp3`, mimetype: "audio/mpeg", caption: title };
                     
                 } else { 
-                    return await reply("❌ Invalid choice! Reply with 1.1 or 1.2.");
+                    return await reply("❌ Invalid choice! Reply with 1 or 2.");
                 }
 
                 await conn.sendMessage(from, type, { quoted: mek });
-                await conn.sendMessage(from, { text: '✅ Media Upload Successful ✅', edit: msg.key });
+                await conn.sendMessage(from, { text: '*✅ Media Upload Successful.*', edit: msg.key });
 
             } catch (error) {
                 console.error(error);
