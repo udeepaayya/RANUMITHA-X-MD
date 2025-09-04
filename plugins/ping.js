@@ -3,7 +3,7 @@ const { cmd, commands } = require('../command');
 
 cmd({
     pattern: "ping",
-    alias: ["speed", "pong", "ranuspeed", "ranuping", "ranumithaspeed", "ranumithaspeed"],
+    alias: ["speed", "pong", "ranuspeed", "ranuping", "ranumithaspeed"],
     use: '.ping',
     desc: "Check bot's response time.",
     category: "main",
@@ -22,13 +22,18 @@ async (conn, mek, m, { from, sender, reply }) => {
             react: { text: randomEmoji, key: mek.key }
         });
 
-        const ping = Date.now() - startTime; 
+        // First send: "ping ! ! !"
+        let sentMsg = await conn.sendMessage(from, { text: "ping ! ! !" }, { quoted: mek });
 
-        // Final message
-        const text = `*Ping: _${ping}ms_ ${randomEmoji}*`;
+        // Calculate ping
+        const ping = Date.now() - startTime;
+
+        // Edit same message with ping result
+        const newText = `*Ping: _${ping}ms_ ${randomEmoji}*`;
 
         await conn.sendMessage(from, {
-            text,
+            edit: sentMsg.key,  // edit same message
+            text: newText,
             contextInfo: {
                 mentionedJid: [sender],
                 forwardingScore: 999,
@@ -39,7 +44,7 @@ async (conn, mek, m, { from, sender, reply }) => {
                     serverMessageId: 143
                 }
             }
-        }, { quoted: mek });
+        });
 
     } catch (e) {
         console.error("Error in ping command:", e);
