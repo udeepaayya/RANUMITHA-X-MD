@@ -14,7 +14,7 @@ async (conn, mek, m, {
         // Get the bot owner's number dynamically from conn.user.id
         const botOwner = conn.user.id.split(":")[0]; // Extract the bot owner's number
         if (senderNumber !== botOwner) {
-            return reply("Only the bot owner can use this command.");
+            return reply("🚫 *Owner Only Command!*");
         }
 
         const steps = [
@@ -65,9 +65,13 @@ cmd({
     category: "fun",
     react: "💻",
     filename: __filename
-},
-async (conn, mek, m, { from, reply }) => {
+    
+}, async (conn, mek, m, { from, isOwner, reply }) => {
     try {
+        if (!isOwner) {
+            await conn.sendMessage(from, { react: { text: "❌", key: mek.key } });
+            return reply("🚫 *Owner Only Command!*");
+        }
         function makeBar(percent) {
             const totalBlocks = 20;
             const filled = Math.floor((percent / 100) * totalBlocks);
