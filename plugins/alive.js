@@ -39,11 +39,11 @@ async (robin, mek, m, {
 
         // Voice Note
         await robin.sendMessage(from, {
-            audio: {
-                url: "https://github.com/Ranumithaofc/RANU-FILE-S-/raw/refs/heads/main/Audio/Amor%20Na%20Praia%20(Slowed)%20edited.mp3"
+            video: {
+                url: "https://github.com/Ranumithaofc/RANU-FILE-S-/raw/refs/heads/main/video/R%20alive%20video%20msg.mp4"
             },
-            mimetype: 'audio/mpeg',
-            ptt: true
+            mimetype: 'video/mp4',
+            ptv: true
         }, { quoted: fakevCard });
 
         // Stylish Alive Caption
