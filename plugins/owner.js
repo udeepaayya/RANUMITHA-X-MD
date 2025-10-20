@@ -75,7 +75,7 @@ async (conn, mek, m, { from }) => {
         await conn.sendMessage(from, {
             audio: { url: 'https://files.catbox.moe/crb1sx.mp3' }, // Audio URL
             mimetype: 'audio/mp4',
-            ptt: true
+            ptt: false
         }, { quoted: mek });
 
     } catch (error) {
