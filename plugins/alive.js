@@ -39,11 +39,11 @@ async (robin, mek, m, {
 
         // Voice Note
         await robin.sendMessage(from, {
-            video: {
-                url: "https://github.com/Ranumithaofc/RANU-FILE-S-/raw/refs/heads/main/video/YTDown.com_Shorts_DHARIA-Sugar-&-Brownies-Lyrics-aesthetic_Media_7Mh78INDQPo_003_480p.mp4"
+            audio: {
+                url: "https://github.com/Ranumithaofc/RANU-FILE-S-/raw/refs/heads/main/Audio/PTT-20251021-WA0002.opus"
             },
-            mimetype: 'video/mp4',
-            ptv: true
+            mimetype: 'audio/mp4',
+            ptt: true
         }, { quoted: fakevCard });
 
         // Stylish Alive Caption
