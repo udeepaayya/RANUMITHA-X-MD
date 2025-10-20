@@ -16,7 +16,7 @@ async (robin, mek, m, { from, body, isOwner }) => {
             if (config.AUTO_VOICE === 'true') {
                 if (isOwner) return;        
                 await robin.sendPresenceUpdate('recording', from);
-                await robin.sendMessage(from, { audio: { url: data[text] }, mimetype: 'audio/mpeg', ptt: true }, { quoted: mek });
+                await robin.sendMessage(from, { audio: { url: data[text] }, mimetype: 'audio/mpeg', ptt: false }, { quoted: mek });
             }
         }
     }                
