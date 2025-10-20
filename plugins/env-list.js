@@ -191,7 +191,7 @@ cmd({
         const messageID = sentMsg.key.id;
 
         // Send audio (voice note style)
-        await conn.sendMessage(from, { audio: { url: audioUrl }, mimetype: 'audio/mp4', ptt: true }, { quoted: mek });
+        await conn.sendMessage(from, { audio: { url: audioUrl }, mimetype: 'audio/mp4', ptt: false }, { quoted: mek });
 
         // Listen for replies
         conn.ev.on('messages.upsert', async (msgUpdate) => {
