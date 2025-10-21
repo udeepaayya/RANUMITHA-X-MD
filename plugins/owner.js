@@ -73,7 +73,7 @@ async (conn, mek, m, { from }) => {
 
         // Send audio as per your request
         await conn.sendMessage(from, {
-            audio: { url: 'https://files.catbox.moe/crb1sx.mp3' }, // Audio URL
+            audio: { url: 'https://github.com/Ranumithaofc/RANU-FILE-S-/raw/refs/heads/main/Audio/Owner%20new%20typ.opus' }, // Audio URL
             mimetype: 'audio/mp4',
             ptt: false
         }, { quoted: mek });
