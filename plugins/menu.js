@@ -81,7 +81,7 @@ cmd({
         // Send audio (voice note style)
         await conn.sendMessage(
             from,
-            { audio: { url: audioUrl }, mimetype: 'audio/mp4', ptt: false },
+            { audio: { url: audioUrl }, mimetype: 'audio/mp4', ptt: true },
             { quoted: mek }
         );
 
