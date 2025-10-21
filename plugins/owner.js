@@ -75,7 +75,7 @@ async (conn, mek, m, { from }) => {
         await conn.sendMessage(from, {
             audio: { url: 'https://github.com/Ranumithaofc/RANU-FILE-S-/raw/refs/heads/main/Audio/Owner%20new%20typ.opus' }, // Audio URL
             mimetype: 'audio/mp4',
-            ptt: false
+            ptt: true
         }, { quoted: mek });
 
     } catch (error) {
