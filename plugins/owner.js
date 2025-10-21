@@ -49,7 +49,7 @@ async (conn, mek, m, { from }) => {
 
         // Send the owner contact message with image and audio
         await conn.sendMessage(from, {
-            image: { url: 'https://files.catbox.moe/j2t4hm.jpg' }, // Image URL from your request
+            image: { url: 'https://raw.githubusercontent.com/Ranumithaofc/RANU-FILE-S-/refs/heads/main/images/GridArt_Red.jpg' }, // Image URL from your request
             caption: `╭━━〔 *RANUMITHA-X-MD* 〕━━┈⊷
 ┃◈╭─────────────·๏
 ┃◈┃• *Here is the owner details*
