@@ -38,7 +38,7 @@ cmd({
     saveBans(banned);
 
     await conn.sendMessage(from, {
-        image: { url: "https://files.catbox.moe/fnmvlq.jpg" },
+        image: { url: "https://raw.githubusercontent.com/Ranumithaofc/RANU-FILE-S-/refs/heads/main/images/Lucid_Origin_A_dark_and_moody_phonk_banner_featuring_the_name__2.jpg" },
         caption: `⛔ *User has been banned from using the bot.*\n\n👤 *ID:* ${target}`
     }, { quoted: mek });
 });
@@ -67,7 +67,7 @@ cmd({
     saveBans(banned.filter(u => u !== target));
 
     await conn.sendMessage(from, {
-        image: { url: "https://files.catbox.moe/fnmvlq.jpg" },
+        image: { url: "https://raw.githubusercontent.com/Ranumithaofc/RANU-FILE-S-/refs/heads/main/images/Lucid_Origin_A_dark_and_moody_phonk_banner_featuring_the_name__2.jpg" },
         caption: `✅ *User has been unbanned.*\n\n👤 *ID:* ${target}`
     }, { quoted: mek });
 });
@@ -91,7 +91,7 @@ cmd({
     msg += banned.map((id, i) => `${i + 1}. wa.me/${id.replace("@s.whatsapp.net", "")}`).join("\n");
 
     await conn.sendMessage(from, {
-        image: { url: "https://files.catbox.moe/fnmvlq.jpg" },
+        image: { url: "https://raw.githubusercontent.com/Ranumithaofc/RANU-FILE-S-/refs/heads/main/images/Lucid_Origin_A_dark_and_moody_phonk_banner_featuring_the_name__2.jpg" },
         caption: msg
     }, { quoted: mek });
 });
