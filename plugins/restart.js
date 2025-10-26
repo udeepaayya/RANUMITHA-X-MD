@@ -3,7 +3,7 @@ const { sleep } = require("../lib/functions");
 
 cmd({  
     pattern: "restart",  
-    react: '✔️',
+    react: '🔄',
     desc: "Restart RANUMITHA-X-MD",  
     category: "owner",  
     filename: __filename  
@@ -11,7 +11,7 @@ cmd({
 async (conn, mek, m, { reply, isOwner }) => {  
     try {  
         if (!isOwner) {  
-            return reply("Only the bot owner can use this command.");  
+            return reply("*🚫 Owner only command!*");  
         }  
 
         const { exec } = require("child_process");  
