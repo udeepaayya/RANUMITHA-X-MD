@@ -13,7 +13,7 @@ cmd({
     category: "misc",
     filename: __filename
 }, async (client, message, args, { reply, isOwner }) => {
-    if (!isOwner) return reply("This command is only for the bot owner.");
+    if (!isOwner) return reply("*🚫 Owner only command!*");
 
     try {
         await reply("🔍 Checking for update...");
