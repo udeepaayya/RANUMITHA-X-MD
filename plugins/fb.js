@@ -6,24 +6,24 @@ const { fetchJson } = require('../lib/functions');
 
 const api = `https://nethu-api-ashy.vercel.app`;
 
-// Fake ChatGPT vCard
+// Fake vCard
 const fakevCard = {
-  key: {
-    fromMe: false,
-    participant: "0@s.whatsapp.net",
-    remoteJid: "status@broadcast"
-  },
-  message: {
-    contactMessage: {
-      displayName: "© Mr Hiruka",
-      vcard: `BEGIN:VCARD
+    key: {
+        fromMe: false,
+        participant: "0@s.whatsapp.net",
+        remoteJid: "status@broadcast"
+    },
+    message: {
+        contactMessage: {
+            displayName: "© Mr Hiruka",
+            vcard: `BEGIN:VCARD
 VERSION:3.0
 FN:Meta
 ORG:META AI;
-TEL;type=CELL;type=VOICE;waid=13135550002:+13135550002
+TEL;type=CELL;type=VOICE;waid=94762095304:+94762095304
 END:VCARD`
+        }
     }
-  }
 };
 
 cmd({
