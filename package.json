@@ -1,7 +1,7 @@
 {
   "name": "RANUMITHA-X-MD",
   "version": "3.5.8",
-  "description": "A WhatsApp Bot Created By Hiruka Ranumitha,
+  "description": "A WhatsApp Bot Created By Hiruka Ranumitha",
   "main": "index.js",
   "scripts": {
     "start": "pm2 start index.js --deep-monitoring --attach --name RANUMITHA-X-MD",
