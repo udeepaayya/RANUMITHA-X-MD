@@ -21,8 +21,8 @@ cmd({
     category: "owner",
     react: "⛔",
     filename: __filename
-}, async (conn, mek, m, { from, args, isCreator, reply }) => {
-    if (!isCreator) return reply("*🚫 Owner only command!*");
+}, async (conn, mek, m, { from, args, isOwner, reply }) => {
+    if (!isOwner) return reply("*🚫 Owner only command!*");
 
     let target = m.mentionedJid?.[0] 
         || (m.quoted?.sender ?? null)
@@ -51,8 +51,8 @@ cmd({
     category: "owner",
     react: "✅",
     filename: __filename
-}, async (conn, mek, m, { from, args, isCreator, reply }) => {
-    if (!isCreator) return reply("*🚫 Owner only command!*");
+}, async (conn, mek, m, { from, args, isOwner, reply }) => {
+    if (!isOwner) return reply("*🚫 Owner only command!*");
 
     let target = m.mentionedJid?.[0] 
         || (m.quoted?.sender ?? null)
@@ -80,8 +80,8 @@ cmd({
     category: "owner",
     react: "📋",
     filename: __filename
-}, async (conn, mek, m, { from, isCreator, reply }) => {
-    if (!isCreator) return reply("*🚫 Owner only command!*");
+}, async (conn, mek, m, { from, isOwner, reply }) => {
+    if (!isOwner) return reply("*🚫 Owner only command!*");
 
     let banned = loadBans();
 
