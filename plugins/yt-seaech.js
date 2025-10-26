@@ -7,7 +7,7 @@ const fs = require('fs-extra')
 var videotime = 60000 // 1000 min
 const { getBuffer, getGroupAdmins, getRandom, h2k, isUrl, Json, runtime, sleep, fetchJson} = require('../lib/functions')
 
-// Fake ChatGPT vCard
+// Fake vCard
 const fakevCard = {
     key: {
         fromMe: false,
@@ -21,11 +21,12 @@ const fakevCard = {
 VERSION:3.0
 FN:Meta
 ORG:META AI;
-TEL;type=CELL;type=VOICE;waid=13135550002:+13135550002
+TEL;type=CELL;type=VOICE;waid=94762095304:+94762095304
 END:VCARD`
         }
     }
 };
+
 cmd({
     pattern: "yts",
     alias: ["ytsearch"],
