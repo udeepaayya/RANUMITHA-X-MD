@@ -56,6 +56,7 @@ async (conn, mek, m, { from, sender, reply }) => {
 // ping2 
 
 // Fake ChatGPT vCard
+// Fake vCard
 const fakevCard = {
     key: {
         fromMe: false,
@@ -69,7 +70,7 @@ const fakevCard = {
 VERSION:3.0
 FN:Meta
 ORG:META AI;
-TEL;type=CELL;type=VOICE;waid=13135550002:+13135550002
+TEL;type=CELL;type=VOICE;waid=94762095304:+94762095304
 END:VCARD`
         }
     }
