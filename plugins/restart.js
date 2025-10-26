@@ -3,6 +3,7 @@ const { sleep } = require("../lib/functions");
 
 cmd({  
     pattern: "restart",  
+    react: '✔️',
     desc: "Restart RANUMITHA-X-MD",  
     category: "owner",  
     filename: __filename  
