@@ -5,7 +5,7 @@ const footer = "> © Powerd by 𝗥𝗔𝗡𝗨𝗠𝗜𝗧𝗛𝗔-𝗫-𝗠�
 
 cmd({
     pattern: "xnxx",
-    alias: ["xvdl", "xvideo"],
+    alias: ["xvdl", "xvideo", "phv"],
     use: ".xnxx <video name>",
     react: "🤤",
     desc: "Search & download xnxx.com videos (18+).",
