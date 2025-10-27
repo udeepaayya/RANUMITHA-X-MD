@@ -45,8 +45,7 @@ cmd({
     filename: __filename
 }, async (conn, mek, m, { from, isOwner, reply }) => {
     try {
-        if (!isOwner) {
-            await conn.sendMessage(from, { react: { text: "❌", key: mek.key } });
+                if (!isOwner) {
             return reply("🚫 *Owner Only Command!*");
         }
 
@@ -219,7 +218,6 @@ cmd({
 
             if (!isOwner) {
                 await conn.sendMessage(fromUser, { text: "🚫 *Owner Only!*" }, { quoted: mekInfo });
-                await conn.sendMessage(fromUser, { react: { text: "❌", key: mekInfo.key } });
                 return;
             }
 
