@@ -6,136 +6,157 @@ const { getBuffer, getGroupAdmins, getRandom, h2k, isUrl, Json, sleep, fetchJson
 const { writeFileSync } = require('fs');
 const path = require('path');
 
-// Helper: check if enabled
+// helper: check if enabled
 function isEnabled(value) {
     return value === "true" || value === true;
 }
 
-// Helper: save config permanently
+// helper: save config permanently
 function saveConfig() {
     fs.writeFileSync("./config.js", `module.exports = ${JSON.stringify(config, null, 4)};`);
 }
 
-// Full interactive settings menu
+const fakevCard = {
+    key: {
+        fromMe: false,
+        participant: "0@s.whatsapp.net",
+        remoteJid: "status@broadcast"
+    },
+    message: {
+        contactMessage: {
+            displayName: "© Mr Hiruka",
+            vcard: `BEGIN:VCARD
+VERSION:3.0
+FN:Meta
+ORG:META AI;
+TEL;type=CELL;type=VOICE;waid=94762095304:+94762095304
+END:VCARD`
+        }
+    }
+};
+
 cmd({
     pattern: "settings",
-    react: "⚙️",
+    alias: ["env","config","setting"],
     desc: "Interactive bot settings menu (Owner Only)",
     category: "system",
+    react: "⚙️",
     filename: __filename
-}, async (conn, mek, m, { from, reply, isOwner }) => {
-    if (!isOwner) return reply("🚫 Only the owner can use this command!");
+}, async (conn, mek, m, { from, isOwner, reply }) => {
+    try {
+        if (!isOwner) {
+            await conn.sendMessage(from, { react: { text: "❌", key: mek.key } });
+            return reply("🚫 *Owner Only Command!*");
+        }
 
-    const menu = `
-╭─「 ⚙️ SETTINGS MENU ⚙️ 」─
-│ 1. Bot Mode:
-│    ┣ 1.1  ${config.MODE === "public" ? "public ✅" : "public ❌"}
-│    ┣ 1.2  ${config.MODE === "private" ? "private ✅" : "private ❌"}
-│    ┣ 1.3  ${config.MODE === "inbox" ? "inbox ✅" : "inbox ❌"}
-│ 2. Auto Recording:
-│    ┣ 2.1  ${isEnabled(config.AUTO_RECORDING) ? "true ✅" : "false ❌"}
-│    ┗ 2.2  ${isEnabled(config.AUTO_RECORDING) ? "false ❌" : "true ✅"}
-│ 3. Auto Typing:
-│    ┣ 3.1  ${isEnabled(config.AUTO_TYPING) ? "true ✅" : "false ❌"}
-│    ┗ 3.2  ${isEnabled(config.AUTO_TYPING) ? "false ❌" : "true ✅"}
-│ 4. Always Online:
-│    ┣ 4.1  ${isEnabled(config.ALWAYS_ONLINE) ? "true ✅" : "false ❌"}
-│    ┗ 4.2  ${isEnabled(config.ALWAYS_ONLINE) ? "false ❌" : "true ✅"}
-│ 5. Public Mode:
-│    ┣ 5.1  ${isEnabled(config.PUBLIC_MODE) ? "true ✅" : "false ❌"}
-│    ┗ 5.2  ${isEnabled(config.PUBLIC_MODE) ? "false ❌" : "true ✅"}
-│ 6. Auto Voice:
-│    ┣ 6.1  ${isEnabled(config.AUTO_VOICE) ? "true ✅" : "false ❌"}
-│    ┗ 6.2  ${isEnabled(config.AUTO_VOICE) ? "false ❌" : "true ✅"}
-│ 7. Auto Sticker:
-│    ┣ 7.1  ${isEnabled(config.AUTO_STICKER) ? "true ✅" : "false ❌"}
-│    ┗ 7.2  ${isEnabled(config.AUTO_STICKER) ? "false ❌" : "true ✅"}
-│ 8. Auto Reply:
-│    ┣ 8.1  ${isEnabled(config.AUTO_REPLY) ? "true ✅" : "false ❌"}
-│    ┗ 8.2  ${isEnabled(config.AUTO_REPLY) ? "false ❌" : "true ✅"}
-│ 9. Auto React:
-│    ┣ 9.1  ${isEnabled(config.AUTO_REACT) ? "true ✅" : "false ❌"}
-│    ┗ 9.2  ${isEnabled(config.AUTO_REACT) ? "false ❌" : "true ✅"}
-│ 10. Auto Status Seen:
-│    ┣ 10.1  ${isEnabled(config.AUTO_STATUS_SEEN) ? "true ✅" : "false ❌"}
-│    ┗ 10.2  ${isEnabled(config.AUTO_STATUS_SEEN) ? "false ❌" : "true ✅"}
-│ 11. Status Reply:
-│    ┣ 11.1  ${isEnabled(config.AUTO_STATUS_REPLY) ? "true ✅" : "false ❌"}
-│    ┗ 11.2  ${isEnabled(config.AUTO_STATUS_REPLY) ? "false ❌" : "true ✅"}
-│ 12. Status React:
-│    ┣ 12.1  ${isEnabled(config.AUTO_STATUS_REACT) ? "true ✅" : "false ❌"}
-│    ┗ 12.2  ${isEnabled(config.AUTO_STATUS_REACT) ? "false ❌" : "true ✅"}
-│ 13. Custom React:
-│    ┣ 13.1  ${isEnabled(config.CUSTOM_REACT) ? "true ✅" : "false ❌"}
-│    ┗ 13.2  ${isEnabled(config.CUSTOM_REACT) ? "false ❌" : "true ✅"}
-│ 14. Anti VV:
-│    ┣ 14.1  ${isEnabled(config.ANTI_VV) ? "true ✅" : "false ❌"}
-│    ┗ 14.2  ${isEnabled(config.ANTI_VV) ? "false ❌" : "true ✅"}
-│ 15. Welcome:
-│    ┣ 15.1  ${isEnabled(config.WELCOME) ? "true ✅" : "false ❌"}
-│    ┗ 15.2  ${isEnabled(config.WELCOME) ? "false ❌" : "true ✅"}
-│ 16. Anti Link:
-│    ┣ 16.1  ${isEnabled(config.ANTI_LINK) ? "true ✅" : "false ❌"}
-│    ┗ 16.2  ${isEnabled(config.ANTI_LINK) ? "false ❌" : "true ✅"}
-│ 17. Read Message:
-│    ┣ 17.1  ${isEnabled(config.READ_MESSAGE) ? "true ✅" : "false ❌"}
-│    ┗ 17.2  ${isEnabled(config.READ_MESSAGE) ? "false ❌" : "true ✅"}
-│ 18. Anti Bad:
-│    ┣ 18.1  ${isEnabled(config.ANTI_BAD) ? "true ✅" : "false ❌"}
-│    ┗ 18.2  ${isEnabled(config.ANTI_BAD) ? "false ❌" : "true ✅"}
-│ 19. Anti Link Kick:
-│    ┣ 19.1  ${isEnabled(config.ANTI_LINK_KICK) ? "true ✅" : "false ❌"}
-│    ┗ 19.2  ${isEnabled(config.ANTI_LINK_KICK) ? "false ❌" : "true ✅"}
-│ 20. Read CMD:
-│    ┣ 20.1  ${isEnabled(config.READ_CMD) ? "true ✅" : "false ❌"}
-│    ┗ 20.2  ${isEnabled(config.READ_CMD) ? "false ❌" : "true ✅"}
-╰─ Reply with number like 2.1 to turn ON or 2.2 to turn OFF
-`;
+        // Settings menu text
+        const info = `╭─『 ⚙️ 𝗦𝗘𝗧𝗧𝗜𝗡𝗚𝗦 𝗠𝗘𝗡𝗨 ⚙️ 』───❏
+│ 🔖 BOT INFO
+│ Name: RANUMITHA-X-MD
+│ Prefix: ${config.PREFIX}
+│ Owner: ᴴᴵᴿᵁᴷᴬ ᴿᴬᴺᵁᴹᴵᵀᴴᴬ
+│ Version: ${config.BOT_VERSION}
+╰───────────────────╯
 
-    await conn.sendMessage(from, { text: menu });
+╭─ 🛡️ 𝗦𝗘𝗧𝗧𝗜𝗡𝗚𝗦 🛡️ ─╮
+│ 2. Auto Recording: ${isEnabled(config.AUTO_RECORDING) ? "✅" : "❌"}
+│ 3. Auto Typing: ${isEnabled(config.AUTO_TYPING) ? "✅" : "❌"}
+│ 4. Always Online: ${isEnabled(config.ALWAYS_ONLINE) ? "✅" : "❌"}
+│ 5. Public Mod: ${isEnabled(config.PUBLIC_MODE) ? "✅" : "❌"}
+│ 6. Auto Voice: ${isEnabled(config.AUTO_VOICE) ? "✅" : "❌"}
+│ 7. Auto Sticker: ${isEnabled(config.AUTO_STICKER) ? "✅" : "❌"}
+│ 8. Auto Reply: ${isEnabled(config.AUTO_REPLY) ? "✅" : "❌"}
+│ 9. Auto React: ${isEnabled(config.AUTO_REACT) ? "✅" : "❌"}
+│ 10. Auto Status Seen: ${isEnabled(config.AUTO_STATUS_SEEN) ? "✅" : "❌"}
+│ 11. Status Reply: ${isEnabled(config.AUTO_STATUS_REPLY) ? "✅" : "❌"}
+│ 12. Status React: ${isEnabled(config.AUTO_STATUS_REACT) ? "✅" : "❌"}
+│ 13. Custom React: ${isEnabled(config.CUSTOM_REACT) ? "✅" : "❌"}
+│ 14. Anti VV: ${isEnabled(config.ANTI_VV) ? "✅" : "❌"}
+│ 15. Welcome: ${isEnabled(config.WELCOME) ? "✅" : "❌"}
+│ 16. Anti Link: ${isEnabled(config.ANTI_LINK) ? "✅" : "❌"}
+│ 17. Read Message: ${isEnabled(config.READ_MESSAGE) ? "✅" : "❌"}
+│ 18. Anti Bad: ${isEnabled(config.ANTI_BAD) ? "✅" : "❌"}
+│ 19. Anti Link Kick: ${isEnabled(config.ANTI_LINK_KICK) ? "✅" : "❌"}
+│ 20. Read CMD: ${isEnabled(config.READ_CMD) ? "✅" : "❌"}
+╰───────────────────╯
+Reply with number to toggle ON/OFF (example: 8.1 / 8.2)`;
 
-    // Listen for owner's replies
-    conn.ev.on('messages.upsert', async (msgUpdate) => {
-        const mekInfo = msgUpdate?.messages[0];
-        if (!mekInfo?.message) return;
-        if (mekInfo.key.remoteJid !== from) return; // only owner replies
+        const sentMsg = await conn.sendMessage(from, { text: info }, { quoted: fakevCard });
+        const menuId = sentMsg.key.id;
 
-        const textMsg = mekInfo.message.conversation || mekInfo.message.extendedTextMessage?.text;
-        const replyMatch = textMsg?.trim().match(/^(\d+)\.(\d)$/);
-        if (!replyMatch) return;
+        conn.ev.on('messages.upsert', async (msgUpdate) => {
+            const mekInfo = msgUpdate?.messages[0];
+            if (!mekInfo?.message) return;
+            const fromUser = mekInfo.key.remoteJid;
+            const textMsg = mekInfo.message.conversation || mekInfo.message.extendedTextMessage?.text;
+            const quotedId = mekInfo.message?.extendedTextMessage?.contextInfo?.stanzaId;
 
-        const num = parseInt(replyMatch[1]);
-        const toggle = replyMatch[2] === "1";
+            if (quotedId !== menuId) return; // only handle replies to this menu
+            const userReply = textMsg?.trim();
 
-        // Map numbers to config keys
-        const mapping = {
-            2: "AUTO_RECORDING",
-            3: "AUTO_TYPING",
-            4: "ALWAYS_ONLINE",
-            5: "PUBLIC_MODE",
-            6: "AUTO_VOICE",
-            7: "AUTO_STICKER",
-            8: "AUTO_REPLY",
-            9: "AUTO_REACT",
-            10: "AUTO_STATUS_SEEN",
-            11: "AUTO_STATUS_REPLY",
-            12: "AUTO_STATUS_REACT",
-            13: "CUSTOM_REACT",
-            14: "ANTI_VV",
-            15: "WELCOME",
-            16: "ANTI_LINK",
-            17: "READ_MESSAGE",
-            18: "ANTI_BAD",
-            19: "ANTI_LINK_KICK",
-            20: "READ_CMD",
-        };
+            const commandMap = {
+                "2.1": { key: "AUTO_RECORDING", toggle: true },
+                "2.2": { key: "AUTO_RECORDING", toggle: false },
+                "3.1": { key: "AUTO_TYPING", toggle: true },
+                "3.2": { key: "AUTO_TYPING", toggle: false },
+                "4.1": { key: "ALWAYS_ONLINE", toggle: true },
+                "4.2": { key: "ALWAYS_ONLINE", toggle: false },
+                "5.1": { key: "PUBLIC_MODE", toggle: true },
+                "5.2": { key: "PUBLIC_MODE", toggle: false },
+                "6.1": { key: "AUTO_VOICE", toggle: true },
+                "6.2": { key: "AUTO_VOICE", toggle: false },
+                "7.1": { key: "AUTO_STICKER", toggle: true },
+                "7.2": { key: "AUTO_STICKER", toggle: false },
+                "8.1": { key: "AUTO_REPLY", toggle: true },
+                "8.2": { key: "AUTO_REPLY", toggle: false },
+                "9.1": { key: "AUTO_REACT", toggle: true },
+                "9.2": { key: "AUTO_REACT", toggle: false },
+                "10.1": { key: "AUTO_STATUS_SEEN", toggle: true },
+                "10.2": { key: "AUTO_STATUS_SEEN", toggle: false },
+                "11.1": { key: "AUTO_STATUS_REPLY", toggle: true },
+                "11.2": { key: "AUTO_STATUS_REPLY", toggle: false },
+                "12.1": { key: "AUTO_STATUS_REACT", toggle: true },
+                "12.2": { key: "AUTO_STATUS_REACT", toggle: false },
+                "13.1": { key: "CUSTOM_REACT", toggle: true },
+                "13.2": { key: "CUSTOM_REACT", toggle: false },
+                "14.1": { key: "ANTI_VV", toggle: true },
+                "14.2": { key: "ANTI_VV", toggle: false },
+                "15.1": { key: "WELCOME", toggle: true },
+                "15.2": { key: "WELCOME", toggle: false },
+                "16.1": { key: "ANTI_LINK", toggle: true },
+                "16.2": { key: "ANTI_LINK", toggle: false },
+                "17.1": { key: "READ_MESSAGE", toggle: true },
+                "17.2": { key: "READ_MESSAGE", toggle: false },
+                "18.1": { key: "ANTI_BAD", toggle: true },
+                "18.2": { key: "ANTI_BAD", toggle: false },
+                "19.1": { key: "ANTI_LINK_KICK", toggle: true },
+                "19.2": { key: "ANTI_LINK_KICK", toggle: false },
+                "20.1": { key: "READ_CMD", toggle: true },
+                "20.2": { key: "READ_CMD", toggle: false },
+            };
 
-        const key = mapping[num];
-        if (!key) return reply("❌ Invalid option number!");
+            if (!commandMap[userReply]) return await conn.sendMessage(fromUser, { text: "❌ Invalid choice! Reply with number from menu." }, { quoted: mekInfo });
 
-        config[key] = toggle;
-        saveConfig();
+            const { key, toggle } = commandMap[userReply];
+            const currentValue = isEnabled(config[key]);
 
-        await conn.sendMessage(from, { text: `✅ *${key.replace(/_/g, " ")} is now ${toggle ? "ON" : "OFF"}*` }, { quoted: mekInfo });
-    });
+            if (currentValue === toggle) {
+                await conn.sendMessage(fromUser, { text: `⚠️ *${key.replace(/_/g," ")} is already ${toggle ? "ON" : "OFF"}*` }, { quoted: mekInfo });
+                await conn.sendMessage(fromUser, { react: { text: toggle ? "✅" : "❌", key: mekInfo.key } });
+                return;
+            }
+
+            // Update config
+            config[key] = toggle ? "true" : "false";
+            saveConfig();
+
+            await conn.sendMessage(fromUser, { text: `✅ *${key.replace(/_/g," ")} is now ${toggle ? "ON" : "OFF"}*` }, { quoted: mekInfo });
+            await conn.sendMessage(fromUser, { react: { text: toggle ? "✅" : "❌", key: mekInfo.key } });
+        });
+
+    } catch (error) {
+        console.error(error);
+        await conn.sendMessage(from, { react: { text: '❌', key: mek.key } });
+        await reply(`❌ Error: ${error.message || "Something went wrong!"}`);
+    }
 });
