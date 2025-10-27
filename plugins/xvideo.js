@@ -21,12 +21,12 @@ cmd({
 
         let listText = "🫣 RANUMITHA-X-MD XNXX SEARCH RESULTS\n\n🔢 *ʀᴇᴘʟʏ ʙᴇʟᴏᴡ ᴀ ɴᴜᴍʙᴇʀ ᴄʜᴏᴏꜱᴇ ᴀ ʀᴇᴀᴜʟᴛ.*\n\n";
         searchApi.result.xvideos.forEach((item, i) => {
-            listText += `*${i + 1}* | ${item.title || "No title"}\n`;
+            listText += `*${i + 1}\.* | ${item.title || "No title"}\n`;
         });
 
         const listMsg = await conn.sendMessage(
             from,
-            { text: listText + `\nReply with number to choose.\n\n${footer}` },
+            { text: listText + `\n\n${footer}` },
             { quoted: mek }
         );
 
