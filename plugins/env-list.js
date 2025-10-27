@@ -92,7 +92,7 @@ Reply with number to toggle ON/OFF (example: 8.1 / 8.2)`;
             if (quotedId !== menuId) return;
 
             if (!isOwner) {
-                await conn.sendMessage(fromUser, { text: "🚫 *Owner Only!*" }, { quoted: mekInfo });
+                await conn.sendMessage(fromUser, { text: "🚫 *Owner Only!*" });
                 await conn.sendMessage(fromUser, { react: { text: "❌", key: mekInfo.key } });
                 return;
             }
