@@ -19,7 +19,7 @@ cmd({
 
         if (!searchApi.result?.xvideos?.length) return await reply("❌ No results found!");
 
-        let listText = "🫣 WHITESHADOW-MD XNXX SEARCH RESULTS\n\n🔢 *ʀᴇᴘʟʏ ʙᴇʟᴏᴡ ᴀ ɴᴜᴍʙᴇʀ ᴄʜᴏᴏꜱᴇ ᴀ ʀᴇᴀᴜʟᴛ.*\n\n";
+        let listText = "🫣 RANUMITHA-X-MD XNXX SEARCH RESULTS\n\n🔢 *ʀᴇᴘʟʏ ʙᴇʟᴏᴡ ᴀ ɴᴜᴍʙᴇʀ ᴄʜᴏᴏꜱᴇ ᴀ ʀᴇᴀᴜʟᴛ.*\n\n";
         searchApi.result.xvideos.forEach((item, i) => {
             listText += `*${i + 1}* | ${item.title || "No title"}\n`;
         });
