@@ -6,219 +6,136 @@ const { getBuffer, getGroupAdmins, getRandom, h2k, isUrl, Json, sleep, fetchJson
 const { writeFileSync } = require('fs');
 const path = require('path');
 
-// helper: check if enabled
+// Helper: check if enabled
 function isEnabled(value) {
-  return value === "true" || value === true;
+    return value === "true" || value === true;
 }
 
-// helper: save config permanently
+// Helper: save config permanently
 function saveConfig() {
-  fs.writeFileSync("./config.js", `module.exports = ${JSON.stringify(config, null, 4)};`);
+    fs.writeFileSync("./config.js", `module.exports = ${JSON.stringify(config, null, 4)};`);
 }
 
+// Full interactive settings menu
 cmd({
-  pattern: "settings",
-  react: "⚙️",
-  alias: ["setting", "config"],
-  desc: "View and manage bot settings.",
-  category: "owner",
-  filename: __filename
-}, async (conn, mek, m, { reply, from, isOwner, args }) => {
-  try {
-    if (!isOwner) {
-      await conn.sendMessage(from, { react: { text: "❌", key: mek.key } });
-      return reply("🚫 *Owner Only Command!*");
-    }
+    pattern: "settings",
+    react: "⚙️",
+    desc: "Interactive bot settings menu (Owner Only)",
+    category: "system",
+    filename: __filename
+}, async (conn, mek, m, { from, reply, isOwner }) => {
+    if (!isOwner) return reply("🚫 Only the owner can use this command!");
 
-    // convert arg (ex: 8.1 => [8,1])
-    const input = args[0] || "";
-    const match = input.match(/^(\d+)\.(\d+)$/);
-    if (match) {
-      const num = parseInt(match[1]);
-      const choice = match[2] === "1" ? "true" : "false";
-
-      const mapping = {
-        2: "AUTO_RECORDING",
-        3: "AUTO_TYPING",
-        4: "ALWAYS_ONLINE",
-        5: "PUBLIC_MODE",
-        6: "AUTO_VOICE",
-        7: "AUTO_STICKER",
-        8: "AUTO_REPLY",
-        9: "AUTO_REACT",
-        10: "AUTO_STATUS_SEEN",
-        11: "AUTO_STATUS_REPLY",
-        12: "AUTO_STATUS_REACT",
-        13: "CUSTOM_REACT",
-        14: "ANTI_VV",
-        15: "WELCOME",
-        16: "ANTI_LINK",
-        17: "READ_MESSAGE",
-        18: "ANTI_BAD",
-        19: "ANTI_LINK_KICK",
-        20: "READ_CMD",
-      };
-
-      const key = mapping[num];
-      if (!key) return reply("❌ Invalid option number!");
-
-      config[key] = choice;
-      saveConfig();
-
-      await conn.sendMessage(from, { react: { text: "✅", key: mek.key } });
-      return reply(`✅ *${key.replace(/_/g, " ")} is now set to ${choice.toUpperCase()}*`);
-    }
-
-    // main menu
-    const text = `
-╭─『 ⚙️ 𝗦𝗘𝗧𝗧𝗜𝗡𝗚𝗦 𝗠𝗘𝗡𝗨 ⚙️ 』───❏
-│
-├─❏ *🔖 BOT INFO*
-├─∘ *Name:* ${config.BOT_NAME || "RANUMITHA-X-MD"}
-├─∘ *Prefix:* ${config.PREFIX}
-├─∘ *Owner:* ${config.OWNER_NAME || "ᴴᴵᴿᵁᴷᴬ ᴿᴬᴺᵁᴹᴵᵀᴴᴬ"}
-├─∘ *Number:* ${config.OWNER_NUMBER}
-└─∘ *Version:* ${config.BOT_VERSION}
-
-      ╭─ 🛡️ 𝗦𝗘𝗧𝗧𝗜𝗡𝗚𝗦 🛡️ ─╮
-╭───────────────────╮
-│ SELECT WORK MODE *${config.MODE.toUpperCase()}*  |
-╰───────────────────╯ 
-│ ┣ 1.1  Public  
-│ ┣ 1.2  Private 
-│ ┣ 1.3  Group   
-│ ┗ 1.4  Inbox
-│
-╭──────────────────╮
-│ Auto Recording: ${isEnabled(config.AUTO_RECORDING) ? "✅" : "❌"}                 |
-╰──────────────────╯ 
-│ ┣ 2.1  true  ✅ 
-│ ┗ 2.2  false ❌
-│
-╭──────────────────╮
-│ Auto Typing: ${isEnabled(config.AUTO_TYPING) ? "✅" : "❌"}                        |
-╰──────────────────╯ 
-│ ┣ 3.1  true  ✅ 
-│ ┗ 3.2  false ❌
-│
-╭──────────────────╮
-│ Always Online: ${isEnabled(config.ALWAYS_ONLINE) ? "✅" : "❌"}                    |
-╰──────────────────╯ 
-│ ┣ 4.1  true  ✅ 
-│ ┗ 4.2  false ❌
-│
-╭──────────────────╮
-│ Public Mod: ${isEnabled(config.PUBLIC_MODE) ? "✅" : "❌"}                         |
-╰──────────────────╯ 
-│ ┣ 5.1  true  ✅ 
-│ ┗ 5.2  false ❌
-│
-╭──────────────────╮
-│ Auto Voice: ${isEnabled(config.AUTO_VOICE) ? "✅" : "❌"}                          |
-╰──────────────────╯ 
-│ ┣ 6.1  true  ✅ 
-│ ┗ 6.2  false ❌
-│
-╭──────────────────╮
-│ Auto Sticker: ${isEnabled(config.AUTO_STICKER) ? "✅" : "❌"}                       |
-╰──────────────────╯ 
-│ ┣ 7.1  true  ✅ 
-│ ┗ 7.2  false ❌
-│
-╭──────────────────╮
-│ Auto Reply: ${isEnabled(config.AUTO_REPLY) ? "✅" : "❌"}                          |
-╰──────────────────╯ 
-│ ┣ 8.1  true  ✅ 
-│ ┗ 8.2  false ❌
-│
-╭──────────────────╮
-│ Auto React: ${isEnabled(config.AUTO_REACT) ? "✅" : "❌"}                         |
-╰──────────────────╯ 
-│ ┣ 9.1  true  ✅ 
-│ ┗ 9.2  false ❌
-│
-╭──────────────────╮
-│ Auto Status Seen: ${isEnabled(config.AUTO_STATUS_SEEN) ? "✅" : "❌"}              |
-╰──────────────────╯ 
-│ ┣ 10.1  true  ✅ 
-│ ┗ 10.2  false ❌
-│
-╭──────────────────╮
-│ Auto Status Reply: ${isEnabled(config.AUTO_STATUS_REPLY) ? "✅" : "❌"}             |
-╰──────────────────╯ 
-│ ┣ 11.1  true  ✅ 
-│ ┗ 11.2  false ❌
-│
-╭──────────────────╮
-│ Auto Status React: ${isEnabled(config.AUTO_STATUS_REACT) ? "✅" : "❌"}             |
-╰──────────────────╯ 
-│ ┣ 12.1  true  ✅ 
-│ ┗ 12.2 false ❌
-│
-╭──────────────────╮
-│ Custom React: ${isEnabled(config.CUSTOM_REACT) ? "✅" : "❌"}                   |
-╰──────────────────╯ 
-│ ┣ 13.1  true  ✅ 
-│ ┗ 13.2  false ❌
-│
-╭──────────────────╮
-│ Anti VV: ${isEnabled(config.ANTI_VV) ? "✅" : "❌"}                                |
-╰──────────────────╯ 
-│ ┣ 14.1  true  ✅ 
-│ ┗ 14.2  false ❌
-│
-╭──────────────────╮
-│ Welcome: ${isEnabled(config.WELCOME) ? "✅" : "❌"}                            |
-╰──────────────────╯ 
-│ ┣ 15.1  true  ✅ 
-│ ┗ 15.2  false ❌
-│
-╭──────────────────╮
-│ Anti Link: ${isEnabled(config.ANTI_LINK) ? "✅" : "❌"}                              |
-╰──────────────────╯ 
-│ ┣ 16.1  true  ✅ 
-│ ┗ 16.2  false ❌
-│
-╭──────────────────╮
-│ Read Message: ${isEnabled(config.READ_MESSAGE) ? "✅" : "❌"}                  |
-╰──────────────────╯ 
-│ ┣ 17.1  true  ✅ 
-│ ┗ 17.2  false ❌
-│
-╭──────────────────╮
-│ Anti Bad: ${isEnabled(config.ANTI_BAD) ? "✅" : "❌"}                              |
-╰──────────────────╯ 
-│ ┣ 18.1  true  ✅ 
-│ ┗ 18.2  false ❌
-│
-╭──────────────────╮
-│ Anti Link Kick: ${isEnabled(config.ANTI_LINK_KICK) ? "✅" : "❌"}                     |
-╰──────────────────╯ 
-│ ┣ 19.1  true  ✅ 
-│ ┗ 19.2  false ❌
-│
-╭──────────────────╮
-│ Read CMD: ${isEnabled(config.READ_CMD) ? "✅" : "❌"}                          |
-╰──────────────────╯ 
-│ ┣ 20.1  true  ✅ 
-│ ┗ 20.2  false ❌
-│
-├─❏ *🦠 STATUS*
-│  ├─∘ Auto Status MSG: ${config.AUTO_STATUS_MSG}
-│  ├─∘ Custom React Emojis: ${config.CUSTOM_REACT_EMOJIS}
-│  ├─∘ Anti-Del Path: ${config.ANTI_DEL_PATH}
-│  └─∘ Dev Number: ${config.DEV}
-│
-╰──────────────────❏
-
-> © Powered by ${config.BOT_NAME || "𝗥𝗔𝗡𝗨𝗠𝗜𝗧𝗛𝗔-𝗫-𝗠𝗗"} 🌛
+    const menu = `
+╭─「 ⚙️ SETTINGS MENU ⚙️ 」─
+│ 1. Bot Mode:
+│    ┣ 1.1  ${config.MODE === "public" ? "public ✅" : "public ❌"}
+│    ┣ 1.2  ${config.MODE === "private" ? "private ✅" : "private ❌"}
+│    ┣ 1.3  ${config.MODE === "inbox" ? "inbox ✅" : "inbox ❌"}
+│ 2. Auto Recording:
+│    ┣ 2.1  ${isEnabled(config.AUTO_RECORDING) ? "true ✅" : "false ❌"}
+│    ┗ 2.2  ${isEnabled(config.AUTO_RECORDING) ? "false ❌" : "true ✅"}
+│ 3. Auto Typing:
+│    ┣ 3.1  ${isEnabled(config.AUTO_TYPING) ? "true ✅" : "false ❌"}
+│    ┗ 3.2  ${isEnabled(config.AUTO_TYPING) ? "false ❌" : "true ✅"}
+│ 4. Always Online:
+│    ┣ 4.1  ${isEnabled(config.ALWAYS_ONLINE) ? "true ✅" : "false ❌"}
+│    ┗ 4.2  ${isEnabled(config.ALWAYS_ONLINE) ? "false ❌" : "true ✅"}
+│ 5. Public Mode:
+│    ┣ 5.1  ${isEnabled(config.PUBLIC_MODE) ? "true ✅" : "false ❌"}
+│    ┗ 5.2  ${isEnabled(config.PUBLIC_MODE) ? "false ❌" : "true ✅"}
+│ 6. Auto Voice:
+│    ┣ 6.1  ${isEnabled(config.AUTO_VOICE) ? "true ✅" : "false ❌"}
+│    ┗ 6.2  ${isEnabled(config.AUTO_VOICE) ? "false ❌" : "true ✅"}
+│ 7. Auto Sticker:
+│    ┣ 7.1  ${isEnabled(config.AUTO_STICKER) ? "true ✅" : "false ❌"}
+│    ┗ 7.2  ${isEnabled(config.AUTO_STICKER) ? "false ❌" : "true ✅"}
+│ 8. Auto Reply:
+│    ┣ 8.1  ${isEnabled(config.AUTO_REPLY) ? "true ✅" : "false ❌"}
+│    ┗ 8.2  ${isEnabled(config.AUTO_REPLY) ? "false ❌" : "true ✅"}
+│ 9. Auto React:
+│    ┣ 9.1  ${isEnabled(config.AUTO_REACT) ? "true ✅" : "false ❌"}
+│    ┗ 9.2  ${isEnabled(config.AUTO_REACT) ? "false ❌" : "true ✅"}
+│ 10. Auto Status Seen:
+│    ┣ 10.1  ${isEnabled(config.AUTO_STATUS_SEEN) ? "true ✅" : "false ❌"}
+│    ┗ 10.2  ${isEnabled(config.AUTO_STATUS_SEEN) ? "false ❌" : "true ✅"}
+│ 11. Status Reply:
+│    ┣ 11.1  ${isEnabled(config.AUTO_STATUS_REPLY) ? "true ✅" : "false ❌"}
+│    ┗ 11.2  ${isEnabled(config.AUTO_STATUS_REPLY) ? "false ❌" : "true ✅"}
+│ 12. Status React:
+│    ┣ 12.1  ${isEnabled(config.AUTO_STATUS_REACT) ? "true ✅" : "false ❌"}
+│    ┗ 12.2  ${isEnabled(config.AUTO_STATUS_REACT) ? "false ❌" : "true ✅"}
+│ 13. Custom React:
+│    ┣ 13.1  ${isEnabled(config.CUSTOM_REACT) ? "true ✅" : "false ❌"}
+│    ┗ 13.2  ${isEnabled(config.CUSTOM_REACT) ? "false ❌" : "true ✅"}
+│ 14. Anti VV:
+│    ┣ 14.1  ${isEnabled(config.ANTI_VV) ? "true ✅" : "false ❌"}
+│    ┗ 14.2  ${isEnabled(config.ANTI_VV) ? "false ❌" : "true ✅"}
+│ 15. Welcome:
+│    ┣ 15.1  ${isEnabled(config.WELCOME) ? "true ✅" : "false ❌"}
+│    ┗ 15.2  ${isEnabled(config.WELCOME) ? "false ❌" : "true ✅"}
+│ 16. Anti Link:
+│    ┣ 16.1  ${isEnabled(config.ANTI_LINK) ? "true ✅" : "false ❌"}
+│    ┗ 16.2  ${isEnabled(config.ANTI_LINK) ? "false ❌" : "true ✅"}
+│ 17. Read Message:
+│    ┣ 17.1  ${isEnabled(config.READ_MESSAGE) ? "true ✅" : "false ❌"}
+│    ┗ 17.2  ${isEnabled(config.READ_MESSAGE) ? "false ❌" : "true ✅"}
+│ 18. Anti Bad:
+│    ┣ 18.1  ${isEnabled(config.ANTI_BAD) ? "true ✅" : "false ❌"}
+│    ┗ 18.2  ${isEnabled(config.ANTI_BAD) ? "false ❌" : "true ✅"}
+│ 19. Anti Link Kick:
+│    ┣ 19.1  ${isEnabled(config.ANTI_LINK_KICK) ? "true ✅" : "false ❌"}
+│    ┗ 19.2  ${isEnabled(config.ANTI_LINK_KICK) ? "false ❌" : "true ✅"}
+│ 20. Read CMD:
+│    ┣ 20.1  ${isEnabled(config.READ_CMD) ? "true ✅" : "false ❌"}
+│    ┗ 20.2  ${isEnabled(config.READ_CMD) ? "false ❌" : "true ✅"}
+╰─ Reply with number like 2.1 to turn ON or 2.2 to turn OFF
 `;
 
-    await conn.sendMessage(from, { react: { text: "⚙️", key: mek.key } });
-    reply(text);
+    await conn.sendMessage(from, { text: menu });
 
-  } catch (e) {
-    console.error(e);
-    reply("⚠️ Error while displaying settings menu!");
-  }
+    // Listen for owner's replies
+    conn.ev.on('messages.upsert', async (msgUpdate) => {
+        const mekInfo = msgUpdate?.messages[0];
+        if (!mekInfo?.message) return;
+        if (mekInfo.key.remoteJid !== from) return; // only owner replies
+
+        const textMsg = mekInfo.message.conversation || mekInfo.message.extendedTextMessage?.text;
+        const replyMatch = textMsg?.trim().match(/^(\d+)\.(\d)$/);
+        if (!replyMatch) return;
+
+        const num = parseInt(replyMatch[1]);
+        const toggle = replyMatch[2] === "1";
+
+        // Map numbers to config keys
+        const mapping = {
+            2: "AUTO_RECORDING",
+            3: "AUTO_TYPING",
+            4: "ALWAYS_ONLINE",
+            5: "PUBLIC_MODE",
+            6: "AUTO_VOICE",
+            7: "AUTO_STICKER",
+            8: "AUTO_REPLY",
+            9: "AUTO_REACT",
+            10: "AUTO_STATUS_SEEN",
+            11: "AUTO_STATUS_REPLY",
+            12: "AUTO_STATUS_REACT",
+            13: "CUSTOM_REACT",
+            14: "ANTI_VV",
+            15: "WELCOME",
+            16: "ANTI_LINK",
+            17: "READ_MESSAGE",
+            18: "ANTI_BAD",
+            19: "ANTI_LINK_KICK",
+            20: "READ_CMD",
+        };
+
+        const key = mapping[num];
+        if (!key) return reply("❌ Invalid option number!");
+
+        config[key] = toggle;
+        saveConfig();
+
+        await conn.sendMessage(from, { text: `✅ *${key.replace(/_/g, " ")} is now ${toggle ? "ON" : "OFF"}*` }, { quoted: mekInfo });
+    });
 });
