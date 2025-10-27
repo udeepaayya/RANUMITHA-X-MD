@@ -6,7 +6,6 @@ const { getBuffer, getGroupAdmins, getRandom, h2k, isUrl, Json, sleep, fetchJson
 const { writeFileSync } = require('fs');
 const path = require('path');
 
-
 // helper: check if enabled
 function isEnabled(value) {
     return value === "true" || value === true;
@@ -50,27 +49,34 @@ cmd({
             return reply("🚫 *Owner Only Command!*");
         }
 
-        // Settings menu text
-        const info = `╭─『 ⚙️ SETTINGS MENU ⚙️ 』───
-│ 2. Auto Recording: ${isEnabled(config.AUTO_RECORDING) ? "✅" : "❌"} (2.1 ON / 2.2 OFF)
-│ 3. Auto Typing: ${isEnabled(config.AUTO_TYPING) ? "✅" : "❌"} (3.1 ON / 3.2 OFF)
-│ 4. Always Online: ${isEnabled(config.ALWAYS_ONLINE) ? "✅" : "❌"} (4.1 ON / 4.2 OFF)
-│ 5. Public Mod: ${isEnabled(config.PUBLIC_MODE) ? "✅" : "❌"} (5.1 ON / 5.2 OFF)
-│ 6. Auto Voice: ${isEnabled(config.AUTO_VOICE) ? "✅" : "❌"} (6.1 ON / 6.2 OFF)
-│ 7. Auto Sticker: ${isEnabled(config.AUTO_STICKER) ? "✅" : "❌"} (7.1 ON / 7.2 OFF)
-│ 8. Auto Reply: ${isEnabled(config.AUTO_REPLY) ? "✅" : "❌"} (8.1 ON / 8.2 OFF)
-│ 9. Auto React: ${isEnabled(config.AUTO_REACT) ? "✅" : "❌"} (9.1 ON / 9.2 OFF)
-│ 10. Auto Status Seen: ${isEnabled(config.AUTO_STATUS_SEEN) ? "✅" : "❌"} (10.1 ON / 10.2 OFF)
-│ 11. Status Reply: ${isEnabled(config.AUTO_STATUS_REPLY) ? "✅" : "❌"} (11.1 ON / 11.2 OFF)
-│ 12. Status React: ${isEnabled(config.AUTO_STATUS_REACT) ? "✅" : "❌"} (12.1 ON / 12.2 OFF)
-│ 13. Custom React: ${isEnabled(config.CUSTOM_REACT) ? "✅" : "❌"} (13.1 ON / 13.2 OFF)
-│ 14. Anti VV: ${isEnabled(config.ANTI_VV) ? "✅" : "❌"} (14.1 ON / 14.2 OFF)
-│ 15. Welcome: ${isEnabled(config.WELCOME) ? "✅" : "❌"} (15.1 ON / 15.2 OFF)
-│ 16. Anti Link: ${isEnabled(config.ANTI_LINK) ? "✅" : "❌"} (16.1 ON / 16.2 OFF)
-│ 17. Read Message: ${isEnabled(config.READ_MESSAGE) ? "✅" : "❌"} (17.1 ON / 17.2 OFF)
-│ 18. Anti Bad: ${isEnabled(config.ANTI_BAD) ? "✅" : "❌"} (18.1 ON / 18.2 OFF)
-│ 19. Anti Link Kick: ${isEnabled(config.ANTI_LINK_KICK) ? "✅" : "❌"} (19.1 ON / 19.2 OFF)
-│ 20. Read CMD: ${isEnabled(config.READ_CMD) ? "✅" : "❌"} (20.1 ON / 20.2 OFF)
+        const info = `╭─『 ⚙️ 𝗦𝗘𝗧𝗧𝗜𝗡𝗚𝗦 𝗠𝗘𝗡𝗨 ⚙️ 』───❏
+│ 🔖 BOT INFO
+│ Name: RANUMITHA-X-MD
+│ Prefix: ${config.PREFIX}
+│ Owner: ᴴᴵᴿᵁᴷᴬ ᴿᴬᴺᵁᴹᴵᵀᴴᴬ
+│ Version: ${config.BOT_VERSION}
+╰───────────────────╯
+
+╭─ 🛡️ 𝗦𝗘𝗧𝗧𝗜𝗡𝗚𝗦 🛡️ ─╮
+│ 2. Auto Recording: ${isEnabled(config.AUTO_RECORDING) ? "✅" : "❌"}
+│ 3. Auto Typing: ${isEnabled(config.AUTO_TYPING) ? "✅" : "❌"}
+│ 4. Always Online: ${isEnabled(config.ALWAYS_ONLINE) ? "✅" : "❌"}
+│ 5. Public Mod: ${isEnabled(config.PUBLIC_MODE) ? "✅" : "❌"}
+│ 6. Auto Voice: ${isEnabled(config.AUTO_VOICE) ? "✅" : "❌"}
+│ 7. Auto Sticker: ${isEnabled(config.AUTO_STICKER) ? "✅" : "❌"}
+│ 8. Auto Reply: ${isEnabled(config.AUTO_REPLY) ? "✅" : "❌"}
+│ 9. Auto React: ${isEnabled(config.AUTO_REACT) ? "✅" : "❌"}
+│ 10. Auto Status Seen: ${isEnabled(config.AUTO_STATUS_SEEN) ? "✅" : "❌"}
+│ 11. Status Reply: ${isEnabled(config.AUTO_STATUS_REPLY) ? "✅" : "❌"}
+│ 12. Status React: ${isEnabled(config.AUTO_STATUS_REACT) ? "✅" : "❌"}
+│ 13. Custom React: ${isEnabled(config.CUSTOM_REACT) ? "✅" : "❌"}
+│ 14. Anti VV: ${isEnabled(config.ANTI_VV) ? "✅" : "❌"}
+│ 15. Welcome: ${isEnabled(config.WELCOME) ? "✅" : "❌"}
+│ 16. Anti Link: ${isEnabled(config.ANTI_LINK) ? "✅" : "❌"}
+│ 17. Read Message: ${isEnabled(config.READ_MESSAGE) ? "✅" : "❌"}
+│ 18. Anti Bad: ${isEnabled(config.ANTI_BAD) ? "✅" : "❌"}
+│ 19. Anti Link Kick: ${isEnabled(config.ANTI_LINK_KICK) ? "✅" : "❌"}
+│ 20. Read CMD: ${isEnabled(config.READ_CMD) ? "✅" : "❌"}
 ╰───────────────────╯
 Reply with number to toggle ON/OFF (example: 8.1 / 8.2)`;
 
@@ -80,13 +86,16 @@ Reply with number to toggle ON/OFF (example: 8.1 / 8.2)`;
         conn.ev.on('messages.upsert', async (msgUpdate) => {
             const mekInfo = msgUpdate?.messages[0];
             if (!mekInfo?.message) return;
-
             const fromUser = mekInfo.key.remoteJid;
-            if (!isOwner) return; // Only owner can toggle
-
             const textMsg = mekInfo.message.conversation || mekInfo.message.extendedTextMessage?.text;
             const quotedId = mekInfo.message?.extendedTextMessage?.contextInfo?.stanzaId;
-            if (quotedId !== menuId) return; // only handle replies to this menu
+            if (quotedId !== menuId) return;
+
+            if (!isOwner) {
+                await conn.sendMessage(fromUser, { text: "🚫 *Owner Only!*" }, { quoted: mekInfo });
+                await conn.sendMessage(fromUser, { react: { text: "❌", key: mekInfo.key } });
+                return;
+            }
 
             const commandMap = {
                 "2.1": { key: "AUTO_RECORDING", toggle: true },
