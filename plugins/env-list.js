@@ -180,7 +180,7 @@ Reply with number to toggle ON/OFF or choose a mode.`;
             await conn.sendMessage(fromUser, { react: { text: statusEmoji, key: mekInfo.key } });
             await conn.sendMessage(
                 fromUser,
-                { text: `${statusEmoji} *${key.replace(/_/g, " ")} is now ${toggle ? "ON ✅" : "OFF ❌"}*` },
+                { text: `${statusEmoji} *${key.replace(/_/g, " ")} is now ${toggle ? "ON" : "OFF"}*` },
                 { quoted: mekInfo }
             );
         });
