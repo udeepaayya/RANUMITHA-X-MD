@@ -103,7 +103,7 @@ Reply with number (e.g. *3.1* or *3.2*) to toggle`;
                 const newMode = modeMap[userInput];
                 if (config.MODE === newMode) {
                     await conn.sendMessage(fromUser, { react: { text: '✅', key: mekInfo.key } });
-                    return conn.sendMessage(fromUser, { text: `⚠️ Already in ${newMode.toUpperCase()} mode!` }, { quoted: mekInfo });
+                    return conn.sendMessage(fromUser, { text: `*⚠️ Bot mode is already set to ${newMode.toUpperCase()}*` }, { quoted: mekInfo });
                 }
                 config.MODE = newMode;
                 saveConfig();
@@ -145,7 +145,7 @@ Reply with number (e.g. *3.1* or *3.2*) to toggle`;
 
             if (currentValue === toggle) {
                 await conn.sendMessage(fromUser, { react: { text: '✅', key: mekInfo.key } });
-                return conn.sendMessage(fromUser, { text: `⚠️ *${key.replace(/_/g, " ")} is already ${toggle ? "ON ✅" : "OFF ❌"}*` }, { quoted: mekInfo });
+                return conn.sendMessage(fromUser, { text: `⚠️ *${key.replace(/_/g, " ")} is already ${toggle ? "ON" : "OFF"}*` }, { quoted: mekInfo });
             }
 
             config[key] = toggle ? "true" : "false";
