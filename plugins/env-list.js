@@ -3,16 +3,13 @@ const config = require('../config');
 const fs = require('fs');
 const { getBuffer, getGroupAdmins, getRandom, h2k, isUrl, Json, sleep, fetchJson } = require('../lib/functions2');
 
-// New image and audio URLs
+// new image + audio
 const image = "https://raw.githubusercontent.com/Ranumithaofc/RANU-FILE-S-/refs/heads/main/images/Config%20img%20.jpg";
 const audioUrl = "https://github.com/Ranumithaofc/RANU-FILE-S-/raw/refs/heads/main/Audio/env%20new%20typ.opus";
 
-// helper: check if enabled
 function isEnabled(value) {
     return value === "true" || value === true;
 }
-
-// helper: save config permanently
 function saveConfig() {
     fs.writeFileSync("./config.js", `module.exports = ${JSON.stringify(config, null, 4)};`);
 }
@@ -39,18 +36,15 @@ END:VCARD`
 cmd({
     pattern: "settings",
     alias: ["env","config","setting"],
-    desc: "Interactive bot settings menu (Owner Only)",
+    desc: "Interactive bot settings menu",
     category: "system",
     react: "⚙️",
     filename: __filename
 }, async (conn, mek, m, { from, isOwner, reply }) => {
     try {
-                if (!isOwner) {
-            return reply("🚫 *Owner Only Command!*");
-        }
+        if (!isOwner) return reply("🚫 *Owner Only Command!*");
 
         const info = `╭─『 ⚙️ 𝗦𝗘𝗧𝗧𝗜𝗡𝗚𝗦 𝗠𝗘𝗡𝗨 ⚙️ 』───❏
-│ 🔖 BOT INFO╭─『 ⚙️ 𝗦𝗘𝗧𝗧𝗜𝗡𝗚𝗦 𝗠𝗘𝗡𝗨 ⚙️ 』───❏
 │
 ├─❏ *🔖 BOT INFO*
 ├─∘ *Name:* RANUMITHA-X-MD
@@ -193,18 +187,8 @@ cmd({
 
 > © Powerd by 𝗥𝗔𝗡𝗨𝗠𝗜𝗧𝗛𝗔-𝗫-𝗠𝗗 🌛`;
 
-        // Send image with caption + audio (PTT)
-        const sentMsg = await conn.sendMessage(from, {
-            image: { url: image },
-            caption: info
-        }, { quoted: fakevCard });
-
-        // send audio separately after menu
-        await conn.sendMessage(from, {
-            audio: { url: audioUrl },
-            mimetype: 'audio/ogg; codecs=opus',
-            ptt: true
-        }, { quoted: mek });
+        const sentMsg = await conn.sendMessage(from, { image: { url: image }, caption: info }, { quoted: fakevCard });
+        await conn.sendMessage(from, { audio: { url: audioUrl }, mimetype: 'audio/ogg; codecs=opus', ptt: true }, { quoted: mek });
 
         const menuId = sentMsg.key.id;
 
@@ -216,11 +200,24 @@ cmd({
             const quotedId = mekInfo.message?.extendedTextMessage?.contextInfo?.stanzaId;
             if (quotedId !== menuId) return;
 
-            if (!isOwner) {
-                await conn.sendMessage(fromUser, { text: "🚫 *Owner Only!*" }, { quoted: mekInfo });
-                return;
+            if (!isOwner) return conn.sendMessage(fromUser, { text: "🚫 *Owner Only!*" }, { quoted: mekInfo });
+
+            const userInput = textMsg?.trim();
+
+            // 🔹 MODE Control Section (1.1 / 1.2 / 1.3)
+            if (["1.1", "1.2", "1.3", "1.4"].includes(userInput)) {
+                let newMode;
+                if (userInput === "1.1") newMode = "public";
+                else if (userInput === "1.2") newMode = "private";
+                else if (userInput === "1.3") newMode = "group";
+                else if (userInput === "1.4") newMode = "inbox";
+
+                config.MODE = newMode;
+                saveConfig();
+                return conn.sendMessage(fromUser, { text: `✅ Bot mode is now set to *${newMode.toUpperCase()}*.` }, { quoted: mekInfo });
             }
 
+            // 🔹 Other toggle features (2.x → 20.x)
             const commandMap = {
                 "2.1": { key: "AUTO_RECORDING", toggle: true },
                 "2.2": { key: "AUTO_RECORDING", toggle: false },
@@ -262,29 +259,21 @@ cmd({
                 "20.2": { key: "READ_CMD", toggle: false }
             };
 
-            const selected = commandMap[textMsg?.trim()];
-            if (!selected)
-                return await conn.sendMessage(fromUser, { text: "❌ Invalid choice! Reply with number from menu." }, { quoted: mekInfo });
+            const selected = commandMap[userInput];
+            if (!selected) return conn.sendMessage(fromUser, { text: "❌ Invalid choice! Reply with a valid number." }, { quoted: mekInfo });
 
             const { key, toggle } = selected;
             const currentValue = isEnabled(config[key]);
-
-            if (currentValue === toggle) {
-                await conn.sendMessage(fromUser, { text: `⚠️ *${key.replace(/_/g," ")} is already ${toggle ? "ON ✅" : "OFF ❌"}*` }, { quoted: mekInfo });
-                await conn.sendMessage(fromUser, { react: { text: toggle ? "✅" : "❌", key: mekInfo.key } });
-                return;
-            }
+            if (currentValue === toggle)
+                return conn.sendMessage(fromUser, { text: `⚠️ *${key.replace(/_/g, " ")} is already ${toggle ? "ON ✔️" : "OFF ❌"}*` }, { quoted: mekInfo });
 
             config[key] = toggle ? "true" : "false";
             saveConfig();
-
-            await conn.sendMessage(fromUser, { text: `✅ *${key.replace(/_/g," ")} is now ${toggle ? "ON" : "OFF"}*` }, { quoted: mekInfo });
-            await conn.sendMessage(fromUser, { react: { text: toggle ? "✅" : "❌", key: mekInfo.key } });
+            await conn.sendMessage(fromUser, { text: `✅ *${key.replace(/_/g, " ")} is now ${toggle ? "ON" : "OFF"}*` }, { quoted: mekInfo });
         });
 
     } catch (error) {
         console.error(error);
-        await conn.sendMessage(from, { react: { text: '❌', key: mek.key } });
         await reply(`❌ Error: ${error.message || "Something went wrong!"}`);
     }
 });
