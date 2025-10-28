@@ -108,7 +108,7 @@ Reply with number (e.g. *3.1* or *3.2*) to toggle`;
                 config.MODE = newMode;
                 saveConfig();
                 await conn.sendMessage(fromUser, { react: { text: '✔️', key: mekInfo.key } });
-                return conn.sendMessage(fromUser, { text: `✔️ *Mode changed to ${newMode.toUpperCase()}*` }, { quoted: mekInfo });
+                return conn.sendMessage(fromUser, { text: `✔️ *Bot mode is now set to ${newMode.toUpperCase()}*` }, { quoted: mekInfo });
             }
 
             // Toggle Configs (2.1 - 20.2)
@@ -151,9 +151,9 @@ Reply with number (e.g. *3.1* or *3.2*) to toggle`;
             config[key] = toggle ? "true" : "false";
             saveConfig();
 
-            const emoji = toggle ? '✅' : '❌';
+            const emoji = toggle ? '✔️' : '❌';
             await conn.sendMessage(fromUser, { react: { text: emoji, key: mekInfo.key } });
-            await conn.sendMessage(fromUser, { text: `${emoji} *${key.replace(/_/g, " ")} is now ${toggle ? "ON ✅" : "OFF ❌"}*` }, { quoted: mekInfo });
+            await conn.sendMessage(fromUser, { text: `${emoji} *${key.replace(/_/g, " ")} is now ${toggle ? "ON" : "OFF"}*` }, { quoted: mekInfo });
         });
 
     } catch (error) {
