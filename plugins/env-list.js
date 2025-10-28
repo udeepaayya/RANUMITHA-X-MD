@@ -3,23 +3,20 @@ const config = require('../config');
 const fs = require('fs');
 const { getBuffer, getGroupAdmins, getRandom, h2k, isUrl, Json, sleep, fetchJson } = require('../lib/functions2');
 
-// new image + audio
+// image & audio
 const image = "https://raw.githubusercontent.com/Ranumithaofc/RANU-FILE-S-/refs/heads/main/images/Config%20img%20.jpg";
 const audioUrl = "https://github.com/Ranumithaofc/RANU-FILE-S-/raw/refs/heads/main/Audio/env%20new%20typ.opus";
 
 function isEnabled(value) {
     return value === "true" || value === true;
 }
+
 function saveConfig() {
     fs.writeFileSync("./config.js", `module.exports = ${JSON.stringify(config, null, 4)};`);
 }
 
 const fakevCard = {
-    key: {
-        fromMe: false,
-        participant: "0@s.whatsapp.net",
-        remoteJid: "status@broadcast"
-    },
+    key: { fromMe: false, participant: "0@s.whatsapp.net", remoteJid: "status@broadcast" },
     message: {
         contactMessage: {
             displayName: "© Mr Hiruka",
@@ -36,7 +33,7 @@ END:VCARD`
 cmd({
     pattern: "settings",
     alias: ["env","config","setting"],
-    desc: "Interactive bot settings menu",
+    desc: "Interactive bot settings menu (Owner Only)",
     category: "system",
     react: "⚙️",
     filename: __filename
@@ -45,147 +42,43 @@ cmd({
         if (!isOwner) return reply("🚫 *Owner Only Command!*");
 
         const info = `╭─『 ⚙️ 𝗦𝗘𝗧𝗧𝗜𝗡𝗚𝗦 𝗠𝗘𝗡𝗨 ⚙️ 』───❏
-│
-├─❏ *🔖 BOT INFO*
-├─∘ *Name:* RANUMITHA-X-MD
-├─∘ *Prefix:* ${config.PREFIX}
-├─∘ *Owner:* ᴴᴵᴿᵁᴷᴬ ᴿᴬᴺᵁᴹᴵᵀᴴᴬ
-├─∘ *Number:* ${config.OWNER_NUMBER}
-└─∘ *Version:* ${config.BOT_VERSION}
-    
-      ╭─ 🛡️ 𝗦𝗘𝗧𝗧𝗜𝗡𝗚𝗦 🛡️ ─╮
-╭───────────────────╮
-│ SELECT WORK MODE *${config.MODE.toUpperCase()}*  |
-╰───────────────────╯ 
-│ ┣ 1.1  Public  
-│ ┣ 1.2  Private 
-│ ┣ 1.3  Group   
-│ ┗ 1.4  Inbox
-│
-╭──────────────────╮
-│ Auto Recording: ${isEnabled(config.AUTO_RECORDING) ? "✅" : "❌"}                 |
-╰──────────────────╯ 
-│ ┣ 2.1  true  ✅ 
-│ ┗ 2.2  false ❌
-│
-╭──────────────────╮
-│ Auto Typing: ${isEnabled(config.AUTO_TYPING) ? "✅" : "❌"}                        |
-╰──────────────────╯ 
-│ ┣ 3.1  true  ✅ 
-│ ┗ 3.2  false ❌
-│
-╭──────────────────╮
-│ Always Online: ${isEnabled(config.ALWAYS_ONLINE) ? "✅" : "❌"}                    |
-╰──────────────────╯ 
-│ ┣ 4.1  true  ✅ 
-│ ┗ 4.2  false ❌
-│
-╭──────────────────╮
-│ Public Mod: ${isEnabled(config.PUBLIC_MODE) ? "✅" : "❌"}                         |
-╰──────────────────╯ 
-│ ┣ 5.1  true  ✅ 
-│ ┗ 5.2  false ❌
-│
-╭──────────────────╮
-│ Auto Voice: ${isEnabled(config.AUTO_VOICE) ? "✅" : "❌"}                          |
-╰──────────────────╯ 
-│ ┣ 6.1  true  ✅ 
-│ ┗ 6.2  false ❌
-│
-╭──────────────────╮
-│ Auto Sticker: ${isEnabled(config.AUTO_STICKER) ? "✅" : "❌"}                       |
-╰──────────────────╯ 
-│ ┣ 7.1  true  ✅ 
-│ ┗ 7.2  false ❌
-│
-╭──────────────────╮
-│ Auto Reply: ${isEnabled(config.AUTO_REPLY) ? "✅" : "❌"}                          |
-╰──────────────────╯ 
-│ ┣ 8.1  true  ✅ 
-│ ┗ 8.2  false ❌
-│
-╭──────────────────╮
-│ Auto React: ${isEnabled(config.AUTO_REACT) ? "✅" : "❌"}                         |
-╰──────────────────╯ 
-│ ┣ 9.1  true  ✅ 
-│ ┗ 9.2  false ❌
-│
-╭──────────────────╮
-│ Auto Status Seen: ${isEnabled(config.AUTO_STATUS_SEEN) ? "✅" : "❌"}              |
-╰──────────────────╯ 
-│ ┣ 10.1  true  ✅ 
-│ ┗ 10.2  false ❌
-│
-╭──────────────────╮
-│ Auto Status Reply: ${isEnabled(config.AUTO_STATUS_REPLY) ? "✅" : "❌"}             |
-╰──────────────────╯ 
-│ ┣ 11.1  true  ✅ 
-│ ┗ 11.2  false ❌
-│
-╭──────────────────╮
-│ Auto Status React: ${isEnabled(config.AUTO_STATUS_REACT) ? "✅" : "❌"}             |
-╰──────────────────╯ 
-│ ┣ 12.1  true  ✅ 
-│ ┗ 12.2 false ❌
-│
-╭──────────────────╮
-│ Custom React: ${isEnabled(config.CUSTOM_REACT) ? "✅" : "❌"}                   |
-╰──────────────────╯ 
-│ ┣ 13.1  true  ✅ 
-│ ┗ 13.2  false ❌
-│
-╭──────────────────╮
-│ Anti VV: ${isEnabled(config.ANTI_VV) ? "✅" : "❌"}                                |
-╰──────────────────╯ 
-│ ┣ 14.1  true  ✅ 
-│ ┗ 14.2  false ❌
-│
-╭──────────────────╮
-│ Welcome: ${isEnabled(config.WELCOME) ? "✅" : "❌"}                            |
-╰──────────────────╯ 
-│ ┣ 15.1  true  ✅ 
-│ ┗ 15.2  false ❌
-│
-╭──────────────────╮
-│ Anti Link: ${isEnabled(config.ANTI_LINK) ? "✅" : "❌"}                              |
-╰──────────────────╯ 
-│ ┣ 16.1  true  ✅ 
-│ ┗ 16.2  false ❌
-│
-╭──────────────────╮
-│ Read Message: ${isEnabled(config.READ_MESSAGE) ? "✅" : "❌"}                  |
-╰──────────────────╯ 
-│ ┣ 17.1  true  ✅ 
-│ ┗ 17.2  false ❌
-│
-╭──────────────────╮
-│ Anti Bad: ${isEnabled(config.ANTI_BAD) ? "✅" : "❌"}                              |
-╰──────────────────╯ 
-│ ┣ 18.1  true  ✅ 
-│ ┗ 18.2  false ❌
-│
-╭──────────────────╮
-│ Anti Link Kick: ${isEnabled(config.ANTI_LINK_KICK) ? "✅" : "❌"}                     |
-╰──────────────────╯ 
-│ ┣ 19.1  true  ✅ 
-│ ┗ 19.2  false ❌
-│
-╭──────────────────╮
-│ Read CMD: ${isEnabled(config.READ_CMD) ? "✅" : "❌"}                          |
-╰──────────────────╯ 
-│ ┣ 20.1  true  ✅ 
-│ ┗ 20.2  false ❌
-│
-│
-├─❏ *🦠 STATUS*
-│  ├─∘ Auto Status MSG: ${config.AUTO_STATUS_MSG}
-│  ├─∘ Custom React Emojis: ${config.CUSTOM_REACT_EMOJIS}
-│  ├─∘ Anti-Del Path: ${config.ANTI_DEL_PATH}
-│  └─∘ Dev Number: ${config.DEV}
-│
-╰──────────────────❏
+│ 🔖 BOT INFO
+│ Name: RANUMITHA-X-MD
+│ Prefix: ${config.PREFIX}
+│ Owner: ᴴᴵᴿᵁᴷᴬ ᴿᴬᴺᵁᴹᴵᵀᴴᴬ
+│ Version: ${config.BOT_VERSION}
+╰───────────────────╯
 
-> © Powerd by 𝗥𝗔𝗡𝗨𝗠𝗜𝗧𝗛𝗔-𝗫-𝗠𝗗 🌛`;
+╭─ 🧩 𝗠𝗢𝗗𝗘 𝗖𝗢𝗡𝗧𝗥𝗢𝗟 ─╮
+│ 1.1 → Private Mode 🔒
+│ 1.2 → Public Mode 🌍
+│ 1.3 → Inbox Mode 💬
+│ 1.4 → Group Mode 👥
+│ Current: ${config.MODE?.toUpperCase() || "PUBLIC"}
+╰───────────────────╯
+
+╭─ 🛡️ 𝗦𝗘𝗧𝗧𝗜𝗡𝗚𝗦 ─╮
+│ 2. Auto Recording: ${isEnabled(config.AUTO_RECORDING) ? "✅" : "❌"}
+│ 3. Auto Typing: ${isEnabled(config.AUTO_TYPING) ? "✅" : "❌"}
+│ 4. Always Online: ${isEnabled(config.ALWAYS_ONLINE) ? "✅" : "❌"}
+│ 5. Public Mod: ${isEnabled(config.PUBLIC_MODE) ? "✅" : "❌"}
+│ 6. Auto Voice: ${isEnabled(config.AUTO_VOICE) ? "✅" : "❌"}
+│ 7. Auto Sticker: ${isEnabled(config.AUTO_STICKER) ? "✅" : "❌"}
+│ 8. Auto Reply: ${isEnabled(config.AUTO_REPLY) ? "✅" : "❌"}
+│ 9. Auto React: ${isEnabled(config.AUTO_REACT) ? "✅" : "❌"}
+│ 10. Auto Status Seen: ${isEnabled(config.AUTO_STATUS_SEEN) ? "✅" : "❌"}
+│ 11. Status Reply: ${isEnabled(config.AUTO_STATUS_REPLY) ? "✅" : "❌"}
+│ 12. Status React: ${isEnabled(config.AUTO_STATUS_REACT) ? "✅" : "❌"}
+│ 13. Custom React: ${isEnabled(config.CUSTOM_REACT) ? "✅" : "❌"}
+│ 14. Anti VV: ${isEnabled(config.ANTI_VV) ? "✅" : "❌"}
+│ 15. Welcome: ${isEnabled(config.WELCOME) ? "✅" : "❌"}
+│ 16. Anti Link: ${isEnabled(config.ANTI_LINK) ? "✅" : "❌"}
+│ 17. Read Message: ${isEnabled(config.READ_MESSAGE) ? "✅" : "❌"}
+│ 18. Anti Bad: ${isEnabled(config.ANTI_BAD) ? "✅" : "❌"}
+│ 19. Anti Link Kick: ${isEnabled(config.ANTI_LINK_KICK) ? "✅" : "❌"}
+│ 20. Read CMD: ${isEnabled(config.READ_CMD) ? "✅" : "❌"}
+╰───────────────────╯
+Reply with number to toggle ON/OFF or choose a mode.`;
 
         const sentMsg = await conn.sendMessage(from, { image: { url: image }, caption: info }, { quoted: fakevCard });
         await conn.sendMessage(from, { audio: { url: audioUrl }, mimetype: 'audio/ogg; codecs=opus', ptt: true }, { quoted: mek });
@@ -204,20 +97,26 @@ cmd({
 
             const userInput = textMsg?.trim();
 
-            // 🔹 MODE Control Section (1.1 / 1.2 / 1.3)
-            if (["1.1", "1.2", "1.3", "1.4"].includes(userInput)) {
-                let newMode;
-                if (userInput === "1.1") newMode = "public";
-                else if (userInput === "1.2") newMode = "private";
-                else if (userInput === "1.3") newMode = "group";
-                else if (userInput === "1.4") newMode = "inbox";
+            // 🔹 Mode Control (1.1 - 1.4)
+            const modeMap = {
+                "1.1": "private",
+                "1.2": "public",
+                "1.3": "inbox",
+                "1.4": "group"
+            };
+
+            if (modeMap[userInput]) {
+                const newMode = modeMap[userInput];
+                if (config.MODE === newMode) {
+                    return conn.sendMessage(fromUser, { text: `⚠️ *Bot mode is already set to ${newMode.toUpperCase()}*` }, { quoted: mekInfo });
+                }
 
                 config.MODE = newMode;
                 saveConfig();
                 return conn.sendMessage(fromUser, { text: `✅ Bot mode is now set to *${newMode.toUpperCase()}*.` }, { quoted: mekInfo });
             }
 
-            // 🔹 Other toggle features (2.x → 20.x)
+            // 🔹 Other toggle settings (2.x – 20.x)
             const commandMap = {
                 "2.1": { key: "AUTO_RECORDING", toggle: true },
                 "2.2": { key: "AUTO_RECORDING", toggle: false },
@@ -265,7 +164,7 @@ cmd({
             const { key, toggle } = selected;
             const currentValue = isEnabled(config[key]);
             if (currentValue === toggle)
-                return conn.sendMessage(fromUser, { text: `⚠️ *${key.replace(/_/g, " ")} is already ${toggle ? "ON ✔️" : "OFF ❌"}*` }, { quoted: mekInfo });
+                return conn.sendMessage(fromUser, { text: `⚠️ *${key.replace(/_/g, " ")} is already ${toggle ? "ON ✅" : "OFF ❌"}*` }, { quoted: mekInfo });
 
             config[key] = toggle ? "true" : "false";
             saveConfig();
