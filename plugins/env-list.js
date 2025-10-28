@@ -114,7 +114,7 @@ Reply with number to toggle ON/OFF or choose a mode.`;
                 config.MODE = newMode;
                 saveConfig();
                 await conn.sendMessage(fromUser, { react: { text: '✅', key: mekInfo.key } });
-                return conn.sendMessage(fromUser, { text: `✅ Bot mode is now set to *${newMode.toUpperCase()}*.` }, { quoted: mekInfo });
+                return conn.sendMessage(fromUser, { text: `✅ *Bot mode is now set to ${newMode.toUpperCase()}*` }, { quoted: mekInfo });
             }
 
             // 🔹 Toggleable Configurations
@@ -176,8 +176,13 @@ Reply with number to toggle ON/OFF or choose a mode.`;
             config[key] = toggle ? "true" : "false";
             saveConfig();
 
-            await conn.sendMessage(fromUser, { react: { text: toggle ? '✅' : '❌', key: mekInfo.key } });
-            await conn.sendMessage(fromUser, { text: `✅ *${key.replace(/_/g, " ")} is now ${toggle ? "ON" : "OFF"}*` }, { quoted: mekInfo });
+            const statusEmoji = toggle ? '✅' : '❌';
+            await conn.sendMessage(fromUser, { react: { text: statusEmoji, key: mekInfo.key } });
+            await conn.sendMessage(
+                fromUser,
+                { text: `${statusEmoji} *${key.replace(/_/g, " ")} is now ${toggle ? "ON ✅" : "OFF ❌"}*` },
+                { quoted: mekInfo }
+            );
         });
 
     } catch (error) {
