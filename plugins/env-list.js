@@ -170,7 +170,7 @@ Reply with number to toggle ON/OFF or choose a mode.`;
 
             if (currentValue === toggle) {
                 await conn.sendMessage(fromUser, { react: { text: '✅', key: mekInfo.key } });
-                return conn.sendMessage(fromUser, { text: `⚠️ *${key.replace(/_/g, " ")} is already ${toggle ? "ON ✅" : "OFF ❌"}*` }, { quoted: mekInfo });
+                return conn.sendMessage(fromUser, { text: `⚠️ *${key.replace(/_/g, " ")} is already ${toggle ? "ON" : "OFF"}*` }, { quoted: mekInfo });
             }
 
             config[key] = toggle ? "true" : "false";
