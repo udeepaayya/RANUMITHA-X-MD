@@ -169,14 +169,14 @@ Reply with number to toggle ON/OFF or choose a mode.`;
             const currentValue = isEnabled(config[key]);
 
             if (currentValue === toggle) {
-                await conn.sendMessage(fromUser, { react: { text: '✔️', key: mekInfo.key } });
+                await conn.sendMessage(fromUser, { react: { text: '✅', key: mekInfo.key } });
                 return conn.sendMessage(fromUser, { text: `⚠️ *${key.replace(/_/g, " ")} is already ${toggle ? "ON ✅" : "OFF ❌"}*` }, { quoted: mekInfo });
             }
 
             config[key] = toggle ? "true" : "false";
             saveConfig();
 
-            const statusEmoji = toggle ? '✅' : '❌';
+            const statusEmoji = toggle ? '✔️' : '❌';
             await conn.sendMessage(fromUser, { react: { text: statusEmoji, key: mekInfo.key } });
             await conn.sendMessage(
                 fromUser,
