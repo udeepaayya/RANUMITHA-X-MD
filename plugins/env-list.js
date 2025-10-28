@@ -263,8 +263,11 @@ cmd({
                 "20.2": { key: "READ_CMD", toggle: false }
             };
 
-            const { key, toggle } = selected;
-            const currentValue = isEnabled(config[key]);
+            const selected = commandMap[userInput];
+            if (!selected) {
+                await conn.sendMessage(fromUser, { react: { text: '😒', key: mekInfo.key } });
+                return conn.sendMessage(fromUser, { text: "*❌ Invalid choice!*" }, { quoted: mekInfo });
+            }
 
             if (currentValue === toggle) {
                 await conn.sendMessage(fromUser, { react: { text: '✅', key: mekInfo.key } });
