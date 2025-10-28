@@ -52,8 +52,9 @@ async (conn, mek, m, { from, prefix, q, reply }) => {
 🔗 *URL:* ${q}
 
 💬 *Reply with your choice:*
-1️⃣ HD Quality 🔋
-2️⃣ SD Quality 🪫
+1. HD Quality 🔋
+2. SD Quality 🪫
+3. Audio typ 🎧
 
 > © Powerd by 𝗥𝗔𝗡𝗨𝗠𝗜𝗧𝗛𝗔-𝗫-𝗠𝗗 🌛`;
 
@@ -103,8 +104,28 @@ async (conn, mek, m, { from, prefix, q, reply }) => {
             caption: "*SD Quality Video* 🪫"
           }, { quoted: mek });
 
-        } else {
-          return reply("❌ Invalid choice! Please reply with *1* or *2*.");
+        // 🔵 Audio Only
+        } else if (choice === "3") {
+          reply("🎧 Extracting audio, please wait...");
+          // You can use your API or an external one for MP3 extraction
+          // If your API already supports audio, replace the link below accordingly
+          const audio = await fetchJson(`${api}/download/fbdown/audio?url=${encodeURIComponent(q)}`).catch(() => null);
+
+          if (!audio || !audio.result?.audio) {
+            return reply("❌ Audio not available for this video.");
+          }
+
+          await conn.sendMessage(from, {
+            audio: { url: audio.result.audio },
+            mimetype: "audio/mpeg",
+            fileName: "Facebook_Audio.mp3",
+            ptt: false,
+            caption: "*Facebook Audio Only* 🎧"
+          }, { quoted: mek });
+        } 
+        
+        else {
+          return reply("❌ Invalid choice! Please reply with *1*, *2*, or *3*.");
         }
 
         // ✅ React done
