@@ -108,13 +108,13 @@ Reply with number to toggle ON/OFF or choose a mode.`;
             if (modeMap[userInput]) {
                 const newMode = modeMap[userInput];
                 if (config.MODE === newMode) {
-                    await conn.sendMessage(fromUser, { react: { text: '✔️', key: mekInfo.key } });
+                    await conn.sendMessage(fromUser, { react: { text: '✅', key: mekInfo.key } });
                     return conn.sendMessage(fromUser, { text: `⚠️ *Bot mode is already set to ${newMode.toUpperCase()}*` }, { quoted: mekInfo });
                 }
                 config.MODE = newMode;
                 saveConfig();
-                await conn.sendMessage(fromUser, { react: { text: '✅', key: mekInfo.key } });
-                return conn.sendMessage(fromUser, { text: `✅ *Bot mode is now set to ${newMode.toUpperCase()}*` }, { quoted: mekInfo });
+                await conn.sendMessage(fromUser, { react: { text: '✔️', key: mekInfo.key } });
+                return conn.sendMessage(fromUser, { text: `✔️ *Bot mode is now set to ${newMode.toUpperCase()}*` }, { quoted: mekInfo });
             }
 
             // 🔹 Toggleable Configurations
