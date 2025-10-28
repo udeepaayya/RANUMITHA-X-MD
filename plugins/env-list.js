@@ -201,7 +201,7 @@ cmd({
 
             const userInput = textMsg?.trim();
 
-            // 🔹 Mode Control (1.1 - 1.4)
+            // Mode Control (1.1 - 1.4)
             const modeMap = {
                 "1.1": "public",
                 "1.2": "private",
@@ -221,7 +221,7 @@ cmd({
                 return conn.sendMessage(fromUser, { text: `✔️ *Bot mode is now set to ${newMode.toUpperCase()}*` }, { quoted: mekInfo });
             }
 
-            // 🔹 Toggleable Configurations
+            // Toggleable Configurations
             const commandMap = {
                 "2.1": { key: "AUTO_RECORDING", toggle: true },
                 "2.2": { key: "AUTO_RECORDING", toggle: false },
@@ -262,12 +262,6 @@ cmd({
                 "20.1": { key: "READ_CMD", toggle: true },
                 "20.2": { key: "READ_CMD", toggle: false }
             };
-
-            const selected = commandMap[userInput];
-            if (!selected) {
-                await conn.sendMessage(fromUser, { react: { text: '⚠️', key: mekInfo.key } });
-                return conn.sendMessage(fromUser, { text: "❌ Invalid choice! Reply with a valid number." }, { quoted: mekInfo });
-            }
 
             const { key, toggle } = selected;
             const currentValue = isEnabled(config[key]);
