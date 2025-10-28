@@ -1,12 +1,13 @@
 const axios = require("axios");
-const cheerio = require('cheerio');
-const { cmd, commands } = require('../command');
+const fs = require("fs");
+const { exec } = require("child_process");
+const path = require("path");
+const { cmd } = require('../command');
 const config = require('../config');
 const { fetchJson } = require('../lib/functions');
 
 const api = `https://nethu-api-ashy.vercel.app`;
 
-// Fake vCard
 const fakevCard = {
     key: {
         fromMe: false,
@@ -39,9 +40,7 @@ async (conn, mek, m, { from, prefix, q, reply }) => {
   try {
     if (!q) return reply("🚩 Please give me a valid Facebook URL 🐼");
 
-    // 🟢 Fetch from API
     const fb = await fetchJson(`${api}/download/fbdown?url=${encodeURIComponent(q)}`);
-
     if (!fb.result || (!fb.result.sd && !fb.result.hd)) {
       return reply("❌ I couldn't find anything. Please check the link.");
     }
@@ -52,13 +51,12 @@ async (conn, mek, m, { from, prefix, q, reply }) => {
 🔗 *URL:* ${q}
 
 💬 *Reply with your choice:*
-1. HD Quality 🔋
-2. SD Quality 🪫
-3. Audio typ 🎧
+1️⃣ HD Quality 🔋
+2️⃣ SD Quality 🪫
+3️⃣ Audio Only 🎧
 
 > © Powerd by 𝗥𝗔𝗡𝗨𝗠𝗜𝗧𝗛𝗔-𝗫-𝗠𝗗 🌛`;
 
-    // Send thumb + caption first
     const sentMsg = await conn.sendMessage(from, {
       image: { url: fb.result.thumb },
       caption: caption
@@ -66,7 +64,6 @@ async (conn, mek, m, { from, prefix, q, reply }) => {
 
     const messageID = sentMsg.key.id;
 
-    // 🟣 Wait for user reply
     conn.ev.on("messages.upsert", async (msgUpdate) => {
       try {
         const mekInfo = msgUpdate?.messages?.[0];
@@ -82,53 +79,70 @@ async (conn, mek, m, { from, prefix, q, reply }) => {
         if (!isReply) return;
 
         const choice = userText.trim();
-
-        // 🕐 React to downloading
         await conn.sendMessage(from, { react: { text: "⬇️", key: mekInfo.key } });
 
-        // 🟢 HD Video
+        // HD
         if (choice === "1") {
-          if (!fb.result.hd) return reply("❌ HD video not available for this link.");
+          if (!fb.result.hd) return reply("❌ HD video not available.");
           await conn.sendMessage(from, {
             video: { url: fb.result.hd },
             mimetype: "video/mp4",
             caption: "*HD Quality Video* 🔋"
           }, { quoted: mek });
-
-        // 🟡 SD Video
-        } else if (choice === "2") {
-          if (!fb.result.sd) return reply("❌ SD video not available for this link.");
+        }
+        // SD
+        else if (choice === "2") {
+          if (!fb.result.sd) return reply("❌ SD video not available.");
           await conn.sendMessage(from, {
             video: { url: fb.result.sd },
             mimetype: "video/mp4",
             caption: "*SD Quality Video* 🪫"
           }, { quoted: mek });
-
-        // 🔵 Audio Only
-        } else if (choice === "3") {
+        }
+        // AUDIO
+        else if (choice === "3") {
           reply("🎧 Extracting audio, please wait...");
-          // You can use your API or an external one for MP3 extraction
-          // If your API already supports audio, replace the link below accordingly
-          const audio = await fetchJson(`${api}/download/fbdown/audio?url=${encodeURIComponent(q)}`).catch(() => null);
 
-          if (!audio || !audio.result?.audio) {
-            return reply("❌ Audio not available for this video.");
-          }
+          const videoUrl = fb.result.sd || fb.result.hd;
+          if (!videoUrl) return reply("❌ No video source available to extract audio.");
+
+          const tmpVideo = path.join(__dirname, `fb_${Date.now()}.mp4`);
+          const tmpAudio = path.join(__dirname, `fb_${Date.now()}.mp3`);
+
+          // Download video first
+          const writer = fs.createWriteStream(tmpVideo);
+          const response = await axios({ url: videoUrl, method: "GET", responseType: "stream" });
+          response.data.pipe(writer);
+
+          await new Promise((resolve, reject) => {
+            writer.on("finish", resolve);
+            writer.on("error", reject);
+          });
+
+          // Extract audio with ffmpeg
+          await new Promise((resolve, reject) => {
+            exec(`ffmpeg -i "${tmpVideo}" -q:a 0 -map a "${tmpAudio}" -y`, (err) => {
+              if (err) reject(err);
+              else resolve();
+            });
+          });
 
           await conn.sendMessage(from, {
-            audio: { url: audio.result.audio },
+            audio: { url: tmpAudio },
             mimetype: "audio/mpeg",
             fileName: "Facebook_Audio.mp3",
             ptt: false,
             caption: "*Facebook Audio Only* 🎧"
           }, { quoted: mek });
-        } 
-        
+
+          // Clean up temp files
+          fs.unlinkSync(tmpVideo);
+          fs.unlinkSync(tmpAudio);
+        }
         else {
           return reply("❌ Invalid choice! Please reply with *1*, *2*, or *3*.");
         }
 
-        // ✅ React done
         await conn.sendMessage(from, { react: { text: "✅", key: mekInfo.key } });
 
       } catch (err) {
