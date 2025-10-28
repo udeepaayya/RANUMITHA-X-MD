@@ -108,15 +108,16 @@ Reply with number to toggle ON/OFF or choose a mode.`;
             if (modeMap[userInput]) {
                 const newMode = modeMap[userInput];
                 if (config.MODE === newMode) {
+                    await conn.sendMessage(fromUser, { react: { text: '✔️', key: mekInfo.key } });
                     return conn.sendMessage(fromUser, { text: `⚠️ *Bot mode is already set to ${newMode.toUpperCase()}*` }, { quoted: mekInfo });
                 }
-
                 config.MODE = newMode;
                 saveConfig();
+                await conn.sendMessage(fromUser, { react: { text: '✅', key: mekInfo.key } });
                 return conn.sendMessage(fromUser, { text: `✅ Bot mode is now set to *${newMode.toUpperCase()}*.` }, { quoted: mekInfo });
             }
 
-            // 🔹 Other toggle settings (2.x – 20.x)
+            // 🔹 Toggleable Configurations
             const commandMap = {
                 "2.1": { key: "AUTO_RECORDING", toggle: true },
                 "2.2": { key: "AUTO_RECORDING", toggle: false },
@@ -159,20 +160,29 @@ Reply with number to toggle ON/OFF or choose a mode.`;
             };
 
             const selected = commandMap[userInput];
-            if (!selected) return conn.sendMessage(fromUser, { text: "❌ Invalid choice! Reply with a valid number." }, { quoted: mekInfo });
+            if (!selected) {
+                await conn.sendMessage(fromUser, { react: { text: '⚠️', key: mekInfo.key } });
+                return conn.sendMessage(fromUser, { text: "❌ Invalid choice! Reply with a valid number." }, { quoted: mekInfo });
+            }
 
             const { key, toggle } = selected;
             const currentValue = isEnabled(config[key]);
-            if (currentValue === toggle)
+
+            if (currentValue === toggle) {
+                await conn.sendMessage(fromUser, { react: { text: '✔️', key: mekInfo.key } });
                 return conn.sendMessage(fromUser, { text: `⚠️ *${key.replace(/_/g, " ")} is already ${toggle ? "ON ✅" : "OFF ❌"}*` }, { quoted: mekInfo });
+            }
 
             config[key] = toggle ? "true" : "false";
             saveConfig();
+
+            await conn.sendMessage(fromUser, { react: { text: toggle ? '✅' : '❌', key: mekInfo.key } });
             await conn.sendMessage(fromUser, { text: `✅ *${key.replace(/_/g, " ")} is now ${toggle ? "ON" : "OFF"}*` }, { quoted: mekInfo });
         });
 
     } catch (error) {
         console.error(error);
+        await conn.sendMessage(from, { react: { text: '⚠️', key: mek.key } });
         await reply(`❌ Error: ${error.message || "Something went wrong!"}`);
     }
 });
