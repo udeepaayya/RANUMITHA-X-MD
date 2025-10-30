@@ -33,15 +33,13 @@ cmd({
 async (conn, mek, m, { from, reply }) => {
     try {
         let ppUrl;
-        let name = "";
-        let bio = "No about info available";
-        let number = "N/A";
+        let caption = "";
 
         // 1️⃣ If it's a group
         if (from.endsWith('@g.us')) {
             const groupMetadata = await conn.groupMetadata(from);
-            name = groupMetadata.subject || "Group";
-            bio = `Group with ${groupMetadata.participants.length} members`;
+            const name = groupMetadata.subject || "Group";
+            const bio = `Group with ${groupMetadata.participants.length} members`;
 
             try {
                 ppUrl = await conn.profilePictureUrl(from, 'image');
@@ -49,19 +47,23 @@ async (conn, mek, m, { from, reply }) => {
                 ppUrl = 'https://i.ibb.co/KhYC4FY/1221bc0bdd2354b42b293317ff2adbcf-icon.png';
             }
 
-        } else {
-            // 2️⃣ Individual user (inbox)
-            let userJid = mek.message?.extendedTextMessage?.contextInfo?.participant || from;
+            caption = `*GROUP INFO*\n\n📛 *Name:* ${name}\n💬 *About:* ${bio}\n\n> © Powered by 𝗥𝗔𝗡𝗨𝗠𝗜𝗧𝗛𝗔-𝗫-𝗠𝗗 🌛`;
 
-            ppUrl = 'https://i.ibb.co/KhYC4FY/1221bc0bdd2354b42b293317ff2adbcf-icon.png'; // Default image
-            number = `+${userJid.replace(/@.+/, '')}`; // Show only number
+        } else {
+            // 2️⃣ Individual chat (inbox)
+            const userJid = from;
+
+            try {
+                ppUrl = await conn.profilePictureUrl(userJid, 'image');
+            } catch {
+                ppUrl = 'https://i.ibb.co/KhYC4FY/1221bc0bdd2354b42b293317ff2adbcf-icon.png';
+            }
+
+            const number = `+${userJid.replace(/@.+/, '')}`;
+            caption = `*CONTACT INFO*\n\n📞 *Number:* ${number}\n\n> © Powered by 𝗥𝗔𝗡𝗨𝗠𝗜𝗧𝗛𝗔-𝗫-𝗠𝗗 🌛`;
         }
 
-        // 3️⃣ Send result
-        const caption = from.endsWith('@g.us')
-            ? `*GROUP INFO*\n\n📛 *Name:* ${name}\n💬 *About:* ${bio}\n\n> © Powered by 𝗥𝗔𝗡𝗨𝗠𝗜𝗧𝗛𝗔-𝗫-𝗠𝗗 🌛`
-            : `*CONTACT INFO*\n\n📞 *Number:* ${number}\n\n> © Powered by 𝗥𝗔𝗡𝗨𝗠𝗜𝗧𝗛𝗔-𝗫-𝗠𝗗 🌛`;
-
+        // Send profile picture with caption
         await conn.sendMessage(from, {
             image: { url: ppUrl },
             caption
