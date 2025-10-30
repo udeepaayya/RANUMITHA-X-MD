@@ -26,6 +26,11 @@ async (conn, mek, m, {
     // Only bot owner can use this command
     if (!isOwner) return reply("❌ Only the bot owner can use this command.");
 
+    // Block messages starting with '.' after the command
+    if (q?.startsWith(".")) {
+      return reply("❌ You cannot send a message starting with '.' using .hidetag");
+    }
+
     // Helper to check URLs
     const isUrl = (url) => /https?:\/\/(www\.)?[\w\-@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([\w\-@:%_\+.~#?&//=]*)/.test(url);
 
