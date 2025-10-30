@@ -50,42 +50,17 @@ async (conn, mek, m, { from, reply }) => {
             }
 
         } else {
-            // 2️⃣ Individual user
+            // 2️⃣ Individual user (inbox)
             let userJid = mek.message?.extendedTextMessage?.contextInfo?.participant || from;
 
-            // Try to get saved contact name
-            let contactName = "";
-            try {
-                const contacts = await conn.fetchContacts([userJid]);
-                if (contacts && contacts.length > 0) {
-                    contactName = contacts[0].name || contacts[0].notify || "";
-                }
-            } catch {}
-
-            // Check if user exists on WhatsApp
-            const [user] = await conn.onWhatsApp(userJid).catch(() => []);
-            if (!user?.exists) return reply("❌ That contact is not registered on WhatsApp.");
-
-            // Get profile picture
-            try {
-                ppUrl = await conn.profilePictureUrl(userJid, 'image');
-            } catch {
-                ppUrl = 'https://i.ibb.co/KhYC4FY/1221bc0bdd2354b42b293317ff2adbcf-icon.png';
-            }
-
-            // Set name and number
-            name = contactName || user?.notify || user?.name || mek.pushName || userJid.split('@')[0];
-            number = `+${userJid.replace(/@.+/, '')}`; // Extract number
-
-            // Fetch about/status
-            try {
-                const status = await conn.fetchStatus(userJid);
-                if (status?.status) bio = status.status;
-            } catch {}
+            ppUrl = 'https://i.ibb.co/KhYC4FY/1221bc0bdd2354b42b293317ff2adbcf-icon.png'; // Default image
+            number = `+${userJid.replace(/@.+/, '')}`; // Show only number
         }
 
         // 3️⃣ Send result
-        const caption = `*  PROFILE INFO\n\n📛 *Name:* ${name}\n📞 *Number:* ${number}\n💬 *About:* ${bio}\n\n> © Powered by 𝗥𝗔𝗡𝗨𝗠𝗜𝗧𝗛𝗔-𝗫-𝗠𝗗 🌛`.trim();
+        const caption = from.endsWith('@g.us')
+            ? `*GROUP INFO*\n\n📛 *Name:* ${name}\n💬 *About:* ${bio}\n\n> © Powered by 𝗥𝗔𝗡𝗨𝗠𝗜𝗧𝗛𝗔-𝗫-𝗠𝗗 🌛`
+            : `*CONTACT INFO*\n\n📞 *Number:* ${number}\n\n> © Powered by 𝗥𝗔𝗡𝗨𝗠𝗜𝗧𝗛𝗔-𝗫-𝗠𝗗 🌛`;
 
         await conn.sendMessage(from, {
             image: { url: ppUrl },
