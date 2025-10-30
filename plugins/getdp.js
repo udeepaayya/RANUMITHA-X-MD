@@ -22,12 +22,12 @@ END:VCARD`
 };
 
 cmd({
-    pattern: "getpp",
-    alias: ["targetdp", "getdp", "getprofile"],
+    pattern: "getdp",
+    alias: ["targetdp", "getpp", "getprofile"],
     react: "🖼️",
     desc: "Get the WhatsApp profile picture, name, and about of the person you sent the command to",
     category: "utility",
-    use: '.getdpcontact',
+    use: '.getdp',
     filename: __filename
 },
 async (conn, mek, m, { from, reply }) => {
@@ -82,7 +82,7 @@ async (conn, mek, m, { from, reply }) => {
         }, { quoted: fakevCard });
 
     } catch (e) {
-        console.error("getdpcontact command error:", e);
+        console.error("getdp command error:", e);
         reply(`❌ Error: ${e.message || "Failed to get contact profile"}`);
     }
 });
