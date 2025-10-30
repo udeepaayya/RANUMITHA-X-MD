@@ -19,7 +19,7 @@ async (conn, mek, m, {
     };
 
     if (!isGroup) return reply("❌ This command can only be used in groups.");
-    if (!isOwner) return reply("❌ Only group admins can use this command.");
+    if (!isOwner) return reply("🚫 *Owner Only Command!*");
 
     const mentionAll = { mentions: participants.map(u => u.id) };
 
