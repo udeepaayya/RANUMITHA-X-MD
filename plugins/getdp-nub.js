@@ -22,18 +22,18 @@ END:VCARD`
 };
 
 cmd({
-    pattern: "getdpn",
+    pattern: "getdpnub",
     react: "🖼️",
-    alias: ["getdpnub", "getdpnumber", "getppnub", "getppn"],
+    alias: ["getdpn", "getdpnumber", "getppnub", "getppn"],
     desc: "Get someone's WhatsApp profile picture and info using phone number",
     category: "utility",
-    use: '.getdp 94712345678',
+    use: '.getdpnub 94712345678',
     filename: __filename
 },
 async (conn, mek, m, { from, reply, args }) => {
     try {
         // 1. CHECK NUMBER
-        if (!args[0]) return reply("❌ Please provide a phone number.\nExample: *.getdp 94712345678*");
+        if (!args[0]) return reply("❌ Please provide a phone number.\nExample: *.getdpnub 947xxxxxxxx*");
 
         // 2. FORMAT NUMBER
         let number = args[0].replace(/[^0-9]/g, ""); // remove special chars
