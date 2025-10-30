@@ -28,14 +28,14 @@ cmd({
     react: "🟢",
     filename: __filename
 },
-async (conn, mek, m, { from, quoted, isGroup, isAdmins, isCreator, fromMe, reply }) => {
+async (conn, mek, m, { from, quoted, isGroup, isAdmins, isOwner, fromMe, reply }) => {
     try {
         // Check if the command is used in a group
-        if (!isGroup) return reply("❌ This command can only be used in a group!");
+        if (!isGroup) return reply("*❌ This command can only be used in a group!*");
 
         // Check if user is either creator or admin
-        if (!isCreator && !isAdmins && !fromMe) {
-            return reply("❌ Only bot owner and group admins can use this command!");
+        if (!isOwner && !isAdmins && !fromMe) {
+            return reply("🚫 *Owner Only Command!*");
         }
 
         // Inform user that we're checking
