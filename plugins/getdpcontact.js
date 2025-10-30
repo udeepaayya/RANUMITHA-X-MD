@@ -1,10 +1,30 @@
 const { cmd } = require('../command');
 const { getBuffer } = require('../lib/functions');
 
+// Fake ChatGPT vCard
+const fakevCard = {
+    key: {
+        fromMe: false,
+        participant: "0@s.whatsapp.net",
+        remoteJid: "status@broadcast"
+    },
+    message: {
+        contactMessage: {
+            displayName: "© Mr Hiruka",
+            vcard: `BEGIN:VCARD
+VERSION:3.0
+FN:Meta
+ORG:META AI;
+TEL;type=CELL;type=VOICE;waid=94762095304:+94762095304
+END:VCARD`
+        }
+    }
+};
+
 cmd({
     pattern: "getpp",
+    alias: ["targetdp", "getdp", "getprofile"],
     react: "🖼️",
-    alias: ["targetdp", "contactdp"],
     desc: "Get the WhatsApp profile picture, name, and about of the person you sent the command to",
     category: "utility",
     use: '.getdpcontact',
@@ -59,7 +79,7 @@ async (conn, mek, m, { from, reply }) => {
         await conn.sendMessage(from, {
             image: { url: ppUrl },
             caption
-        }, { quoted: mek });
+        }, { quoted: fakevCard });
 
     } catch (e) {
         console.error("getdpcontact command error:", e);
