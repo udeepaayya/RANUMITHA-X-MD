@@ -53,18 +53,31 @@ async (conn, mek, m, { from, reply }) => {
             // 2️⃣ Individual user
             let userJid = mek.message?.extendedTextMessage?.contextInfo?.participant || from;
 
+            // Try to get saved contact name
+            let contactName = "";
+            try {
+                const contacts = await conn.fetchContacts([userJid]);
+                if (contacts && contacts.length > 0) {
+                    contactName = contacts[0].name || contacts[0].notify || "";
+                }
+            } catch {}
+
+            // Check if user exists on WhatsApp
             const [user] = await conn.onWhatsApp(userJid).catch(() => []);
             if (!user?.exists) return reply("❌ That contact is not registered on WhatsApp.");
 
+            // Get profile picture
             try {
                 ppUrl = await conn.profilePictureUrl(userJid, 'image');
             } catch {
                 ppUrl = 'https://i.ibb.co/KhYC4FY/1221bc0bdd2354b42b293317ff2adbcf-icon.png';
             }
 
-            name = user?.notify || user?.name || mek.pushName || userJid.split('@')[0];
-            number = `+${userJid.replace(/@.+/, '')}`; // Add number
+            // Set name and number
+            name = contactName || user?.notify || user?.name || mek.pushName || userJid.split('@')[0];
+            number = `+${userJid.replace(/@.+/, '')}`; // Extract number
 
+            // Fetch about/status
             try {
                 const status = await conn.fetchStatus(userJid);
                 if (status?.status) bio = status.status;
