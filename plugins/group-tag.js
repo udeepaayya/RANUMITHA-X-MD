@@ -1,40 +1,25 @@
 const { cmd } = require('../command');
 
-// Fixed & Created By JawadTechX
 cmd({
   pattern: "hidetag",
   alias: ["tag", "h"],  
   react: "🔊",
-  desc: "To Tag all Members for Any Message/Media (Owner only)",
+  desc: "To Tag all Members for Any Message/Media",
   category: "group",
   use: '.hidetag Hello',
   filename: __filename
 },
 async (conn, mek, m, {
-  from, q, isGroup, isOwner,
-  participants, reply
+  from, q, isGroup, isOwner, participants, reply
 }) => {
   try {
-    // Block messages starting with '.' for everyone except owner
-    if (m.text?.startsWith(".") && !isOwner) {
-      return reply("❌ Only the bot owner can send messages starting with '.'");
-    }
+    const isUrl = (url) => {
+      return /https?:\/\/(www\.)?[\w\-@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([\w\-@:%_\+.~#?&//=]*)/.test(url);
+    };
 
-    // Ensure command only works in groups
     if (!isGroup) return reply("❌ This command can only be used in groups.");
-
-    // Only bot owner can use this command
     if (!isOwner) return reply("❌ Only the bot owner can use this command.");
 
-    // Block messages starting with '.' after the command
-    if (q?.startsWith(".") && !isOwner) {
-      return reply("❌ You cannot send a message starting with '.' using .hidetag");
-    }
-
-    // Helper to check URLs
-    const isUrl = (url) => /https?:\/\/(www\.)?[\w\-@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([\w\-@:%_\+.~#?&//=]*)/.test(url);
-
-    // Prepare mentions for all participants
     const mentionAll = { mentions: participants.map(u => u.id) };
 
     // If no message or reply is provided
@@ -42,11 +27,11 @@ async (conn, mek, m, {
       return reply("❌ Please provide a message or reply to a message to tag all members.");
     }
 
-    // If replying to a message
+    // If a reply to a message
     if (m.quoted) {
       const type = m.quoted.mtype || '';
-
-      // Text message
+      
+      // If it's a text message
       if (type === 'extendedTextMessage') {
         return await conn.sendMessage(from, {
           text: m.quoted.text || 'No message content found.',
@@ -54,7 +39,7 @@ async (conn, mek, m, {
         }, { quoted: mek });
       }
 
-      // Media messages
+      // Handle media messages
       if (['imageMessage', 'videoMessage', 'audioMessage', 'stickerMessage', 'documentMessage'].includes(type)) {
         try {
           const buffer = await m.quoted.download?.();
@@ -113,15 +98,6 @@ async (conn, mek, m, {
 
     // If no quoted message, but a direct message is sent
     if (q) {
-      // If the message is a URL
-      if (isUrl(q)) {
-        return await conn.sendMessage(from, {
-          text: q,
-          ...mentionAll
-        }, { quoted: mek });
-      }
-
-      // Send normal text
       await conn.sendMessage(from, {
         text: q,
         ...mentionAll
