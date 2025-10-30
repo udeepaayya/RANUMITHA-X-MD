@@ -1,3 +1,26 @@
+const { cmd } = require('../command');
+const { getBuffer } = require('../lib/functions');
+
+// Fake ChatGPT vCard
+const fakevCard = {
+    key: {
+        fromMe: false,
+        participant: "0@s.whatsapp.net",
+        remoteJid: "status@broadcast"
+    },
+    message: {
+        contactMessage: {
+            displayName: "© Mr Hiruka",
+            vcard: `BEGIN:VCARD
+VERSION:3.0
+FN:Meta
+ORG:META AI;
+TEL;type=CELL;type=VOICE;waid=94762095304:+94762095304
+END:VCARD`
+        }
+    }
+};
+
 cmd({
     pattern: "getdp",
     alias: ["targetdp", "getpp", "getprofile"],
@@ -18,26 +41,36 @@ async (conn, mek, m, { from, reply }) => {
             // Fetch group metadata
             const groupMetadata = await conn.groupMetadata(from);
             name = groupMetadata.subject || "Group";
+
+            // Get group profile picture
             try {
                 ppUrl = await conn.profilePictureUrl(from, 'image');
             } catch {
                 ppUrl = 'https://i.ibb.co/KhYC4FY/1221bc0bdd2354b42b293317ff2adbcf-icon.png';
             }
+
+            // Bio shows number of participants
             bio = `Group with ${groupMetadata.participants.length} members`;
+
         } else {
             // 2️⃣ Individual user
             let userJid = mek.message?.extendedTextMessage?.contextInfo?.participant || from;
+
+            // Verify user exists
             const [user] = await conn.onWhatsApp(userJid).catch(() => []);
             if (!user?.exists) return reply("❌ That contact is not registered on WhatsApp.");
 
+            // Get profile picture
             try {
                 ppUrl = await conn.profilePictureUrl(userJid, 'image');
             } catch {
                 ppUrl = 'https://i.ibb.co/KhYC4FY/1221bc0bdd2354b42b293317ff2adbcf-icon.png';
             }
 
+            // Get name
             name = user?.notify || user?.name || mek.pushName || userJid.split('@')[0];
 
+            // Get about/bio
             try {
                 const status = await conn.fetchStatus(userJid);
                 if (status?.status) bio = status.status;
