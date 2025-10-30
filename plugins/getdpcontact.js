@@ -3,29 +3,33 @@ const { getBuffer } = require('../lib/functions');
 
 cmd({
     pattern: "getdpcontact",
-    react: "📱",
-    alias: ["contactinfo", "numberdp"],
-    desc: "Get WhatsApp profile picture, name, and about using number in message text",
+    react: "👤",
+    alias: ["targetdp", "contactdp"],
+    desc: "Get the WhatsApp profile picture, name, and about of the person you sent the command to",
     category: "utility",
-    use: '.getdpcontact 94712345678',
+    use: '.getdpcontact',
     filename: __filename
 },
-async (conn, mek, m, { from, reply, args }) => {
+async (conn, mek, m, { from, reply }) => {
     try {
-        // 1. GET NUMBER FROM MESSAGE
-        let number = args[0];
-        if (!number) return reply("❌ Please type a number.\nExample: *.getdpcontact 94762095308*");
+        // 1️⃣ CHECK IF MESSAGE IS REPLY OR DIRECT CHAT
+        let userJid;
 
-        // 2. CLEAN AND FORMAT NUMBER
-        number = number.replace(/[^0-9]/g, "");
-        if (!number.startsWith("94")) number = "94" + number; // auto add SL code
-        const userJid = number + "@s.whatsapp.net";
+        if (mek.message?.extendedTextMessage?.contextInfo?.participant) {
+            // if replied to someone
+            userJid = mek.message.extendedTextMessage.contextInfo.participant;
+        } else {
+            // else get the chat target (the person you sent the message to)
+            userJid = from.endsWith('@g.us') ? null : from;
+        }
 
-        // 3. VERIFY USER EXISTS ON WHATSAPP
+        if (!userJid) return reply("❌ Please use this command in a direct chat (not in group).");
+
+        // 2️⃣ VERIFY USER EXISTS
         const [user] = await conn.onWhatsApp(userJid).catch(() => []);
-        if (!user?.exists) return reply("❌ That number is not registered on WhatsApp.");
+        if (!user?.exists) return reply("❌ That contact is not registered on WhatsApp.");
 
-        // 4. GET PROFILE PICTURE
+        // 3️⃣ GET PROFILE PICTURE
         let ppUrl;
         try {
             ppUrl = await conn.profilePictureUrl(userJid, 'image');
@@ -33,31 +37,31 @@ async (conn, mek, m, { from, reply, args }) => {
             ppUrl = 'https://i.ibb.co/KhYC4FY/1221bc0bdd2354b42b293317ff2adbcf-icon.png'; // default dp
         }
 
-        // 5. GET NAME
+        // 4️⃣ GET NAME
         let userName = "";
         try {
-            userName = user?.notify || user?.name || userJid.split('@')[0];
+            userName = user?.notify || user?.name || mek.pushName || userJid.split('@')[0];
         } catch {
             userName = userJid.split('@')[0];
         }
 
-        // 6. GET ABOUT / STATUS
-        let bio = "No about available";
+        // 5️⃣ GET ABOUT (bio)
+        let bio = "No about info available";
         try {
             const status = await conn.fetchStatus(userJid);
             if (status?.status) bio = status.status;
         } catch {}
 
-        // 7. FORMAT MESSAGE
+        // 6️⃣ FORMAT MESSAGE
         const caption = `
-*👤 WHATSAPP PROFILE INFO*
+*👤 CONTACT PROFILE INFO*
 
 📛 *Name:* ${userName}
-📞 *Number:* +${number}
+📞 *Number:* +${userJid.replace(/@.+/, '')}
 📝 *About:* ${bio}
 `.trim();
 
-        // 8. SEND RESULT
+        // 7️⃣ SEND RESULT
         await conn.sendMessage(from, {
             image: { url: ppUrl },
             caption
