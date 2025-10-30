@@ -1,9 +1,8 @@
 const { cmd } = require('../command');
 
-
 cmd({
-  pattern: "pp",
-  alias: ["ppp", "pppp"],
+  pattern: "promote",
+  alias: ["adminup", "makeadmin"],
   react: "🛡️",
   desc: "Promote a user to admin (Owner & Admin only)",
   category: "group",
@@ -16,26 +15,26 @@ async (conn, mek, m, {
   try {
     if (!isGroup) return reply("❌ This command can only be used in groups.");
 
-    // 🧩 Check if user is owner or group admin
-    if (!isOwner && !isAdmins) 
+    // ✅ Check if user is Owner or Group Admin
+    if (!isOwner && !isAdmins)
       return reply("❌ Only bot owner or group admins can use this command!");
 
-    // 🧩 Check if bot is admin
+    // ✅ Check if bot is admin
     const botNumber = conn.user.id.split(":")[0] + "@s.whatsapp.net";
     const botAdmin = participants.find(p => p.id === botNumber && p.admin);
     if (!botAdmin) return reply("❌ Firstly give me admin!");
 
-    // 🧩 Check if replied to a user
+    // ✅ Check if replied to someone
     const quoted = m.quoted ? m.quoted.sender : false;
     if (!quoted) return reply("⚠️ Please reply to a user to promote them.");
 
-    // 🧩 Check if user is already admin
+    // ✅ Check if that user is already admin
     const groupAdmins = participants.filter(p => p.admin).map(p => p.id);
     if (groupAdmins.includes(quoted)) {
       return reply("✅ That user is already an admin!");
     }
 
-    // 🧩 Promote user
+    // ✅ Promote user
     await conn.groupParticipantsUpdate(from, [quoted], "promote");
     reply("🎉 User has been promoted to admin successfully!");
 
