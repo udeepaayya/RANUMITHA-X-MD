@@ -2,8 +2,8 @@ const { cmd } = require('../command');
 const { getBuffer } = require('../lib/functions');
 
 cmd({
-    pattern: "getdpcontact",
-    react: "👤",
+    pattern: "getpp",
+    react: "🖼️",
     alias: ["targetdp", "contactdp"],
     desc: "Get the WhatsApp profile picture, name, and about of the person you sent the command to",
     category: "utility",
@@ -53,13 +53,7 @@ async (conn, mek, m, { from, reply }) => {
         } catch {}
 
         // 6️⃣ FORMAT MESSAGE
-        const caption = `
-*👤 CONTACT PROFILE INFO*
-
-📛 *Name:* ${userName}
-📞 *Number:* +${userJid.replace(/@.+/, '')}
-📝 *About:* ${bio}
-`.trim();
+        const caption = `*  CONTACT PROFILE INFO\n\n📛 *Number:* +${userJid.replace(/@.+/, '')}\n\n> © Powerd by 𝗥𝗔𝗡𝗨𝗠𝗜𝗧𝗛𝗔-𝗫-𝗠𝗗 🌛`.trim();
 
         // 7️⃣ SEND RESULT
         await conn.sendMessage(from, {
