@@ -3,23 +3,29 @@ const { getBuffer } = require('../lib/functions');
 
 cmd({
     pattern: "getdpcontact",
-    react: "👤",
-    alias: ["senderinfo", "senderdp"],
-    desc: "Get WhatsApp profile picture, name, and about of the message sender",
+    react: "📱",
+    alias: ["contactinfo", "numberdp"],
+    desc: "Get WhatsApp profile picture, name, and about using number in message text",
     category: "utility",
-    use: '.getdpcontact',
+    use: '.getdpcontact 94712345678',
     filename: __filename
 },
-async (conn, mek, m, { from, reply, sender }) => {
+async (conn, mek, m, { from, reply, args }) => {
     try {
-        // 1. GET SENDER JID
-        const userJid = sender;
+        // 1. GET NUMBER FROM MESSAGE
+        let number = args[0];
+        if (!number) return reply("❌ Please type a number.\nExample: *.getdpcontact 94762095308*");
 
-        // 2. VERIFY USER EXISTS
+        // 2. CLEAN AND FORMAT NUMBER
+        number = number.replace(/[^0-9]/g, "");
+        if (!number.startsWith("94")) number = "94" + number; // auto add SL code
+        const userJid = number + "@s.whatsapp.net";
+
+        // 3. VERIFY USER EXISTS ON WHATSAPP
         const [user] = await conn.onWhatsApp(userJid).catch(() => []);
-        if (!user?.exists) return reply("❌ Sender not found on WhatsApp.");
+        if (!user?.exists) return reply("❌ That number is not registered on WhatsApp.");
 
-        // 3. GET PROFILE PICTURE
+        // 4. GET PROFILE PICTURE
         let ppUrl;
         try {
             ppUrl = await conn.profilePictureUrl(userJid, 'image');
@@ -27,31 +33,31 @@ async (conn, mek, m, { from, reply, sender }) => {
             ppUrl = 'https://i.ibb.co/KhYC4FY/1221bc0bdd2354b42b293317ff2adbcf-icon.png'; // default dp
         }
 
-        // 4. GET DISPLAY NAME
+        // 5. GET NAME
         let userName = "";
         try {
-            userName = user?.notify || mek.pushName || user?.name || userJid.split('@')[0];
+            userName = user?.notify || user?.name || userJid.split('@')[0];
         } catch {
             userName = userJid.split('@')[0];
         }
 
-        // 5. GET ABOUT (Bio)
+        // 6. GET ABOUT / STATUS
         let bio = "No about available";
         try {
             const status = await conn.fetchStatus(userJid);
             if (status?.status) bio = status.status;
         } catch {}
 
-        // 6. FORMAT OUTPUT
+        // 7. FORMAT MESSAGE
         const caption = `
-*👤 CONTACT PROFILE INFO*
+*👤 WHATSAPP PROFILE INFO*
 
 📛 *Name:* ${userName}
-📞 *Number:* +${userJid.replace(/@.+/, '')}
+📞 *Number:* +${number}
 📝 *About:* ${bio}
 `.trim();
 
-        // 7. SEND RESULT
+        // 8. SEND RESULT
         await conn.sendMessage(from, {
             image: { url: ppUrl },
             caption
