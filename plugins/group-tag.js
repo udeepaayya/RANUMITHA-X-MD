@@ -11,13 +11,13 @@ cmd({
   filename: __filename
 },
 async (conn, mek, m, {
-  from, q, isGroup, isOwner, isAdmins,
+  from, q, isGroup, isOwner,
   participants, reply
 }) => {
   try {
-    // Block admins from sending messages starting with '.'
-    if (isGroup && isAdmins && m.text?.startsWith(".")) {
-      return reply("❌ Admins cannot send messages starting with '.'");
+    // Block messages starting with '.' for everyone except owner
+    if (m.text?.startsWith(".") && !isOwner) {
+      return reply("❌ Only the bot owner can send messages starting with '.'");
     }
 
     // Ensure command only works in groups
@@ -27,7 +27,7 @@ async (conn, mek, m, {
     if (!isOwner) return reply("❌ Only the bot owner can use this command.");
 
     // Block messages starting with '.' after the command
-    if (q?.startsWith(".")) {
+    if (q?.startsWith(".") && !isOwner) {
       return reply("❌ You cannot send a message starting with '.' using .hidetag");
     }
 
