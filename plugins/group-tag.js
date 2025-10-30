@@ -4,23 +4,24 @@ cmd({
   pattern: "hidetag",
   alias: ["tag", "h"],  
   react: "🔊",
-  desc: "Owner-only command to tag all members for any message/media",
-  category: "utility",
+  desc: "To Tag all Members for Any Message/Media",
+  category: "group",
   use: '.hidetag Hello',
   filename: __filename
 },
 async (conn, mek, m, {
-  q, isOwner, participants, reply
+  from, q, isGroup, isOwner,
+  participants, reply
 }) => {
   try {
     const isUrl = (url) => {
       return /https?:\/\/(www\.)?[\w\-@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([\w\-@:%_\+.~#?&//=]*)/.test(url);
     };
 
-    // Owner check
-    if (!isOwner) return reply("❌ Only the bot owner can use this command.");
+    if (!isGroup) return reply("❌ This command can only be used in groups.");
+    if (!isOwner) return reply("❌ Only group admins can use this command.");
 
-    const mentionAll = participants ? { mentions: participants.map(u => u.id) } : {};
+    const mentionAll = { mentions: participants.map(u => u.id) };
 
     // If no message or reply is provided
     if (!q && !m.quoted) {
@@ -31,15 +32,15 @@ async (conn, mek, m, {
     if (m.quoted) {
       const type = m.quoted.mtype || '';
       
-      // Text message
+      // If it's a text message (extendedTextMessage)
       if (type === 'extendedTextMessage') {
-        return await conn.sendMessage(m.from, {
+        return await conn.sendMessage(from, {
           text: m.quoted.text || 'No message content found.',
           ...mentionAll
         }, { quoted: mek });
       }
 
-      // Media messages
+      // Handle media messages
       if (['imageMessage', 'videoMessage', 'audioMessage', 'stickerMessage', 'documentMessage'].includes(type)) {
         try {
           const buffer = await m.quoted.download?.();
@@ -81,7 +82,7 @@ async (conn, mek, m, {
           }
 
           if (content) {
-            return await conn.sendMessage(m.from, content, { quoted: mek });
+            return await conn.sendMessage(from, content, { quoted: mek });
           }
         } catch (e) {
           console.error("Media download/send error:", e);
@@ -89,17 +90,26 @@ async (conn, mek, m, {
         }
       }
 
-      // Fallback
-      return await conn.sendMessage(m.from, {
+      // Fallback for any other message type
+      return await conn.sendMessage(from, {
         text: m.quoted.text || "📨 Message",
         ...mentionAll
       }, { quoted: mek });
     }
 
-    // Direct message (not quoted)
+    // If no quoted message, but a direct message is sent
     if (q) {
-      await conn.sendMessage(m.from, {
-        text: q,
+      // If the direct message is a URL, send it as a message
+      if (isUrl(q)) {
+        return await conn.sendMessage(from, {
+          text: q,
+          ...mentionAll
+        }, { quoted: mek });
+      }
+
+      // Otherwise, just send the text without the command name
+      await conn.sendMessage(from, {
+        text: q, // Sends the message without the command name
         ...mentionAll
       }, { quoted: mek });
     }
