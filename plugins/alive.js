@@ -40,7 +40,7 @@ async (robin, mek, m, {
         // Voice Note
         await robin.sendMessage(from, {
             audio: {
-                url: "https://github.com/Ranumithaofc/RANU-FILE-S-/raw/refs/heads/main/Audio/Alive%20new%20typ.opus"
+                url: "https://github.com/Ranumithaofc/RANU-FILE-S-/raw/refs/heads/main/Audio/Ranumitha-x-md-Alive-org.opus"
             },
             mimetype: 'audio/mp4',
             ptt: true
