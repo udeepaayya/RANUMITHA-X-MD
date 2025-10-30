@@ -4,23 +4,23 @@ cmd({
   pattern: "hidetag",
   alias: ["tag", "h"],  
   react: "🔊",
-  desc: "To Tag all Members for Any Message/Media",
-  category: "group",
+  desc: "Owner-only command to tag all members for any message/media",
+  category: "utility",
   use: '.hidetag Hello',
   filename: __filename
 },
 async (conn, mek, m, {
-  from, q, isGroup, isOwner, participants, reply
+  q, isOwner, participants, reply
 }) => {
   try {
     const isUrl = (url) => {
       return /https?:\/\/(www\.)?[\w\-@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([\w\-@:%_\+.~#?&//=]*)/.test(url);
     };
 
-    if (!isGroup) return reply("❌ This command can only be used in groups.");
+    // Owner check
     if (!isOwner) return reply("❌ Only the bot owner can use this command.");
 
-    const mentionAll = { mentions: participants.map(u => u.id) };
+    const mentionAll = participants ? { mentions: participants.map(u => u.id) } : {};
 
     // If no message or reply is provided
     if (!q && !m.quoted) {
@@ -31,15 +31,15 @@ async (conn, mek, m, {
     if (m.quoted) {
       const type = m.quoted.mtype || '';
       
-      // If it's a text message
+      // Text message
       if (type === 'extendedTextMessage') {
-        return await conn.sendMessage(from, {
+        return await conn.sendMessage(m.from, {
           text: m.quoted.text || 'No message content found.',
           ...mentionAll
         }, { quoted: mek });
       }
 
-      // Handle media messages
+      // Media messages
       if (['imageMessage', 'videoMessage', 'audioMessage', 'stickerMessage', 'documentMessage'].includes(type)) {
         try {
           const buffer = await m.quoted.download?.();
@@ -81,7 +81,7 @@ async (conn, mek, m, {
           }
 
           if (content) {
-            return await conn.sendMessage(from, content, { quoted: mek });
+            return await conn.sendMessage(m.from, content, { quoted: mek });
           }
         } catch (e) {
           console.error("Media download/send error:", e);
@@ -89,16 +89,16 @@ async (conn, mek, m, {
         }
       }
 
-      // Fallback for any other message type
-      return await conn.sendMessage(from, {
+      // Fallback
+      return await conn.sendMessage(m.from, {
         text: m.quoted.text || "📨 Message",
         ...mentionAll
       }, { quoted: mek });
     }
 
-    // If no quoted message, but a direct message is sent
+    // Direct message (not quoted)
     if (q) {
-      await conn.sendMessage(from, {
+      await conn.sendMessage(m.from, {
         text: q,
         ...mentionAll
       }, { quoted: mek });
