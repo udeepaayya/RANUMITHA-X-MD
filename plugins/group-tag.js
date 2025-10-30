@@ -5,23 +5,31 @@ cmd({
   pattern: "hidetag",
   alias: ["tag", "h"],  
   react: "🔊",
-  desc: "To Tag all Members for Any Message/Media",
+  desc: "To Tag all Members for Any Message/Media (Owner only)",
   category: "group",
   use: '.hidetag Hello',
   filename: __filename
 },
 async (conn, mek, m, {
-  from, q, isGroup, isCreator, isAdmins,
+  from, q, isGroup, isOwner, isAdmins,
   participants, reply
 }) => {
   try {
-    const isUrl = (url) => {
-      return /https?:\/\/(www\.)?[\w\-@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([\w\-@:%_\+.~#?&//=]*)/.test(url);
-    };
+    // Block admins from sending messages starting with '.'
+    if (isGroup && isAdmins && m.text?.startsWith(".")) {
+      return reply("❌ Admins cannot send messages starting with '.'");
+    }
 
+    // Ensure command only works in groups
     if (!isGroup) return reply("❌ This command can only be used in groups.");
-    if (!isAdmins && !isCreator) return reply("❌ Only group admins can use this command.");
 
+    // Only bot owner can use this command
+    if (!isOwner) return reply("❌ Only the bot owner can use this command.");
+
+    // Helper to check URLs
+    const isUrl = (url) => /https?:\/\/(www\.)?[\w\-@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([\w\-@:%_\+.~#?&//=]*)/.test(url);
+
+    // Prepare mentions for all participants
     const mentionAll = { mentions: participants.map(u => u.id) };
 
     // If no message or reply is provided
@@ -29,11 +37,11 @@ async (conn, mek, m, {
       return reply("❌ Please provide a message or reply to a message to tag all members.");
     }
 
-    // If a reply to a message
+    // If replying to a message
     if (m.quoted) {
       const type = m.quoted.mtype || '';
-      
-      // If it's a text message (extendedTextMessage)
+
+      // Text message
       if (type === 'extendedTextMessage') {
         return await conn.sendMessage(from, {
           text: m.quoted.text || 'No message content found.',
@@ -41,7 +49,7 @@ async (conn, mek, m, {
         }, { quoted: mek });
       }
 
-      // Handle media messages
+      // Media messages
       if (['imageMessage', 'videoMessage', 'audioMessage', 'stickerMessage', 'documentMessage'].includes(type)) {
         try {
           const buffer = await m.quoted.download?.();
@@ -100,7 +108,7 @@ async (conn, mek, m, {
 
     // If no quoted message, but a direct message is sent
     if (q) {
-      // If the direct message is a URL, send it as a message
+      // If the message is a URL
       if (isUrl(q)) {
         return await conn.sendMessage(from, {
           text: q,
@@ -108,9 +116,9 @@ async (conn, mek, m, {
         }, { quoted: mek });
       }
 
-      // Otherwise, just send the text without the command name
+      // Send normal text
       await conn.sendMessage(from, {
-        text: q, // Sends the message without the command name
+        text: q,
         ...mentionAll
       }, { quoted: mek });
     }
