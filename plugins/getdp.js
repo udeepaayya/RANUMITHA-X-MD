@@ -47,7 +47,7 @@ async (conn, mek, m, { from, reply }) => {
                 ppUrl = 'https://i.ibb.co/KhYC4FY/1221bc0bdd2354b42b293317ff2adbcf-icon.png';
             }
 
-            caption = `* 👥GROUP INFO\n\n📛 *Name:* ${name}\n💬 *About:* ${bio}\n\n> © Powered by 𝗥𝗔𝗡𝗨𝗠𝗜𝗧𝗛𝗔-𝗫-𝗠𝗗 🌛`;
+            caption = `*👥 GROUP INFO*\n\n📛 *Name:* ${name}\n💬 *About:* ${bio}\n\n> © Powered by 𝗥𝗔𝗡𝗨𝗠𝗜𝗧𝗛𝗔-𝗫-𝗠𝗗 🌛`;
 
         } else {
             // 2️⃣ Individual chat (inbox)
@@ -60,7 +60,7 @@ async (conn, mek, m, { from, reply }) => {
             }
 
             const number = `+${userJid.replace(/@.+/, '')}`;
-            caption = `* 👤CONTACT INFO\n\n📞 *Number:* ${number}\n\n> © Powered by 𝗥𝗔𝗡𝗨𝗠𝗜𝗧𝗛𝗔-𝗫-𝗠𝗗 🌛`;
+            caption = `*👤 CONTACT INFO*\n\n📞 *Number:* ${number}\n\n> © Powered by 𝗥𝗔𝗡𝗨𝗠𝗜𝗧𝗛𝗔-𝗫-𝗠𝗗 🌛`;
         }
 
         // Send profile picture with caption
