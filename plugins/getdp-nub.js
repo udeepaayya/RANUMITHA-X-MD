@@ -22,9 +22,9 @@ END:VCARD`
 };
 
 cmd({
-    pattern: "getdp",
+    pattern: "getdpn",
     react: "🖼️",
-    alias: ["getprofilepic", "fetchdp"],
+    alias: ["getdpnub", "getdpnumber", "getppnub", "getppn"],
     desc: "Get someone's WhatsApp profile picture and info using phone number",
     category: "utility",
     use: '.getdp 94712345678',
