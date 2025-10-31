@@ -25,7 +25,7 @@ END:VCARD`
 
 cmd({
     pattern: "alive",
-    alias: ["hyranu", "ranu", "status", "a"],
+    alias: ["hyranu", "ranu", "status"],
     react: "🌝",
     desc: "Check bot online or no.",
     category: "main",
