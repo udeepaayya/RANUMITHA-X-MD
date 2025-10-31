@@ -34,7 +34,7 @@ async (conn, mek, m, { from, args, q, reply }) => {
         if (!q) return reply("Please provide a TikTok video link.");
         if (!q.includes("tiktok.com")) return reply("Invalid TikTok link.");
         
-        reply("Downloading video, please wait...");
+        reply("*⬇️ Downloading video, please wait...*");
         
         const apiUrl = `https://delirius-apiofc.vercel.app/download/tiktok?url=${q}`;
         const { data } = await axios.get(apiUrl);
@@ -44,7 +44,9 @@ async (conn, mek, m, { from, args, q, reply }) => {
         const { title, like, comment, share, author, meta } = data.data;
         const videoUrl = meta.media.find(v => v.type === "video").org;
         
-        const caption = `🎵 *TikTok Video* 🎵\n\n` +
+        const caption = `*🫧 RANUMITHA-X-MD TIKTOK VIDEO DOWNLOADER 🫧*
+
+title: * 🎵\n\n` +
                         `👤 *User:* ${author.nickname} (@${author.username})\n` +
                         `📖 *Title:* ${title}\n` +
                         `👍 *Likes:* ${like}\n💬 *Comments:* ${comment}\n🔁 *Shares:* ${share}\n\n> © Powerd by 𝗥𝗔𝗡𝗨𝗠𝗜𝗧𝗛𝗔-𝗫-𝗠𝗗 🌛`;
