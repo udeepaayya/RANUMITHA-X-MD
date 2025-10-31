@@ -1,8 +1,8 @@
 const { cmd } = require('../command');
 
 cmd({
-    pattern: "demote",
-    alias: ["d", "dismiss", "removeadmin"],
+    pattern: "demote2",
+    alias: ["d2", "dismiss2", "removeadmin2"],
     desc: "Demotes a group admin to a normal member",
     category: "admin",
     react: "⬇️",
