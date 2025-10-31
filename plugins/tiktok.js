@@ -26,7 +26,7 @@ cmd({
     alias: ["ttdl", "tt", "tiktokdl"],
     desc: "Download TikTok video without watermark",
     category: "downloader",
-    react: "🎵",
+    react: "🎥",
     filename: __filename
 },
 async (conn, mek, m, { from, args, q, reply }) => {
@@ -44,8 +44,7 @@ async (conn, mek, m, { from, args, q, reply }) => {
         const { title, like, comment, share, author, meta } = data.data;
         const videoUrl = meta.media.find(v => v.type === "video").org;
         
-        const caption = `*🫧 RANUMITHA-X-MD TIKTOK VIDEO DOWNLOADER 🫧*
-
+        const caption = `*🫧 RANUMITHA-X-MD TIKTOK VIDEO DOWNLOADER 🫧*\n\n` +
                         `👤 *User:* ${author.nickname} (@${author.username})\n` +
                         `📖 *Title:* ${title}\n` +
                         `👍 *Likes:* ${like}\n💬 *Comments:* ${comment}\n🔁 *Shares:* ${share}\n\n> © Powerd by 𝗥𝗔𝗡𝗨𝗠𝗜𝗧𝗛𝗔-𝗫-𝗠𝗗 🌛`;
