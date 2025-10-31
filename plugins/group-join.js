@@ -13,25 +13,26 @@ cmd({
 },
 async (conn, mek, m, { from, q, reply, isOwner }) => {
     try {
-        // 🔒 Manual Owner Only Check
+        // 🔒 Extra Safety Check
         if (!isOwner) return reply("🚫 *Owner Only Command!*");
 
         if (!q) return reply("❌ Please send a valid WhatsApp group link!\nExample: .join https://chat.whatsapp.com/xxxxxx");
 
-        // 🔍 Check link validity
+        // 🔍 Check valid link
         const linkRegex = /chat\.whatsapp\.com\/([0-9A-Za-z]{20,24})/;
         const match = q.match(linkRegex);
         if (!match) return reply("⚠️ Invalid WhatsApp group link!");
 
         const inviteCode = match[1];
 
-        // ⏳ React before join
+        // ⏳ React while joining
         await conn.sendMessage(from, { react: { text: "⏳", key: mek.key } });
 
         // 🚀 Try joining
         let res = await conn.groupAcceptInvite(inviteCode);
         await sleep(1000);
 
+        // ✅ Success
         if (res) {
             await conn.sendMessage(from, { react: { text: "✅", key: mek.key } });
             return reply("✅ Successfully joined the group!");
@@ -44,12 +45,16 @@ async (conn, mek, m, { from, q, reply, isOwner }) => {
         await conn.sendMessage(from, { react: { text: "❌", key: mek.key } });
         console.error(e);
 
-        if (String(e).includes("not-authorized")) {
-            reply("🚫 Failed: Bot is not authorized to join this group!");
-        } else if (String(e).includes("already")) {
-            reply("⚠️ Bot is already in this group!");
+        const errMsg = String(e);
+
+        if (errMsg.includes("already")) {
+            return reply("😊 You are already joined in the group!");
+        } else if (errMsg.includes("not-authorized")) {
+            return reply("🚫 Failed: Bot is not authorized to join this group!");
+        } else if (errMsg.includes("invalid") || errMsg.includes("400")) {
+            return reply("⚠️ Invalid group invite link!");
         } else {
-            reply("❌ Error joining group:\n" + e.message);
+            return reply("❌ Error joining group:\n" + e.message);
         }
     }
 });
