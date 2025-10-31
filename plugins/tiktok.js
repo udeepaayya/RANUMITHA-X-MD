@@ -46,7 +46,6 @@ async (conn, mek, m, { from, args, q, reply }) => {
         
         const caption = `*🫧 RANUMITHA-X-MD TIKTOK VIDEO DOWNLOADER 🫧*
 
-title: * 🎵\n\n` +
                         `👤 *User:* ${author.nickname} (@${author.username})\n` +
                         `📖 *Title:* ${title}\n` +
                         `👍 *Likes:* ${like}\n💬 *Comments:* ${comment}\n🔁 *Shares:* ${share}\n\n> © Powerd by 𝗥𝗔𝗡𝗨𝗠𝗜𝗧𝗛𝗔-𝗫-𝗠𝗗 🌛`;
