@@ -1,46 +1,55 @@
-const config = require('../config')
-const { cmd, commands } = require('../command')
-const { getBuffer, getGroupAdmins, getRandom, h2k, isUrl, Json, runtime, sleep, fetchJson } = require('../lib/functions')
+const { cmd } = require('../command');
+const { sleep } = require('../lib/functions');
 
 cmd({
     pattern: "join",
-    react: "📬",
-    alias: ["joinme", "f_join"],
-    desc: "To Join a Group from Invite link",
-    category: "group",
-    use: '.join < Group Link >',
+    alias: ["joingroup"],
+    react: "📩",
+    desc: "Join a WhatsApp group using an invite link (Owner only)",
+    category: "owner",
+    use: ".join <group link>",
+    isOwner: true, // ✅ Only Owner can use this
     filename: __filename
-}, async (conn, mek, m, { from, l, quoted, body, isCmd, command, args, q, isGroup, sender, senderNumber, botNumber2, botNumber, pushname, isMe, isOwner, groupMetadata, groupName, participants, groupAdmins, isBotAdmins, isCreator, isDev, isAdmins, reply }) => {
+},
+async (conn, mek, m, { from, q, reply, isOwner }) => {
     try {
-        const msr = {
-            own_cmd: "You don't have permission to use this command."
-        };
+        // 🔒 Manual Owner Only Check
+        if (!isOwner) return reply("🚫 *Owner Only Command!*");
 
-        // Only allow the creator to use the command
-        if (!isCreator) return reply(msr.own_cmd);
+        if (!q) return reply("❌ Please send a valid WhatsApp group link!\nExample: .join https://chat.whatsapp.com/xxxxxx");
 
-        // If there's no input, check if the message is a reply with a link
-        if (!q && !quoted) return reply("*Please write the Group Link*️ 🖇️");
+        // 🔍 Check link validity
+        const linkRegex = /chat\.whatsapp\.com\/([0-9A-Za-z]{20,24})/;
+        const match = q.match(linkRegex);
+        if (!match) return reply("⚠️ Invalid WhatsApp group link!");
 
-        let groupLink;
+        const inviteCode = match[1];
 
-        // If the message is a reply to a group invite link
-        if (quoted && quoted.type === 'conversation' && isUrl(quoted.text)) {
-            groupLink = quoted.text.split('https://chat.whatsapp.com/')[1];
-        } else if (q && isUrl(q)) {
-            // If the user provided the link in the command
-            groupLink = q.split('https://chat.whatsapp.com/')[1];
+        // ⏳ React before join
+        await conn.sendMessage(from, { react: { text: "⏳", key: mek.key } });
+
+        // 🚀 Try joining
+        let res = await conn.groupAcceptInvite(inviteCode);
+        await sleep(1000);
+
+        if (res) {
+            await conn.sendMessage(from, { react: { text: "✅", key: mek.key } });
+            return reply("✅ Successfully joined the group!");
+        } else {
+            await conn.sendMessage(from, { react: { text: "❌", key: mek.key } });
+            return reply("❌ Failed to join the group. Unknown error occurred!");
         }
 
-        if (!groupLink) return reply("❌ *Invalid Group Link* 🖇️");
-
-        // Accept the group invite
-        await conn.groupAcceptInvite(groupLink);
-        await conn.sendMessage(from, { text: `✔️ *Successfully Joined*` }, { quoted: mek });
-
     } catch (e) {
-        await conn.sendMessage(from, { react: { text: '❌', key: mek.key } });
-        console.log(e);
-        reply(`❌ *Error Occurred!!*\n\n${e}`);
+        await conn.sendMessage(from, { react: { text: "❌", key: mek.key } });
+        console.error(e);
+
+        if (String(e).includes("not-authorized")) {
+            reply("🚫 Failed: Bot is not authorized to join this group!");
+        } else if (String(e).includes("already")) {
+            reply("⚠️ Bot is already in this group!");
+        } else {
+            reply("❌ Error joining group:\n" + e.message);
+        }
     }
 });
