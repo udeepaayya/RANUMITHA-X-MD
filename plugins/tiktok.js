@@ -9,21 +9,20 @@ cmd({
     react: "🎵",
     filename: __filename
 },
-async (conn, mek, m, { from, args, q, reply }) => {
+async (conn, mek, m, { from, args, q }) => {
     try {
-        if (!q) return reply("Please provide a TikTok video link.");
-        if (!q.includes("tiktok.com")) return reply("Invalid TikTok link.");
-
-        reply("📥 Fetching TikTok data, please wait...");
+        if (!q) return conn.sendMessage(from, { text: "Please provide a TikTok video link." }, { quoted: mek });
+        if (!q.includes("tiktok.com")) return conn.sendMessage(from, { text: "Invalid TikTok link." }, { quoted: mek });
 
         const apiUrl = `https://delirius-apiofc.vercel.app/download/tiktok?url=${q}`;
         const { data } = await axios.get(apiUrl);
 
-        if (!data.status || !data.data) return reply("❌ Failed to fetch TikTok video details.");
+        if (!data.status || !data.data)
+            return conn.sendMessage(from, { text: "❌ Failed to fetch TikTok video details." }, { quoted: mek });
 
         const { title, like, comment, share, author, meta } = data.data;
 
-        // Extract available formats
+        // Extract video/audio links safely
         const videoWithWatermark = meta.media.find(v => v.type === "video" && v.quality === "watermark")?.org;
         const videoNoWatermark = meta.media.find(v => v.type === "video" && v.quality === "hd")?.org;
         const videoOriginal = meta.media.find(v => v.type === "video" && v.quality === "original")?.org;
@@ -45,48 +44,50 @@ async (conn, mek, m, { from, args, q, reply }) => {
 3️⃣  *Original Quality* 📼
 4️⃣  *Audio (MP3)* 🎶`;
 
-        const menuMessage = await conn.sendMessage(from, {
+        const sentMsg = await conn.sendMessage(from, {
             caption: menuMsg,
             video: { url: videoNoWatermark || videoWithWatermark },
             contextInfo: { mentionedJid: [m.sender] }
         }, { quoted: mek });
 
-        // Listen for the user's reply
+        // ✅ Handle replies
         conn.ev.on('messages.upsert', async (msgData) => {
             const msg = msgData.messages[0];
             if (!msg.message || !msg.message.extendedTextMessage) return;
-            if (msg.message.extendedTextMessage.contextInfo?.stanzaId !== menuMessage.key.id) return;
+            const contextId = msg.message.extendedTextMessage.contextInfo?.stanzaId;
+
+            // Check if reply is to the correct message
+            if (contextId !== sentMsg.key.id) return;
 
             const userResponse = msg.message.extendedTextMessage.text.trim();
 
-            try {
-                if (userResponse === '1') {
-                    if (!videoWithWatermark) return reply("❌ Watermark version not available.");
-                    await conn.sendMessage(from, { video: { url: videoWithWatermark }, caption: "🎫 *With Watermark Video*" }, { quoted: msg });
-                } 
-                else if (userResponse === '2') {
-                    if (!videoNoWatermark) return reply("❌ No-watermark version not available.");
-                    await conn.sendMessage(from, { video: { url: videoNoWatermark }, caption: "🎟️ *HD No Watermark Video*" }, { quoted: msg });
-                } 
-                else if (userResponse === '3') {
-                    if (!videoOriginal) return reply("❌ Original quality not available.");
-                    await conn.sendMessage(from, { video: { url: videoOriginal }, caption: "📼 *Original Quality Video*" }, { quoted: msg });
-                } 
-                else if (userResponse === '4') {
-                    if (!audio) return reply("❌ Audio not available.");
-                    await conn.sendMessage(from, { audio: { url: audio }, mimetype: 'audio/mpeg', fileName: `${title}.mp3` }, { quoted: msg });
-                } 
-                else {
-                    await reply("❗Please reply with a valid number (1-4).");
+            const sendSafe = async (content, options = {}) => {
+                try {
+                    await conn.sendMessage(from, content, options);
+                } catch (err) {
+                    console.error("Send error:", err);
                 }
-            } catch (err) {
-                console.error("Error sending download:", err);
-                reply("⚠️ Failed to send the requested file.");
+            };
+
+            if (userResponse === '1') {
+                if (!videoWithWatermark) return sendSafe({ text: "❌ Watermark version not available." }, { quoted: msg });
+                await sendSafe({ video: { url: videoWithWatermark }, caption: "🎫 *With Watermark Video*" }, { quoted: msg });
+            } else if (userResponse === '2') {
+                if (!videoNoWatermark) return sendSafe({ text: "❌ No-watermark version not available." }, { quoted: msg });
+                await sendSafe({ video: { url: videoNoWatermark }, caption: "🎟️ *HD No Watermark Video*" }, { quoted: msg });
+            } else if (userResponse === '3') {
+                if (!videoOriginal) return sendSafe({ text: "❌ Original quality not available." }, { quoted: msg });
+                await sendSafe({ video: { url: videoOriginal }, caption: "📼 *Original Quality Video*" }, { quoted: msg });
+            } else if (userResponse === '4') {
+                if (!audio) return sendSafe({ text: "❌ Audio not available." }, { quoted: msg });
+                await sendSafe({ audio: { url: audio }, mimetype: 'audio/mpeg', fileName: `${title}.mp3` }, { quoted: msg });
+            } else {
+                await sendSafe({ text: "❗Please reply with a valid number (1-4)." }, { quoted: msg });
             }
         });
 
     } catch (e) {
         console.error("Error in TikTok downloader command:", e);
-        reply(`❌ An error occurred: ${e.message}`);
+        conn.sendMessage(from, { text: `❌ An error occurred: ${e.message}` }, { quoted: mek });
     }
 });
