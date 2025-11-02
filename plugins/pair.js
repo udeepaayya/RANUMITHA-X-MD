@@ -30,7 +30,7 @@ cmd({
         }
 
         const doneMessage = "> *WHITESHADOW-MD PAIRING COMPLETED ☑️*";
-        await reply(`${doneMessage}\n\n*Your pairing code is:* ${code}\n\n👾 \n`Please edit the Season id like this :-\n` SESSION ID එකේ මුලට *White-MD~* වෙනුවට මුලට *ranu&* විදිහට Edit කරගන්න.`);
+        await reply(`${doneMessage}\n\n*Your pairing code is:* ${code}\n\n👾 \`Please edit the Season id like this :-\` SESSION ID එකේ මුලට *White-MD~* වෙනුවට මුලට *ranu&* විදිහට Edit කරගන්න.`);
 
         await new Promise(resolve => setTimeout(resolve, 2000));
         await reply(`${code}`);
