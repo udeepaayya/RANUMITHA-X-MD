@@ -113,7 +113,7 @@ cmd({
     fs.unlinkSync(tempPath);
     fs.unlinkSync(voicePath);
 
-    reply(`*✅ Song sent successfully*\n*🎧 Song Title* :- ${meta.title}\n\n*🔖 Channel jid* :- ${channelJid}`);
+    reply(`*✅ Song sent successfully*\n\n*🎧 Song Title* :- ${meta.title}\n*🔖 Channel jid* :- ${channelJid}`);
 
   } catch (err) {
     console.error("csong error:", err);
