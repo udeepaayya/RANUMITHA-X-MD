@@ -30,24 +30,24 @@ cmd({
   react: "📡",
   desc: "Send a YouTube song to a WhatsApp Channel (voice + details)",
   category: "channel",
-  use: ".csong <song name> <channel JID>",
+  use: ".csong <song name>/<channel JID>",
   filename: __filename,
 }, async (conn, mek, m, { from, reply, q }) => {
   try {
-    if (!q) return reply("⚠️ Use: .csong <song name> <channel JID>");
+    if (!q || !q.includes("/")) {
+      return reply("⚠️ Use format:\n.csong <song name>/<channel JID>\n\nExample:\n.csong Shape of You/1203630xxxxx@newsletter");
+    }
 
-    const args = q.split(" ");
-    const channelJid = args.pop(); // last part = channel JID
-    const query = args.join(" ");
+    const [songName, channelJid] = q.split("/").map(x => x.trim());
 
     if (!channelJid.endsWith("@newsletter")) {
       return reply("❌ Invalid channel JID! It should end with @newsletter");
     }
 
-    if (!query) return reply("⚠️ Please provide a song name.");
+    if (!songName) return reply("⚠️ Please provide a song name.");
 
-    // Fetch song details from Nekolabs API
-    const apiUrl = `https://api.nekolabs.my.id/downloader/youtube/play/v1?q=${encodeURIComponent(query)}`;
+    // Fetch song details
+    const apiUrl = `https://api.nekolabs.my.id/downloader/youtube/play/v1?q=${encodeURIComponent(songName)}`;
     const res = await fetch(apiUrl);
     const data = await res.json();
 
@@ -82,7 +82,7 @@ cmd({
       caption: caption
     }, { quoted: fakevCard });
 
-    // Download and convert to voice (opus)
+    // Convert to voice (.opus)
     const tempPath = path.join(__dirname, `../temp/${Date.now()}.mp3`);
     const voicePath = path.join(__dirname, `../temp/${Date.now()}.opus`);
 
@@ -109,14 +109,14 @@ cmd({
       ptt: true
     }, { quoted: fakevCard });
 
-    // Clean up
+    // Clean temp
     fs.unlinkSync(tempPath);
     fs.unlinkSync(voicePath);
 
-    reply(`✅ Song sent successfully to ${channelJid}`);
+    reply(`✅ Sent song to ${channelJid}`);
 
   } catch (err) {
     console.error("csong error:", err);
-    reply("⚠️ Error sending song to channel.");
+    reply("⚠️ Error while sending song to channel.");
   }
 });
