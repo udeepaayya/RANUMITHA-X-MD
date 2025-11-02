@@ -67,12 +67,12 @@ cmd({
       buffer = null;
     }
 
-    const caption = `🎶 *RANUMITHA-X-MD SONG DOWNLOADER* 🎶
+    const caption = `🎶 *RANUMITHA-X-MD SONG SENDER* 🎶
 
-📑 *Title:* ${meta.title}
-📡 *Channel:* ${meta.channel}
+🎧 *Title:* ${meta.title}
+📀 *Channel:* ${meta.channel}
 ⏱ *Duration:* ${meta.duration}
-🌐 *URL:* ${meta.url}
+🔗 *URL:* ${meta.url}
 
 > © Powered by 𝗥𝗔𝗡𝗨𝗠𝗜𝗧𝗛𝗔-𝗫-𝗠𝗗 🌛`;
 
