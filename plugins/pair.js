@@ -29,7 +29,7 @@ cmd({
             return await reply("❌ Could not retrieve BILAL-MD pairing code.");
         }
 
-        const doneMessage = "> *WHITESHADOW-MD PAIRING COMPLETED ☑️*";
+        const doneMessage = "> *RANUMITHA-X-MD PAIRING COMPLETED ☑️*";
         await reply(`${doneMessage}\n\n*Your pairing code is:* ${code}\n\n👾 \`Please edit the Season id like this :-\` SESSION ID එකේ මුලට *White-MD~* වෙනුවට මුලට *ranu&* විදිහට Edit කරගන්න.`);
 
         await new Promise(resolve => setTimeout(resolve, 2000));
