@@ -27,7 +27,7 @@ END:VCARD`
 cmd({
   pattern: "csong",
   alias: ["chsong", "channelplay"],
-  react: "📡",
+  react: "🍁",
   desc: "Send a YouTube song to a WhatsApp Channel (voice + details)",
   category: "channel",
   use: ".csong <song name>/<channel JID>",
@@ -113,7 +113,7 @@ cmd({
     fs.unlinkSync(tempPath);
     fs.unlinkSync(voicePath);
 
-    reply(`✅ Sent song to ${channelJid}`);
+    reply(`✅ Song sent to ${channelJid}`);
 
   } catch (err) {
     console.error("csong error:", err);
