@@ -3,7 +3,6 @@ const config = require('../config');
 const os = require("os");
 const { runtime } = require('../lib/functions');
 
-// Fake ChatGPT vCard
 const fakevCard = {
     key: {
         fromMe: false,
@@ -47,7 +46,7 @@ async (robin, mek, m, {
         }, { quoted: fakevCard });
 
         // Stylish Alive Caption
-       const status = `
+        const status = `
 👋 Hello, I am alive now !!
 
 ╭─〔 💠 ALIVE STATUS 💠 〕─◉
@@ -61,29 +60,44 @@ async (robin, mek, m, {
 │🖥 *Host*: ${os.hostname()}
 │🌀 *Version*: ${config.BOT_VERSION}
 ╰─────────────────────────────⊷
-     
-      ☘ ʙᴏᴛ ᴍᴇɴᴜ  - .menu
-      🔥 ʙᴏᴛ ꜱᴘᴇᴇᴅ - .ping
+
+      1️⃣  ʙᴏᴛ ᴍᴇɴᴜ (.menu)
+      2️⃣  ʙᴏᴛ ꜱᴘᴇᴇᴅ (.ping)
 
 > 𝐌𝐚𝐝𝐞 𝐛𝐲 𝗥𝗔𝗡𝗨𝗠𝗜𝗧𝗛𝗔 🥶`;
 
         // Send Image + Caption
-        await robin.sendMessage(from, {
+        const sentMsg = await robin.sendMessage(from, {
             image: {
-                url: "https://raw.githubusercontent.com/Ranumithaofc/RANU-FILE-S-/refs/heads/main/images/GridArt_20250726_193256660.jpg" // You can replace this with your own ALIVE_IMG URL
+                url: "https://raw.githubusercontent.com/Ranumithaofc/RANU-FILE-S-/refs/heads/main/images/GridArt_20250726_193256660.jpg"
             },
             caption: status,
             contextInfo: {
-                mentionedJid: [sender],
-                forwardingScore: 999,
-                isForwarded: false,
-                forwardedNewsletterMessageInfo: {
-                    newsletterJid: '',
-                    newsletterName: '',
-                    serverMessageId: 143
-                }
+                mentionedJid: [sender]
             }
         }, { quoted: mek });
+
+        // Wait for user reply
+        robin.ev.on('messages.upsert', async (msgUpdate) => {
+            try {
+                const msg = msgUpdate.messages[0];
+                if (!msg.message || msg.key.fromMe) return;
+                if (msg.message.extendedTextMessage?.contextInfo?.stanzaId !== sentMsg.key.id) return;
+
+                const text = msg.message.conversation || msg.message.extendedTextMessage?.text;
+                if (!text) return;
+
+                if (text.trim() === '1') {
+                    await reply('🪄 Opening Menu...');
+                    await robin.sendMessage(from, { text: '.menu' });
+                } else if (text.trim() === '2') {
+                    await reply('⚡ Checking Ping...');
+                    await robin.sendMessage(from, { text: '.ping' });
+                }
+            } catch (err) {
+                console.log('Reply handler error:', err);
+            }
+        });
 
     } catch (e) {
         console.log("Alive Error:", e);
