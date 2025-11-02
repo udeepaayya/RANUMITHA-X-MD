@@ -4,7 +4,7 @@ const config = require('../config');
 cmd({
     pattern: "jid",
     alias: ["id", "chatid", "gjid"],  
-    desc: "Get full JID of current chat/user (Creator Only)",
+    desc: "Get full JID of current chat/user/channel (Creator Only)",
     react: "🆔",
     category: "utility",
     filename: __filename,
@@ -12,15 +12,28 @@ cmd({
     from, isGroup, reply, sender 
 }) => {
     try {
-        if (isGroup) {
-            // Ensure group JID ends with @g.us
-            const groupJID = from.includes('@g.us') ? from : `${from}@g.us`;
-            return reply(`${groupJID}`);
+        let chatJID;
+        let chatType;
+
+        if (from.endsWith('@g.us')) {
+            // Group
+            chatJID = from;
+            chatType = "🧩 Group";
+        } else if (from.endsWith('@newsletter')) {
+            // Channel
+            chatJID = from;
+            chatType = "📢 Channel";
+        } else if (sender.endsWith('@s.whatsapp.net')) {
+            // Private Chat
+            chatJID = sender;
+            chatType = "💬 Private Chat";
         } else {
-            // Ensure user JID ends with @s.whatsapp.net
-            const userJID = sender.includes('@s.whatsapp.net') ? sender : `${sender}@s.whatsapp.net`;
-            return reply(`${userJID}`);
+            // Unknown or special case
+            chatJID = from || sender;
+            chatType = "❓ Unknown Type";
         }
+
+        return reply(`${chatType} JID: \n${chatJID}`);
 
     } catch (e) {
         console.error("JID Error:", e);
