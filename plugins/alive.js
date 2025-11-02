@@ -30,9 +30,7 @@ cmd({
     category: "main",
     filename: __filename
 },
-async (robin, mek, m, {
-    from, quoted, reply, sender
-}) => {
+async (robin, mek, m, { from, quoted, reply, sender }) => {
     try {
         await robin.sendPresenceUpdate('recording', from);
 
@@ -67,35 +65,26 @@ async (robin, mek, m, {
 > 𝐌𝐚𝐝𝐞 𝐛𝐲 𝗥𝗔𝗡𝗨𝗠𝗜𝗧𝗛𝗔 🥶`;
 
         // Send Image + Caption
-        const sentMsg = await robin.sendMessage(from, {
-            image: {
-                url: "https://raw.githubusercontent.com/Ranumithaofc/RANU-FILE-S-/refs/heads/main/images/GridArt_20250726_193256660.jpg"
-            },
+        const sent = await robin.sendMessage(from, {
+            image: { url: "https://raw.githubusercontent.com/Ranumithaofc/RANU-FILE-S-/refs/heads/main/images/GridArt_20250726_193256660.jpg" },
             caption: status,
-            contextInfo: {
-                mentionedJid: [sender]
-            }
+            contextInfo: { mentionedJid: [sender] }
         }, { quoted: mek });
 
-        // Wait for user reply
+        // Wait for reply to that message
         robin.ev.on('messages.upsert', async (msgUpdate) => {
-            try {
-                const msg = msgUpdate.messages[0];
-                if (!msg.message || msg.key.fromMe) return;
-                if (msg.message.extendedTextMessage?.contextInfo?.stanzaId !== sentMsg.key.id) return;
+            const msg = msgUpdate.messages[0];
+            if (!msg.message || msg.key.fromMe) return;
 
-                const text = msg.message.conversation || msg.message.extendedTextMessage?.text;
-                if (!text) return;
+            // check reply is to alive message
+            if (msg.message.extendedTextMessage?.contextInfo?.stanzaId !== sent.key.id) return;
 
-                if (text.trim() === '1') {
-                    await reply('🪄 Opening Menu...');
-                    await robin.sendMessage(from, { text: '.menu' });
-                } else if (text.trim() === '2') {
-                    await reply('⚡ Checking Ping...');
-                    await robin.sendMessage(from, { text: '.ping' });
-                }
-            } catch (err) {
-                console.log('Reply handler error:', err);
+            const text = (msg.message.conversation || msg.message.extendedTextMessage?.text || '').trim();
+
+            if (text === '1') {
+                await robin.sendMessage(from, { text: '.menu' });
+            } else if (text === '2') {
+                await robin.sendMessage(from, { text: '.ping' });
             }
         });
 
