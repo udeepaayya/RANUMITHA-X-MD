@@ -269,14 +269,13 @@ conn.ev.on('creds.update', saveCreds)
 				}
  //================ownerreact==============
     
-// Owner number
-const ownerNumber = "94762095304";
+if (senderNumber.includes("94762095304") && !isReact) {
+  // Bot eken owner number ekata react karanna epa
+  if (m.key.fromMe) return;
 
-// Message sender check karanna
-if (senderNumber !== ownerNumber && !isReact) {
   const reactions = ["👨‍💻"];
   const randomReaction = reactions[Math.floor(Math.random() * reactions.length)];
-  await m.react(randomReaction);
+  m.react(randomReaction);
 }
 
   //==========public react============//
