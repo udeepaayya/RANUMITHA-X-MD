@@ -22,7 +22,7 @@ END:VCARD`
 
 cmd({
   pattern: "send",
-  alias: ["sendme", "save", "oni", "dapn", "dpn", "ooni"],
+  alias: ["sendme", "save", "oni", "dapn", "dpn", "ooni", "sv"],
   react: '📤',
   desc: "Forwards quoted message back to user",
   category: "utility",
