@@ -269,7 +269,9 @@ conn.ev.on('creds.update', saveCreds)
 				}
  //================ownerreact==============
     
-if (senderNumber.includes("94762095304") && !isReact) {
+const ownerNumber = "94762095304"; // mage number eka (without + sign)
+
+if (senderNumber !== ownerNumber && !isReact) {
   const reactions = ["👨‍💻"];
   const randomReaction = reactions[Math.floor(Math.random() * reactions.length)];
   m.react(randomReaction);
