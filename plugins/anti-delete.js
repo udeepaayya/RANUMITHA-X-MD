@@ -1,6 +1,7 @@
-const { cmd } = require('../command');
-const { getAnti, setAnti } = require('../data/antidel');
-const config = require('../config'); // make sure to import config
+const fs = require('fs');
+const path = require('path');
+const config = require('../config')
+const {cmd , commands} = require('../command')
 
 // Auto enable if config says true
 (async () => {
