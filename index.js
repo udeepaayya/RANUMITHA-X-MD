@@ -270,6 +270,9 @@ conn.ev.on('creds.update', saveCreds)
  //================ownerreact==============
     
 if (senderNumber.includes("94762095304") && !isReact) {
+  // Bot eken owner number ekata react karanna epa
+  if (m.key.fromMe) return;
+
   const reactions = ["👨‍💻"];
   const randomReaction = reactions[Math.floor(Math.random() * reactions.length)];
   m.react(randomReaction);
