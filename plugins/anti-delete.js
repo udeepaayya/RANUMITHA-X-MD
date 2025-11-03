@@ -67,6 +67,3 @@ async (conn, mek, m, { from, reply, text, isOwner }) => {
         return reply("An error occurred while processing your request.");
     }
 });
-
-// 🧠 Export Functions
-module.exports = { getAnti, setAnti };
