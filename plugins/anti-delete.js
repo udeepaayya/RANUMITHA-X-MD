@@ -1,20 +1,5 @@
-const fs = require('fs');
-const path = require('path');
+const { cmd } = require('../command');
 const { getAnti, setAnti } = require('../data/antidel');
-const config = require('../config');
-const {cmd , commands} = require('../command');
-
-// Auto enable if config says true
-(async () => {
-    try {
-        if (config.ANTI_DELETE === 'true') {
-            await setAnti(true);
-            console.log('✅ Anti-delete is enabled from config');
-        }
-    } catch (err) {
-        console.error('Failed to set anti-delete from config:', err);
-    }
-})();
 
 cmd({
     pattern: "antidelete",
