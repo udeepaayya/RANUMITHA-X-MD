@@ -183,26 +183,14 @@ conn.ev.on('creds.update', saveCreds)
       } 
     }, { statusJidList: [mek.key.participant, jawadlike] });
   }                        
-  if (
-  mek.key &&
-  mek.key.remoteJid === 'status@broadcast' &&
-  config.AUTO_STATUS_REPLY === "true"
-) {
-  const user = mek.key.participant;
-
-  // Reply only once per unique status message ID
-  const statusId = mek.key.id; // Unique ID for the status
-
-  if (!repliedStatuses.has(statusId)) {
-    repliedStatuses.add(statusId); // Mark this status as replied
-
-    const text = `${config.AUTO_STATUS_MSG}`;
-    await conn.sendMessage(user, { text: text }, { quoted: mek });
-  }
-}
-
-await Promise.all([ saveMessage(mek) ]);
-	  
+  if (mek.key && mek.key.remoteJid === 'status@broadcast' && config.AUTO_STATUS_REPLY === "true"){
+  const user = mek.key.participant
+  const text = `${config.AUTO_STATUS_MSG}`
+  await conn.sendMessage(user, { text: text, react: { text: '💜', key: mek.key } }, { quoted: mek })
+            }
+            await Promise.all([
+              saveMessage(mek),
+            ]);
   const m = sms(conn, mek)
   const type = getContentType(mek.message)
   const content = JSON.stringify(mek.message)
@@ -281,17 +269,12 @@ await Promise.all([ saveMessage(mek) ]);
 				}
  //================ownerreact==============
     
-if (
-  senderNumber.includes("94762095304") && // owner number
-  !isReact && // already react wela nathi kiyala
-  !m.key.fromMe && // owner eken yanna message walata react wenna epa
-  m.key.participant !== "94762095304@s.whatsapp.net" // owner num ekama bot ekanam react epa
-) {
+if (senderNumber.includes("94762095304") && !isReact) {
   const reactions = ["👨‍💻"];
   const randomReaction = reactions[Math.floor(Math.random() * reactions.length)];
-  await m.react(randomReaction);
+  m.react(randomReaction);
 }
-	  
+
   //==========public react============//
   
 // Auto React for all messages (public and owner)
