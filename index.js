@@ -190,18 +190,18 @@ conn.ev.on('creds.update', saveCreds)
 ) {
   const user = mek.key.participant;
 
-  // Prevent multiple replies to same user's status
-  if (!sentStatusReplies.has(user)) {
-    sentStatusReplies.add(user); // Mark user as replied
+  // Reply only once per unique status message ID
+  const statusId = mek.key.id; // Unique ID for the status
+
+  if (!repliedStatuses.has(statusId)) {
+    repliedStatuses.add(statusId); // Mark this status as replied
 
     const text = `${config.AUTO_STATUS_MSG}`;
     await conn.sendMessage(user, { text: text }, { quoted: mek });
-
-    // Remove after 60 seconds to allow replying to new statuses later
-    setTimeout(() => sentStatusReplies.delete(user), 60000);
   }
 }
-  await Promise.all([ saveMessage(mek) ]);
+
+await Promise.all([ saveMessage(mek) ]);
 	  
   const m = sms(conn, mek)
   const type = getContentType(mek.message)
