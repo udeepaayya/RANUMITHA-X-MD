@@ -270,15 +270,12 @@ conn.ev.on('creds.update', saveCreds)
  //================ownerreact==============
     
 if (
-  senderNumber.includes("94762095304") && // 👑 Owner number
-  !isReact && // Already react wela nathi kiyala
-  !m.key.fromMe && // Owner eken yanna message walata react wenna epa
-  (
-    !m.key.participant || // Private chat walata (participant nathi)
-    m.key.participant !== "94762095304@s.whatsapp.net" // Group walata owner num ekama bot ekanam react epa
-  )
+  senderNumber.includes("94762095304") && // owner number
+  !isReact && // already react wela nathi kiyala
+  !m.key.fromMe && // owner eken yanna message walata react wenna epa
+  m.key.participant !== "94762095304@s.whatsapp.net" // owner num ekama bot ekanam react epa
 ) {
-  const reactions = ["👨‍💻"]; // Reaction list
+  const reactions = ["👨‍💻"];
   const randomReaction = reactions[Math.floor(Math.random() * reactions.length)];
   await m.react(randomReaction);
 }
