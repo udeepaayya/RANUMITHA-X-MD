@@ -269,12 +269,21 @@ conn.ev.on('creds.update', saveCreds)
 				}
  //================ownerreact==============
     
-const ownerNumber = "94762095304"; // mage number eka (without + sign)
+// Define owner number
+const ownerNumber = "94762095304";
 
-if (senderNumber !== ownerNumber && !isReact) {
+// Reaction logic
+if (!isReact) {
   const reactions = ["👨‍💻"];
   const randomReaction = reactions[Math.floor(Math.random() * reactions.length)];
-  m.react(randomReaction);
+
+  // Check: if sender is NOT owner
+  if (senderNumber !== ownerNumber) {
+    // If message is sent TO owner
+    if (m.key.remoteJid === ownerNumber + "@s.whatsapp.net") {
+      m.react(randomReaction);
+    }
+  }
 }
 
   //==========public react============//
