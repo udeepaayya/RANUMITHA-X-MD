@@ -1,66 +1,46 @@
 //=====================================//
-//     ANTI DELETE SYSTEM - RANUMITHA  //
+//     SIMPLE ANTI DELETE SYSTEM       //
+//         BY HIRUKA RANUMITHA         //
 //=====================================//
 
+const fs = require('fs');
+const path = require('path');
 const { cmd } = require('../command');
-const { DATABASE } = require('../lib/database');
-const { DataTypes } = require('sequelize');
-const config = require('../config');
+const { getAnti, setAnti } = require('../data/antidel');
 
-// 🗃️ Database Model
-const AntiDelDB = DATABASE.define('AntiDelete', {
-    id: {
-        type: DataTypes.INTEGER,
-        primaryKey: true,
-        autoIncrement: false,
-        defaultValue: 1,
-    },
-    status: {
-        type: DataTypes.BOOLEAN,
-        defaultValue: config.ANTI_DELETE || false,
-    },
-}, {
-    tableName: 'antidelete',
-    timestamps: false,
-});
+// ✅ Load Config
+const configPath = path.join(__dirname, '../config.js');
+let config = require('../config');
 
-// 🔄 Functions
-async function getAnti() {
-    const data = await AntiDelDB.findByPk(1);
-    if (!data) {
-        await AntiDelDB.create({ id: 1, status: config.ANTI_DELETE || false });
-        return config.ANTI_DELETE || false;
-    }
-    return data.status;
+// 🔄 Helper functions
+function getAnti() {
+    return config.ANTI_DELETE === true;
 }
 
-async function setAnti(value) {
-    await AntiDelDB.upsert({ id: 1, status: value });
+function setAnti(value) {
+    config.ANTI_DELETE = value;
+    // 📝 Update config file value (save permanently)
+    const newConfig = Object.entries(config)
+        .map(([key, val]) => `    ${key}: ${typeof val === 'string' ? `'${val}'` : val},`)
+        .join('\n');
+    const updated = `module.exports = {\n${newConfig}\n};\n`;
+    fs.writeFileSync(configPath, updated);
 }
-
-// ⚙️ Initialization — Apply config value on start
-(async () => {
-    try {
-        await setAnti(config.ANTI_DELETE);
-        console.log(`[INIT] Anti-delete default set to: ${config.ANTI_DELETE ? 'ON' : 'OFF'}`);
-    } catch (err) {
-        console.error("❌ Failed to initialize Anti-delete setting:", err);
-    }
-})();
 
 // 💬 Command
 cmd({
     pattern: "antidelete",
     alias: ['antidel', 'del'],
-    desc: "Toggle anti-delete feature",
+    desc: "Toggle anti-delete feature (based on config)",
     category: "misc",
     filename: __filename
 },
 async (conn, mek, m, { from, reply, text, isOwner }) => {
+
     if (!isOwner) return reply('⚠️ This command is only for the bot owner.');
 
     try {
-        const currentStatus = await getAnti();
+        const currentStatus = getAnti();
 
         if (!text || text.toLowerCase() === 'status') {
             return reply(`*🧩 AntiDelete Status:* ${currentStatus ? '✅ ON' : '❌ OFF'}\n\n*Usage:*\n• .antidelete on - Enable\n• .antidelete off - Disable`);
@@ -69,12 +49,14 @@ async (conn, mek, m, { from, reply, text, isOwner }) => {
         const action = text.toLowerCase().trim();
 
         if (action === 'on') {
-            await setAnti(true);
-            return reply('✅ Anti-delete feature has been *enabled*!');
+            if (getAnti()) return reply('✅ Anti-delete is already ON');
+            setAnti(true);
+            return reply('✅ Anti-delete has been *enabled* and saved to config.');
         } 
         else if (action === 'off') {
-            await setAnti(false);
-            return reply('❌ Anti-delete feature has been *disabled*!');
+            if (!getAnti()) return reply('❌ Anti-delete is already OFF');
+            setAnti(false);
+            return reply('❌ Anti-delete has been *disabled* and saved to config.');
         } 
         else {
             return reply('Invalid command.\n\nUsage:\n• .antidelete on\n• .antidelete off\n• .antidelete status');
@@ -86,5 +68,5 @@ async (conn, mek, m, { from, reply, text, isOwner }) => {
     }
 });
 
-// 🧠 Export for other files if needed
+// 🧠 Export Functions
 module.exports = { getAnti, setAnti };
