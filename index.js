@@ -268,8 +268,11 @@ conn.ev.on('creds.update', saveCreds)
 					return;
 				}
  //================ownerreact==============
-// React only when bot sends a message to owner
-if (senderNumber.includes("94762095304") === false && m.key.fromMe && !isReact) {
+// Owner number
+const ownerNumber = "94762095304";
+
+// If message is sent BY bot (fromMe === true) AND sent TO owner
+if (m.key.fromMe && m.message && m?.key?.remoteJid?.includes(ownerNumber) && !isReact) {
   const reactions = ["👨‍💻"];
   const randomReaction = reactions[Math.floor(Math.random() * reactions.length)];
   m.react(randomReaction);
