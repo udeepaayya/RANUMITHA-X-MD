@@ -34,6 +34,8 @@ AUTO_STATUS_REPLY: process.env.AUTO_STATUS_REPLY || "false",
 // make true if you want auto reply on status 
 AUTO_STATUS_REACT: process.env.AUTO_STATUS_REACT || "true",
 // make true or false automatic status react
+ANTI_DELETE: process.env.ANTI_DELETE || "true",
+// make antidelete true or false
 CUSTOM_REACT: process.env.CUSTOM_REACT || "false",
 // make this true for custum emoji react
 ANTI_VV: process.env.ANTI_VV || "true",
