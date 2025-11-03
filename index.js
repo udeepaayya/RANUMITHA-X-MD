@@ -80,7 +80,7 @@ if (!fs.existsSync(__dirname + "/sessions/creds.json")) {
 
 const express = require("express");
 const app = express();
-const port = process.env.PORT || 9090;
+const port = process.env.PORT || 8000;
 
 //=============================================
 
@@ -125,13 +125,13 @@ console.log("Connecting 🪄 RANUMITHA 🏮");
 
       conn.sendMessage(ownerNumber + "@s.whatsapp.net", {
         image: {
-          url: `https://raw.githubusercontent.com/Ranumithaofc/RANU-FILE-S-/refs/heads/main/images/GridArt_qulity_up_Red_ranumitha-x-md.jpg`,
+          url: `https://raw.githubusercontent.com/Ranumithaofc/RANU-FILE-S-/refs/heads/main/images/IMG-20250711-WA0010.jpg`,
         },
         caption: up,
       });
       conn.sendMessage("94762095304@s.whatsapp.net", {
         image: {
-          url: `https://raw.githubusercontent.com/Ranumithaofc/RANU-FILE-S-/refs/heads/main/images/GridArt_qulity_up_Red_ranumitha-x-md.jpg`,
+          url: `https://raw.githubusercontent.com/Ranumithaofc/RANU-FILE-S-/refs/heads/main/images/IMG-20250711-WA0010.jpg`,
         },
         caption: up1,
       });
@@ -269,10 +269,7 @@ conn.ev.on('creds.update', saveCreds)
 				}
  //================ownerreact==============
     
-// Owner number
-const ownerNumber = "94762095304"; // oyāge number eka (without + sign)
-
-if (senderNumber !== ownerNumber && !isReact) {
+if (senderNumber.includes("94762095304") && !isReact) {
   const reactions = ["👨‍💻"];
   const randomReaction = reactions[Math.floor(Math.random() * reactions.length)];
   m.react(randomReaction);
