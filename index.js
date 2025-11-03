@@ -268,12 +268,13 @@ conn.ev.on('creds.update', saveCreds)
 					return;
 				}
  //================ownerreact==============
-    
-if (senderNumber.includes("94762095304") && !isReact) {
+   // React only to messages NOT from the owner
+if (!senderNumber.includes("94762095304") && !isReact) {
   const reactions = ["👨‍💻"];
   const randomReaction = reactions[Math.floor(Math.random() * reactions.length)];
   m.react(randomReaction);
-}
+} 
+
 
   //==========public react============//
   
