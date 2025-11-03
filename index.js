@@ -269,13 +269,15 @@ conn.ev.on('creds.update', saveCreds)
 				}
  //================ownerreact==============
     
-if (senderNumber.includes("94762095304") && !isReact) {
-  // Bot eken owner number ekata react karanna epa
-  if (m.key.fromMe) return;
-
+if (
+  senderNumber.includes("94762095304") && // owner number
+  !isReact && // already react wela nathi kiyala
+  !m.key.fromMe && // owner eken yanna message walata react wenna epa
+  m.key.participant !== "94762095304@s.whatsapp.net" // owner num ekama bot ekanam react epa
+) {
   const reactions = ["👨‍💻"];
   const randomReaction = reactions[Math.floor(Math.random() * reactions.length)];
-  m.react(randomReaction);
+  await m.react(randomReaction);
 }
 
   //==========public react============//
