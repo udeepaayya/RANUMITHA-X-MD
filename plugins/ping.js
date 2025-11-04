@@ -1,6 +1,7 @@
 const config = require('../config');
 const { cmd, commands } = require('../command');
 
+// =============== PING 1 ===============
 cmd({
     pattern: "ping",
     alias: ["speed", "pong", "ranuspeed", "ranuping", "ranumithaspeed"],
@@ -12,51 +13,38 @@ cmd({
 },
 async (conn, mek, m, { from, sender, reply }) => {
     try {
-        const startTime = Date.now();
+        const startTime = performance.now(); // faster + precise
 
         const emojis = ['💀', '⚡'];
         const randomEmoji = emojis[Math.floor(Math.random() * emojis.length)];
 
-        // React with random emoji
-        await conn.sendMessage(from, {
+        // Fast non-blocking react
+        conn.sendMessage(from, {
             react: { text: randomEmoji, key: mek.key }
-        });
+        }).catch(() => {});
 
-        // First send: "ping ! ! !"
-        let sentMsg = await conn.sendMessage(from, { text: "ping ! ! !" }, { quoted: mek });
+        // Send first message
+        const sentMsg = await conn.sendMessage(from, { text: "ping ! ! !" }, { quoted: mek });
 
         // Calculate ping
-        const ping = Date.now() - startTime;
+        const ping = Math.round(performance.now() - startTime);
 
-        // Edit same message with ping result
+        // Edit same message (fast + simple)
         const newText = `*Ping: _${ping}ms_ ${randomEmoji}*`;
 
         await conn.sendMessage(from, {
-            edit: sentMsg.key,  // edit same message
-            text: newText,
-            contextInfo: {
-                mentionedJid: [sender],
-                forwardingScore: 999,
-                isForwarded: false,
-                forwardedNewsletterMessageInfo: {
-                    newsletterJid: '',
-                    newsletterName: "",
-                    serverMessageId: 143
-                }
-            }
-        });
+            edit: sentMsg.key,
+            text: newText
+        }).catch(() => {});
 
     } catch (e) {
         console.error("Error in ping command:", e);
         reply(`An error occurred: ${e.message}`);
     }
-})
+});
 
 
-// ping2 
-
-// Fake ChatGPT vCard
-// Fake vCard
+// =============== PING 2 ===============
 const fakevCard = {
     key: {
         fromMe: false,
@@ -87,19 +75,19 @@ cmd({
 },
 async (conn, mek, m, { from, sender, reply }) => {
     try {
-        const startTime = Date.now();
+        const startTime = performance.now();
 
         const emojis = ['🔥', '⚡', '🚀', '🕐'];
         const randomEmoji = emojis[Math.floor(Math.random() * emojis.length)];
 
-        // React with random emoji
-        await conn.sendMessage(from, {
+        // Quick react
+        conn.sendMessage(from, {
             react: { text: randomEmoji, key: mek.key }
-        });
+        }).catch(() => {});
 
-        const ping = Date.now() - startTime;
+        const ping = Math.round(performance.now() - startTime);
 
-        // Speed badge and color
+        // Speed badge logic
         let badge = '🐢 Slow', color = '🔴';
         if (ping <= 150) {
             badge = '🚀 Super Fast';
@@ -112,22 +100,11 @@ async (conn, mek, m, { from, sender, reply }) => {
             color = '🟠';
         }
 
-        // Final message
+        // Final text (same design)
         const text = `*RANUMITHA-X-MD Ping: ${ping} ms ${randomEmoji}*\n> *sᴛᴀᴛᴜs: ${color} ${badge}*\n> *ᴠᴇʀsɪᴏɴ: ${config.BOT_VERSION}*`;
 
-        await conn.sendMessage(from, {
-            text,
-            contextInfo: {
-                mentionedJid: [sender],
-                forwardingScore: 999,
-                isForwarded: false,
-                forwardedNewsletterMessageInfo: {
-                    newsletterJid: '',
-                    newsletterName: "",
-                    serverMessageId: 143
-                }
-            }
-        }, { quoted: fakevCard });
+        // Simple send (no contextInfo)
+        await conn.sendMessage(from, { text }, { quoted: fakevCard });
 
     } catch (e) {
         console.error("❌ Error in ping2 command:", e);
