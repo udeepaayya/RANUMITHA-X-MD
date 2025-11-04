@@ -1,7 +1,7 @@
 const config = require('../config');
 const { cmd, commands } = require('../command');
 
-// ==================== PING (Edit Version) ====================
+// ==================== PING (Edit Version - Fast) ====================
 cmd({
     pattern: "ping",
     alias: ["speed", "pong", "ranuspeed", "ranuping", "ranumithaspeed"],
@@ -44,7 +44,7 @@ async (conn, mek, m, { from, sender, reply }) => {
 });
 
 
-// ==================== PING2 (Simple + No Edit) ====================
+// ==================== PING2 (No Edit + Accurate Ping Display) ====================
 
 // Fake vCard
 const fakevCard = {
@@ -70,34 +70,36 @@ cmd({
     pattern: "ping2",
     alias: ["speed2", "pong2", "ranuspeed2", "ranumithaspeed2"],
     use: '.ping2',
-    desc: "Check bot's response time (simple output).",
+    desc: "Check bot's response time (simple and accurate).",
     category: "main",
     react: "🚀",
     filename: __filename
 },
 async (conn, mek, m, { from, sender, reply }) => {
     try {
-        const startTime = performance.now();
-
         const emojis = ['🔥', '⚡', '🚀', '💫'];
         const randomEmoji = emojis[Math.floor(Math.random() * emojis.length)];
 
-        // React with random emoji
-        conn.sendMessage(from, {
-            react: { text: randomEmoji, key: mek.key }
-        }).catch(() => {});
+        // Step 1: Start timer
+        const start = Date.now();
 
-        // Calculate ping
-        const ping = Math.round(performance.now() - startTime);
+        // Step 2: Send a quick message to measure actual latency
+        const temp = await conn.sendMessage(from, { text: '🚀 ping ! ! !' }, { quoted: fakevCard });
 
-        // Define speed label
+        // Step 3: Calculate ping
+        const ping = Date.now() - start;
+
+        // Step 4: Define status labels
         let badge = '🐢 Slow', color = '🔴';
         if (ping <= 150) { badge = '🚀 Super Fast'; color = '🟢'; }
         else if (ping <= 300) { badge = '⚡ Fast'; color = '🟡'; }
         else if (ping <= 600) { badge = '⚠️ Medium'; color = '🟠'; }
 
-        // Send final ping result
-        const text = `*RANUMITHA-X-MD Ping: ${ping} ms ${randomEmoji}*\n> *sᴛᴀᴛᴜs:* ${color} ${badge}\n> *ᴠᴇʀsɪᴏɴ:* ${config.BOT_VERSION}`;
+        // Step 5: React with random emoji
+        conn.sendMessage(from, { react: { text: randomEmoji, key: mek.key } }).catch(() => {});
+
+        // Step 6: Send the final ping result (no edit)
+        const text = `*RANUMITHA-X-MD Ping:* ${ping} ms ${randomEmoji}\n> *Status:* ${color} ${badge}\n> *Version:* ${config.BOT_VERSION}`;
         await conn.sendMessage(from, { text }, { quoted: fakevCard });
 
     } catch (e) {
