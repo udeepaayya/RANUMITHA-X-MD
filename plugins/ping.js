@@ -1,7 +1,7 @@
 const config = require('../config');
 const { cmd, commands } = require('../command');
 
-// ==================== PING (Edit Version - Fast) ====================
+// ==================== PING 1 ====================
 cmd({
     pattern: "ping",
     alias: ["speed", "pong", "ranuspeed", "ranuping", "ranumithaspeed"],
@@ -13,29 +13,29 @@ cmd({
 },
 async (conn, mek, m, { from, sender, reply }) => {
     try {
-        const startTime = Date.now();
+        const startTime = performance.now(); // Faster measurement
 
         const emojis = ['💀', '⚡'];
         const randomEmoji = emojis[Math.floor(Math.random() * emojis.length)];
 
-        // React with random emoji
-        await conn.sendMessage(from, {
+        // Fast non-blocking reaction
+        conn.sendMessage(from, {
             react: { text: randomEmoji, key: mek.key }
-        });
+        }).catch(() => {});
 
-        // First send: "ping ! ! !"
-        let sentMsg = await conn.sendMessage(from, { text: "ping ! ! !" }, { quoted: mek });
+        // First send
+        const sentMsg = await conn.sendMessage(from, { text: "ping ! ! !" }, { quoted: mek });
 
-        // Calculate ping
-        const ping = Date.now() - startTime;
+        // Calculate ping time
+        const ping = Math.round(performance.now() - startTime);
 
-        // Edit same message with ping result
+        // Edit same message with result
         const newText = `*Ping: _${ping}ms_ ${randomEmoji}*`;
 
         await conn.sendMessage(from, {
             edit: sentMsg.key,
-            text: newText,
-        });
+            text: newText
+        }).catch(() => {});
 
     } catch (e) {
         console.error("Error in ping command:", e);
@@ -44,9 +44,9 @@ async (conn, mek, m, { from, sender, reply }) => {
 });
 
 
-// ==================== PING2 (Final Result Only - No Edit, No Measuring Msg) ====================
+// ==================== PING 2 ====================
 
-// Fake vCard
+// Fake vCard (same as before)
 const fakevCard = {
     key: {
         fromMe: false,
@@ -70,34 +70,44 @@ cmd({
     pattern: "ping2",
     alias: ["speed2", "pong2", "ranuspeed2", "ranumithaspeed2"],
     use: '.ping2',
-    desc: "Check bot's response time (simple and accurate).",
+    desc: "Check bot's response time.",
     category: "main",
     react: "🚀",
     filename: __filename
 },
 async (conn, mek, m, { from, sender, reply }) => {
     try {
-        const emojis = ['🔥', '⚡', '🚀', '💫'];
+        // Start measuring
+        const startTime = performance.now();
+
+        const emojis = ['🔥', '⚡', '🚀', '🕐'];
         const randomEmoji = emojis[Math.floor(Math.random() * emojis.length)];
 
-        // Start timer before sending
-        const start = Date.now();
+        // Quick reaction
+        conn.sendMessage(from, {
+            react: { text: randomEmoji, key: mek.key }
+        }).catch(() => {});
 
-        // React
-        conn.sendMessage(from, { react: { text: randomEmoji, key: mek.key } }).catch(() => {});
+        // Send temporary message
+        const sentMsg = await conn.sendMessage(from, { text: "🚀 Checking speed..." }, { quoted: fakevCard });
 
-        // Calculate ping
-        const ping = Date.now() - start;
+        // Measure ping after message send
+        const ping = Math.round(performance.now() - startTime);
 
-        // Define status
+        // Define speed levels
         let badge = '🐢 Slow', color = '🔴';
         if (ping <= 150) { badge = '🚀 Super Fast'; color = '🟢'; }
         else if (ping <= 300) { badge = '⚡ Fast'; color = '🟡'; }
         else if (ping <= 600) { badge = '⚠️ Medium'; color = '🟠'; }
 
-        // Send final ping result only
-        const text = `*RANUMITHA-X-MD Ping:* ${ping} ms ${randomEmoji}\n> *Status:* ${color} ${badge}\n> *Version:* ${config.BOT_VERSION}`;
-        await conn.sendMessage(from, { text }, { quoted: fakevCard });
+        // Create final message (ping now visible)
+        const text = `*RANUMITHA-X-MD Ping: ${ping} ms ${randomEmoji}*\n> *sᴛᴀᴛᴜs:* ${color} ${badge}\n> *ᴠᴇʀsɪᴏɴ:* ${config.BOT_VERSION}`;
+
+        // Edit the same message (instant update)
+        await conn.sendMessage(from, {
+            edit: sentMsg.key,
+            text
+        }).catch(() => {});
 
     } catch (e) {
         console.error("❌ Error in ping2 command:", e);
