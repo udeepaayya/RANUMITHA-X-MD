@@ -13,20 +13,20 @@ cmd({
 },
 async (conn, mek, m, { from, sender, reply }) => {
     try {
-        const startTime = performance.now(); // Faster measurement
+        const startTime = performance.now();
 
         const emojis = ['💀', '⚡'];
         const randomEmoji = emojis[Math.floor(Math.random() * emojis.length)];
 
-        // Fast non-blocking reaction
+        // React fast (non-blocking)
         conn.sendMessage(from, {
             react: { text: randomEmoji, key: mek.key }
         }).catch(() => {});
 
-        // First send
+        // Send first message
         const sentMsg = await conn.sendMessage(from, { text: "ping ! ! !" }, { quoted: mek });
 
-        // Calculate ping time
+        // Calculate ping
         const ping = Math.round(performance.now() - startTime);
 
         // Edit same message with result
@@ -46,7 +46,7 @@ async (conn, mek, m, { from, sender, reply }) => {
 
 // ==================== PING 2 ====================
 
-// Fake vCard (same as before)
+// Fake vCard
 const fakevCard = {
     key: {
         fromMe: false,
@@ -70,44 +70,37 @@ cmd({
     pattern: "ping2",
     alias: ["speed2", "pong2", "ranuspeed2", "ranumithaspeed2"],
     use: '.ping2',
-    desc: "Check bot's response time.",
+    desc: "Check bot's response time (no edit).",
     category: "main",
     react: "🚀",
     filename: __filename
 },
 async (conn, mek, m, { from, sender, reply }) => {
     try {
-        // Start measuring
         const startTime = performance.now();
 
         const emojis = ['🔥', '⚡', '🚀', '🕐'];
         const randomEmoji = emojis[Math.floor(Math.random() * emojis.length)];
 
-        // Quick reaction
+        // React quickly
         conn.sendMessage(from, {
             react: { text: randomEmoji, key: mek.key }
         }).catch(() => {});
 
-        // Send temporary message
-        const sentMsg = await conn.sendMessage(from, { text: "🚀 Checking speed..." }, { quoted: fakevCard });
-
-        // Measure ping after message send
+        // Calculate ping
         const ping = Math.round(performance.now() - startTime);
 
-        // Define speed levels
+        // Speed levels
         let badge = '🐢 Slow', color = '🔴';
         if (ping <= 150) { badge = '🚀 Super Fast'; color = '🟢'; }
         else if (ping <= 300) { badge = '⚡ Fast'; color = '🟡'; }
         else if (ping <= 600) { badge = '⚠️ Medium'; color = '🟠'; }
 
-        // Create final message (ping now visible)
+        // Final text message
         const text = `*RANUMITHA-X-MD Ping: ${ping} ms ${randomEmoji}*\n> *sᴛᴀᴛᴜs:* ${color} ${badge}\n> *ᴠᴇʀsɪᴏɴ:* ${config.BOT_VERSION}`;
 
-        // Edit the same message (instant update)
-        await conn.sendMessage(from, {
-            edit: sentMsg.key,
-            text
-        }).catch(() => {});
+        // Send as a new message (no edit)
+        await conn.sendMessage(from, { text }, { quoted: fakevCard });
 
     } catch (e) {
         console.error("❌ Error in ping2 command:", e);
