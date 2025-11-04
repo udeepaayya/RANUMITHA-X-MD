@@ -1,7 +1,7 @@
 const config = require('../config');
 const { cmd, commands } = require('../command');
 
-// ==================== PING 1 ====================
+// ==================== PING (Edit Version) ====================
 cmd({
     pattern: "ping",
     alias: ["speed", "pong", "ranuspeed", "ranuping", "ranumithaspeed"],
@@ -13,29 +13,29 @@ cmd({
 },
 async (conn, mek, m, { from, sender, reply }) => {
     try {
-        const startTime = performance.now();
+        const startTime = Date.now();
 
         const emojis = ['💀', '⚡'];
         const randomEmoji = emojis[Math.floor(Math.random() * emojis.length)];
 
-        // React fast (non-blocking)
-        conn.sendMessage(from, {
+        // React with random emoji
+        await conn.sendMessage(from, {
             react: { text: randomEmoji, key: mek.key }
-        }).catch(() => {});
+        });
 
-        // Send first message
-        const sentMsg = await conn.sendMessage(from, { text: "ping ! ! !" }, { quoted: mek });
+        // First send: "ping ! ! !"
+        let sentMsg = await conn.sendMessage(from, { text: "ping ! ! !" }, { quoted: mek });
 
         // Calculate ping
-        const ping = Math.round(performance.now() - startTime);
+        const ping = Date.now() - startTime;
 
-        // Edit same message with result
+        // Edit same message with ping result
         const newText = `*Ping: _${ping}ms_ ${randomEmoji}*`;
 
         await conn.sendMessage(from, {
             edit: sentMsg.key,
-            text: newText
-        }).catch(() => {});
+            text: newText,
+        });
 
     } catch (e) {
         console.error("Error in ping command:", e);
@@ -44,7 +44,7 @@ async (conn, mek, m, { from, sender, reply }) => {
 });
 
 
-// ==================== PING 2 ====================
+// ==================== PING2 (Simple + No Edit) ====================
 
 // Fake vCard
 const fakevCard = {
@@ -70,7 +70,7 @@ cmd({
     pattern: "ping2",
     alias: ["speed2", "pong2", "ranuspeed2", "ranumithaspeed2"],
     use: '.ping2',
-    desc: "Check bot's response time (no edit).",
+    desc: "Check bot's response time (simple output).",
     category: "main",
     react: "🚀",
     filename: __filename
@@ -79,10 +79,10 @@ async (conn, mek, m, { from, sender, reply }) => {
     try {
         const startTime = performance.now();
 
-        const emojis = ['🔥', '⚡', '🚀', '🕐'];
+        const emojis = ['🔥', '⚡', '🚀', '💫'];
         const randomEmoji = emojis[Math.floor(Math.random() * emojis.length)];
 
-        // React quickly
+        // React with random emoji
         conn.sendMessage(from, {
             react: { text: randomEmoji, key: mek.key }
         }).catch(() => {});
@@ -90,16 +90,14 @@ async (conn, mek, m, { from, sender, reply }) => {
         // Calculate ping
         const ping = Math.round(performance.now() - startTime);
 
-        // Speed levels
+        // Define speed label
         let badge = '🐢 Slow', color = '🔴';
         if (ping <= 150) { badge = '🚀 Super Fast'; color = '🟢'; }
         else if (ping <= 300) { badge = '⚡ Fast'; color = '🟡'; }
         else if (ping <= 600) { badge = '⚠️ Medium'; color = '🟠'; }
 
-        // Final text message
+        // Send final ping result
         const text = `*RANUMITHA-X-MD Ping: ${ping} ms ${randomEmoji}*\n> *sᴛᴀᴛᴜs:* ${color} ${badge}\n> *ᴠᴇʀsɪᴏɴ:* ${config.BOT_VERSION}`;
-
-        // Send as a new message (no edit)
         await conn.sendMessage(from, { text }, { quoted: fakevCard });
 
     } catch (e) {
