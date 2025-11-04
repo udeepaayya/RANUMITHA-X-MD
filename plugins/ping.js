@@ -44,7 +44,7 @@ async (conn, mek, m, { from, sender, reply }) => {
 });
 
 
-// ==================== PING2 (No Edit + Accurate Ping Display) ====================
+// ==================== PING2 (Final Result Only - No Edit, No Measuring Msg) ====================
 
 // Fake vCard
 const fakevCard = {
@@ -80,25 +80,22 @@ async (conn, mek, m, { from, sender, reply }) => {
         const emojis = ['🔥', '⚡', '🚀', '💫'];
         const randomEmoji = emojis[Math.floor(Math.random() * emojis.length)];
 
-        // Step 1: Start timer
+        // Start timer before sending
         const start = Date.now();
 
-        // Step 2: Send a quick message to measure actual latency
-        const temp = await conn.sendMessage(from, { text: '🚀 ping ! ! !' }, { quoted: fakevCard });
+        // React
+        conn.sendMessage(from, { react: { text: randomEmoji, key: mek.key } }).catch(() => {});
 
-        // Step 3: Calculate ping
+        // Calculate ping
         const ping = Date.now() - start;
 
-        // Step 4: Define status labels
+        // Define status
         let badge = '🐢 Slow', color = '🔴';
         if (ping <= 150) { badge = '🚀 Super Fast'; color = '🟢'; }
         else if (ping <= 300) { badge = '⚡ Fast'; color = '🟡'; }
         else if (ping <= 600) { badge = '⚠️ Medium'; color = '🟠'; }
 
-        // Step 5: React with random emoji
-        conn.sendMessage(from, { react: { text: randomEmoji, key: mek.key } }).catch(() => {});
-
-        // Step 6: Send the final ping result (no edit)
+        // Send final ping result only
         const text = `*RANUMITHA-X-MD Ping:* ${ping} ms ${randomEmoji}\n> *Status:* ${color} ${badge}\n> *Version:* ${config.BOT_VERSION}`;
         await conn.sendMessage(from, { text }, { quoted: fakevCard });
 
