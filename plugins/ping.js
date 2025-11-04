@@ -56,6 +56,7 @@ async (conn, mek, m, { from, sender, reply }) => {
 // ping2 
 
 // Fake ChatGPT vCard
+// Fake vCard
 const fakevCard = {
     key: {
         fromMe: false,
