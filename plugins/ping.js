@@ -44,9 +44,9 @@ async (conn, mek, m, { from, sender, reply }) => {
 });
 
 
-// ==================== PING 2 ====================
+// ping2 
 
-// Fake vCard (same as before)
+// Fake ChatGPT vCard
 const fakevCard = {
     key: {
         fromMe: false,
@@ -60,7 +60,7 @@ const fakevCard = {
 VERSION:3.0
 FN:Meta
 ORG:META AI;
-TEL;type=CELL;type=VOICE;waid=94762095304:+94762095304
+TEL;type=CELL;type=VOICE;waid=13135550002:+13135550002
 END:VCARD`
         }
     }
@@ -77,37 +77,47 @@ cmd({
 },
 async (conn, mek, m, { from, sender, reply }) => {
     try {
-        // Start measuring
-        const startTime = performance.now();
+        const startTime = Date.now();
 
         const emojis = ['🔥', '⚡', '🚀', '🕐'];
         const randomEmoji = emojis[Math.floor(Math.random() * emojis.length)];
 
-        // Quick reaction
-        conn.sendMessage(from, {
-            react: { text: randomEmoji, key: mek.key }
-        }).catch(() => {});
-
-        // Send temporary message
-        const sentMsg = await conn.sendMessage(from, { text: "🚀 Checking speed..." }, { quoted: fakevCard });
-
-        // Measure ping after message send
-        const ping = Math.round(performance.now() - startTime);
-
-        // Define speed levels
-        let badge = '🐢 Slow', color = '🔴';
-        if (ping <= 150) { badge = '🚀 Super Fast'; color = '🟢'; }
-        else if (ping <= 300) { badge = '⚡ Fast'; color = '🟡'; }
-        else if (ping <= 600) { badge = '⚠️ Medium'; color = '🟠'; }
-
-        // Create final message (ping now visible)
-        const text = `*RANUMITHA-X-MD Ping: ${ping} ms ${randomEmoji}*\n> *sᴛᴀᴛᴜs:* ${color} ${badge}\n> *ᴠᴇʀsɪᴏɴ:* ${config.BOT_VERSION}`;
-
-        // Edit the same message (instant update)
+        // React with random emoji
         await conn.sendMessage(from, {
-            edit: sentMsg.key,
-            text
-        }).catch(() => {});
+            react: { text: randomEmoji, key: mek.key }
+        });
+
+        const ping = Date.now() - startTime;
+
+        // Speed badge and color
+        let badge = '🐢 Slow', color = '🔴';
+        if (ping <= 150) {
+            badge = '🚀 Super Fast';
+            color = '🟢';
+        } else if (ping <= 300) {
+            badge = '⚡ Fast';
+            color = '🟡';
+        } else if (ping <= 600) {
+            badge = '⚠️ Medium';
+            color = '🟠';
+        }
+
+        // Final message
+        const text = `*RANUMITHA-X-MD Ping: ${ping} ms ${randomEmoji}*\n> *sᴛᴀᴛᴜs: ${color} ${badge}*\n> *ᴠᴇʀsɪᴏɴ: ${config.BOT_VERSION}*`;
+
+        await conn.sendMessage(from, {
+            text,
+            contextInfo: {
+                mentionedJid: [sender],
+                forwardingScore: 999,
+                isForwarded: false,
+                forwardedNewsletterMessageInfo: {
+                    newsletterJid: '',
+                    newsletterName: "",
+                    serverMessageId: 143
+                }
+            }
+        }, { quoted: fakevCard });
 
     } catch (e) {
         console.error("❌ Error in ping2 command:", e);
