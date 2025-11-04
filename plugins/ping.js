@@ -1,7 +1,6 @@
 const config = require('../config');
 const { cmd, commands } = require('../command');
 
-// ==================== PING 1 ====================
 cmd({
     pattern: "ping",
     alias: ["speed", "pong", "ranuspeed", "ranuping", "ranumithaspeed"],
@@ -13,35 +12,45 @@ cmd({
 },
 async (conn, mek, m, { from, sender, reply }) => {
     try {
-        const startTime = performance.now(); // Faster measurement
+        const startTime = Date.now();
 
         const emojis = ['💀', '⚡'];
         const randomEmoji = emojis[Math.floor(Math.random() * emojis.length)];
 
-        // Fast non-blocking reaction
-        conn.sendMessage(from, {
+        // React with random emoji
+        await conn.sendMessage(from, {
             react: { text: randomEmoji, key: mek.key }
-        }).catch(() => {});
+        });
 
-        // First send
-        const sentMsg = await conn.sendMessage(from, { text: "ping ! ! !" }, { quoted: mek });
+        // First send: "ping ! ! !"
+        let sentMsg = await conn.sendMessage(from, { text: "ping ! ! !" }, { quoted: mek });
 
-        // Calculate ping time
-        const ping = Math.round(performance.now() - startTime);
+        // Calculate ping
+        const ping = Date.now() - startTime;
 
-        // Edit same message with result
+        // Edit same message with ping result
         const newText = `*Ping: _${ping}ms_ ${randomEmoji}*`;
 
         await conn.sendMessage(from, {
-            edit: sentMsg.key,
-            text: newText
-        }).catch(() => {});
+            edit: sentMsg.key,  // edit same message
+            text: newText,
+            contextInfo: {
+                mentionedJid: [sender],
+                forwardingScore: 999,
+                isForwarded: false,
+                forwardedNewsletterMessageInfo: {
+                    newsletterJid: '',
+                    newsletterName: "",
+                    serverMessageId: 143
+                }
+            }
+        });
 
     } catch (e) {
         console.error("Error in ping command:", e);
         reply(`An error occurred: ${e.message}`);
     }
-});
+})
 
 
 // ping2 
