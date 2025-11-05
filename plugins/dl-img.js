@@ -44,6 +44,8 @@ cmd({
             return reply("❌ No images found. Try different keywords.");
         }
 
+        const results = response.data.results;
+
         const selectedImages = results
             .sort(() => 0.5 - Math.random())
             .slice(0, 5);
@@ -96,6 +98,7 @@ cmd({
             return reply("❌ No Images found. Try a different keyword.");
         }
 
+        const results = response.data.result.images;
         // Randomly pick 5 images
         const selectedImages = results
             .sort(() => 0.5 - Math.random())
