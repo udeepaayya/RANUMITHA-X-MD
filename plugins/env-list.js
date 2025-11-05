@@ -132,46 +132,52 @@ cmd({
 │ ┗ 13.2  false ❌
 │
 ╭──────────────────╮
-│ Anti VV: ${isEnabled(config.ANTI_VV) ? "✅" : "❌"}                                |
+│ Anti Delete: ${isEnabled(config.ANTI_DELETE) ? "✅" : "❌"}                                |
 ╰──────────────────╯ 
 │ ┣ 14.1  true  ✅ 
 │ ┗ 14.2  false ❌
 │
 ╭──────────────────╮
-│ Welcome: ${isEnabled(config.WELCOME) ? "✅" : "❌"}                            |
+│ Anti VV: ${isEnabled(config.ANTI_VV) ? "✅" : "❌"}                                |
 ╰──────────────────╯ 
 │ ┣ 15.1  true  ✅ 
 │ ┗ 15.2  false ❌
 │
 ╭──────────────────╮
-│ Anti Link: ${isEnabled(config.ANTI_LINK) ? "✅" : "❌"}                              |
+│ Welcome: ${isEnabled(config.WELCOME) ? "✅" : "❌"}                            |
 ╰──────────────────╯ 
 │ ┣ 16.1  true  ✅ 
 │ ┗ 16.2  false ❌
 │
 ╭──────────────────╮
-│ Read Message: ${isEnabled(config.READ_MESSAGE) ? "✅" : "❌"}                  |
+│ Anti Link: ${isEnabled(config.ANTI_LINK) ? "✅" : "❌"}                              |
 ╰──────────────────╯ 
 │ ┣ 17.1  true  ✅ 
 │ ┗ 17.2  false ❌
 │
 ╭──────────────────╮
-│ Anti Bad: ${isEnabled(config.ANTI_BAD) ? "✅" : "❌"}                              |
+│ Read Message: ${isEnabled(config.READ_MESSAGE) ? "✅" : "❌"}                  |
 ╰──────────────────╯ 
 │ ┣ 18.1  true  ✅ 
 │ ┗ 18.2  false ❌
 │
 ╭──────────────────╮
-│ Anti Link Kick: ${isEnabled(config.ANTI_LINK_KICK) ? "✅" : "❌"}                     |
+│ Anti Bad: ${isEnabled(config.ANTI_BAD) ? "✅" : "❌"}                              |
 ╰──────────────────╯ 
 │ ┣ 19.1  true  ✅ 
 │ ┗ 19.2  false ❌
 │
 ╭──────────────────╮
-│ Read CMD: ${isEnabled(config.READ_CMD) ? "✅" : "❌"}                          |
+│ Anti Link Kick: ${isEnabled(config.ANTI_LINK_KICK) ? "✅" : "❌"}                     |
 ╰──────────────────╯ 
 │ ┣ 20.1  true  ✅ 
 │ ┗ 20.2  false ❌
+│
+╭──────────────────╮
+│ Read CMD: ${isEnabled(config.READ_CMD) ? "✅" : "❌"}                          |
+╰──────────────────╯ 
+│ ┣ 21.1  true  ✅ 
+│ ┗ 21.2  false ❌
 │
 │
 ├─❏ *🦠 STATUS*
@@ -235,13 +241,14 @@ cmd({
                 "11.1": { key: "AUTO_STATUS_REPLY", toggle: true }, "11.2": { key: "AUTO_STATUS_REPLY", toggle: false },
                 "12.1": { key: "AUTO_STATUS_REACT", toggle: true }, "12.2": { key: "AUTO_STATUS_REACT", toggle: false },
                 "13.1": { key: "CUSTOM_REACT", toggle: true }, "13.2": { key: "CUSTOM_REACT", toggle: false },
-                "14.1": { key: "ANTI_VV", toggle: true }, "14.2": { key: "ANTI_VV", toggle: false },
-                "15.1": { key: "WELCOME", toggle: true }, "15.2": { key: "WELCOME", toggle: false },
-                "16.1": { key: "ANTI_LINK", toggle: true }, "16.2": { key: "ANTI_LINK", toggle: false },
-                "17.1": { key: "READ_MESSAGE", toggle: true }, "17.2": { key: "READ_MESSAGE", toggle: false },
-                "18.1": { key: "ANTI_BAD", toggle: true }, "18.2": { key: "ANTI_BAD", toggle: false },
-                "19.1": { key: "ANTI_LINK_KICK", toggle: true }, "19.2": { key: "ANTI_LINK_KICK", toggle: false },
-                "20.1": { key: "READ_CMD", toggle: true }, "20.2": { key: "READ_CMD", toggle: false }
+                "14.1": { key: "ANTI_DELETE", toggle: true }, "14.2": { key: "ANTI_DELETE", toggle: false },
+                "15.1": { key: "ANTI_VV", toggle: true }, "15.2": { key: "ANTI_VV", toggle: false },
+                "16.1": { key: "WELCOME", toggle: true }, "16.2": { key: "WELCOME", toggle: false },
+                "17.1": { key: "ANTI_LINK", toggle: true }, "17.2": { key: "ANTI_LINK", toggle: false },
+                "18.1": { key: "READ_MESSAGE", toggle: true }, "18.2": { key: "READ_MESSAGE", toggle: false },
+                "19.1": { key: "ANTI_BAD", toggle: true }, "19.2": { key: "ANTI_BAD", toggle: false },
+                "20.1": { key: "ANTI_LINK_KICK", toggle: true }, "20.2": { key: "ANTI_LINK_KICK", toggle: false },
+                "21.1": { key: "READ_CMD", toggle: true }, "21.2": { key: "READ_CMD", toggle: false }
             };
 
             const selected = commandMap[userInput];
