@@ -1,35 +1,36 @@
-const { cmd } = require('../command');
-const yts = require('yt-search');
 const axios = require('axios');
-const fs = require('fs');
-const path = require('path');
+const yts = require('yt-search');
+const { cmd } = require('../command');
 
 cmd({
-  pattern: "video",
-  react: "🎬",
-  desc: "Download YouTube MP4 (WhatsApp compatible)",
-  category: "download",
-  use: ".video3 <query>",
-  filename: __filename
+    pattern: "video",
+    react: "🎬",
+    desc: "Download YouTube MP4",
+    category: "download",
+    use: ".video <query>",
+    filename: __filename
 }, async (conn, mek, m, { from, reply, q }) => {
-  try {
-    if (!q) return reply("❓ What video do you want to download?");
+    try {
+        if (!q) return reply("❓ What video do you want to download?");
 
-    const search = await yts(q);
-    if (!search.videos.length) return reply("❌ No results found for your query.");
+        const search = await yts(q);
+        if (!search.videos.length) return reply("❌ No results found for your query.");
 
-    const data = search.videos[0];
-    const ytUrl = data.url;
+        const data = search.videos[0];
+        const ytUrl = data.url;
 
-    // ✅ Use a better API (returns real mp4 link)
-    const api = `https://api.akuari.my.id/downloader/youtube?link=${encodeURIComponent(ytUrl)}`;
-    const { data: apiRes } = await axios.get(api);
+        // Define API links for multiple qualities
+        const formats = {
+            "240p": `https://sadiya-tech-apis.vercel.app/download/ytdl?url=${encodeURIComponent(ytUrl)}&format=240&apikey=YOU_API_KEY`,
+            "360p": `https://sadiya-tech-apis.vercel.app/download/ytdl?url=${encodeURIComponent(ytUrl)}&format=360&apikey=YOU_API_KEY`,
+            "480p": `https://sadiya-tech-apis.vercel.app/download/ytdl?url=${encodeURIComponent(ytUrl)}&format=480&apikey=YOU_API_KEY`,
+            "720p": `https://sadiya-tech-apis.vercel.app/download/ytdl?url=${encodeURIComponent(ytUrl)}&format=720&apikey=YOU_API_KEY`
+        };
 
-    if (!apiRes?.status || !apiRes.mp4) return reply("❌ Failed to get video link. Try again later.");
+        const caption = `
+*📽️ RANUMITHA-X-MD VIDEO DOWONLOADER 🎥*
 
-    const videoUrl = apiRes.mp4;
-    const caption = `
-📑 *Title:* ${data.title}
+🎵 *Title:* ${data.title}
 ⏱️ *Duration:* ${data.timestamp}
 📆 *Uploaded:* ${data.ago}
 📊 *Views:* ${data.views}
@@ -37,65 +38,96 @@ cmd({
 
 🔢 *Reply Below Number*
 
-1️⃣ *Video Type*
-2️⃣ *Document Type*
+1. *Video FILE 📽️*
 
-> Powered by DARK-KNIGHT-XMD`;
+   1.1 240p (Video)
+   1.2 360p (Video)
+   1.3 480p (Video)
+   1.4 720p (Video)
 
-    const sentMsg = await conn.sendMessage(from, {
-      image: { url: data.thumbnail },
-      caption
-    }, { quoted: m });
+2. *Document FILE 📂*
+ 
+   2.1 240p (Document)
+   2.2 360p (Document)
+   2.3 480p (Document)
+   2.4 720p (Document)
 
-    const messageID = sentMsg.key.id;
+> © Powerd by 𝗥𝗔𝗡𝗨𝗠𝗜𝗧𝗛𝗔-𝗫-𝗠𝗗 🌛`;
 
-    conn.ev.on("messages.upsert", async (msgData) => {
-      const receivedMsg = msgData.messages[0];
-      if (!receivedMsg?.message) return;
+        const sentMsg = await conn.sendMessage(from, {
+            image: { url: data.thumbnail },
+            caption
+        }, { quoted: m });
 
-      const receivedText = receivedMsg.message.conversation || receivedMsg.message.extendedTextMessage?.text;
-      const senderID = receivedMsg.key.remoteJid;
-      const isReplyToBot = receivedMsg.message.extendedTextMessage?.contextInfo?.stanzaId === messageID;
+        const messageID = sentMsg.key.id;
 
-      if (!isReplyToBot) return;
+        // Listen for user replies
+        conn.ev.on("messages.upsert", async (msgData) => {
+            const receivedMsg = msgData.messages[0];
+            if (!receivedMsg?.message) return;
 
-      await conn.sendMessage(senderID, { react: { text: '⏳', key: receivedMsg.key } });
+            const receivedText =
+                receivedMsg.message.conversation ||
+                receivedMsg.message.extendedTextMessage?.text;
 
-      // ✅ Download file locally to ensure correct format
-      const tempFile = path.join(__dirname, "../temp", `${Date.now()}.mp4`);
-      const writer = fs.createWriteStream(tempFile);
+            const senderID = receivedMsg.key.remoteJid;
+            const isReplyToBot =
+                receivedMsg.message.extendedTextMessage?.contextInfo?.stanzaId === messageID;
 
-      const videoStream = await axios({
-        url: videoUrl,
-        method: 'GET',
-        responseType: 'stream'
-      });
+            if (isReplyToBot) {
+                let selectedFormat, isDocument = false;
 
-      videoStream.data.pipe(writer);
+                switch (receivedText.trim().toUpperCase()) {
+                    case "1.1": selectedFormat = "240p"; break;
+                    case "1.2": selectedFormat = "360p"; break;
+                    case "1.3": selectedFormat = "480p"; break;
+                    case "1.4": selectedFormat = "720p"; break;
 
-      writer.on('finish', async () => {
-        if (receivedText.trim() === "1") {
-          await conn.sendMessage(senderID, {
-            video: fs.readFileSync(tempFile),
-            mimetype: "video/mp4",
-            caption: data.title
-          }, { quoted: receivedMsg });
-        } else if (receivedText.trim() === "2") {
-          await conn.sendMessage(senderID, {
-            document: fs.readFileSync(tempFile),
-            mimetype: "video/mp4",
-            fileName: `${data.title}.mp4`
-          }, { quoted: receivedMsg });
-        } else {
-          reply("❌ Invalid option! Please reply with 1 or 2.");
-        }
+                    case "2.1": selectedFormat = "240p"; isDocument = true; break;
+                    case "2.2": selectedFormat = "360p"; isDocument = true; break;
+                    case "2.3": selectedFormat = "480p"; isDocument = true; break;
+                    case "2.4": selectedFormat = "720p"; isDocument = true; break;
 
-        fs.unlinkSync(tempFile);
-      });
-    });
+                    default:
+                        return reply("*❌ Invalid option!*");
+                }
 
-  } catch (error) {
-    console.error("Video Command Error:", error);
-    reply("❌ Error occurred while downloading. Try again later.");
-  }
+                // React ⬇️ when download starts
+                await conn.sendMessage(senderID, { react: { text: '⬇️', key: receivedMsg.key } });
+
+                const { data: apiRes } = await axios.get(formats[selectedFormat]);
+
+                if (!apiRes?.status || !apiRes.result?.download) {
+                    await conn.sendMessage(senderID, { react: { text: '❌', key: receivedMsg.key } });
+                    return reply(`❌ Unable to download the ${selectedFormat} version. Try another one!`);
+                }
+
+                const result = apiRes.result;
+
+                // React ⬆️ before uploading
+                await conn.sendMessage(senderID, { react: { text: '⬆️', key: receivedMsg.key } });
+
+                if (isDocument) {
+                    await conn.sendMessage(senderID, {
+                        document: { url: result.download },
+                        mimetype: "video/mp4",
+                        fileName: `${data.title}.mp4`
+                    }, { quoted: receivedMsg });
+                } else {
+                    await conn.sendMessage(senderID, {
+                        video: { url: result.download },
+                        mimetype: "video/mp4",
+                        ptt: false,
+                    }, { quoted: receivedMsg });
+                }
+
+                // React ✅ after upload complete
+                await conn.sendMessage(senderID, { react: { text: '✅', key: receivedMsg.key } });
+            }
+        });
+
+    } catch (error) {
+        console.error("Video Command Error:", error);
+        reply("❌ An error occurred while processing your request. Please try again later.");
+    }
 });
