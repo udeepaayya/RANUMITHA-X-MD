@@ -20,11 +20,11 @@ async (conn, mek, m, { from, reply, text, isOwner }) => {
         
         const action = text.toLowerCase().trim();
         
-        if (action === 'true') {
+        if (action === 'on') {
             await setAnti(true);
             return reply('✅ Anti-delete has been enabled');
         } 
-        else if (action === 'true') {
+        else if (action === 'off') {
             await setAnti(false);
             return reply('❌ Anti-delete has been disabled');
         } 
