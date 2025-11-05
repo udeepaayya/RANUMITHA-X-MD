@@ -206,7 +206,6 @@ cmd({
 
             const userInput = textMsg?.trim();
 
-            // Mode control
             const modeMap = {
                 "1.1": "public",
                 "1.2": "private",
@@ -221,10 +220,10 @@ cmd({
                 }
                 config.MODE = newMode;
                 saveConfig();
+                await conn.sendMessage(fromUser, { react: { text: "✅", key: mekInfo.key } });
                 return conn.sendMessage(fromUser, { text: `✔️ Bot mode set to ${newMode.toUpperCase()}` }, { quoted: mekInfo });
             }
 
-            // Toggle settings
             const map = {
                 "2.1": ["AUTO_RECORDING", true], "2.2": ["AUTO_RECORDING", false],
                 "3.1": ["AUTO_TYPING", true], "3.2": ["AUTO_TYPING", false],
@@ -247,21 +246,23 @@ cmd({
                 "21.1": ["READ_CMD", true], "21.2": ["READ_CMD", false],
             };
 
-            // Anti-delete DB link
+            // Anti-delete
             if (userInput === "14.1") {
                 await setAnti(true);
                 config.ANTI_DELETE = "true";
                 saveConfig();
+                await conn.sendMessage(fromUser, { react: { text: "✅", key: mekInfo.key } });
                 return conn.sendMessage(fromUser, { text: "✅ Anti-delete has been enabled" }, { quoted: mekInfo });
             }
             if (userInput === "14.2") {
                 await setAnti(false);
                 config.ANTI_DELETE = "false";
                 saveConfig();
+                await conn.sendMessage(fromUser, { react: { text: "❌", key: mekInfo.key } });
                 return conn.sendMessage(fromUser, { text: "❌ Anti-delete has been disabled" }, { quoted: mekInfo });
             }
 
-            // General config toggle
+            // General toggle + react
             if (map[userInput]) {
                 const [key, toggle] = map[userInput];
                 const current = isEnabled(config[key]);
@@ -270,6 +271,7 @@ cmd({
                 }
                 config[key] = toggle ? "true" : "false";
                 saveConfig();
+                await conn.sendMessage(fromUser, { react: { text: toggle ? "✅" : "❌", key: mekInfo.key } });
                 return conn.sendMessage(fromUser, { text: `${toggle ? "✅" : "❌"} ${key.replace(/_/g, " ")} now ${toggle ? "ON" : "OFF"}` }, { quoted: mekInfo });
             }
 
