@@ -2,8 +2,8 @@ const { cmd } = require('../command');
 const { getAnti, setAnti } = require('../data/antidel');
 
 cmd({
-    pattern: "welcome",
-    alias: ["welcomeset"],
+    pattern: "antidelete",
+    alias: ["setantidelete"],
     desc: "Enable or disable welcome messages for new members",
     category: "settings",
     filename: __filename
