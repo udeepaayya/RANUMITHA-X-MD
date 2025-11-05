@@ -23,7 +23,7 @@ END:VCARD`
 
 cmd({
     pattern: "img",
-    react: "🦋",
+    react: "🖼️",
     desc: "Search and download Google images",
     category: "download",
     use: ".img <keywords>",
