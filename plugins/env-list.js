@@ -1,6 +1,7 @@
 const { cmd, commands } = require('../command');
 const config = require('../config');
 const fs = require('fs');
+const { getAnti, setAnti } = require('../data/antidel');
 const { getBuffer, getGroupAdmins, getRandom, h2k, isUrl, Json, sleep, fetchJson } = require('../lib/functions2');
 
 // image & audio
