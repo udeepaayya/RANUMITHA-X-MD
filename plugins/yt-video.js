@@ -2,6 +2,26 @@ const axios = require('axios');
 const yts = require('yt-search');
 const { cmd } = require('../command');
 
+// Fake ChatGPT vCard
+const fakevCard = {
+    key: {
+        fromMe: false,
+        participant: "0@s.whatsapp.net",
+        remoteJid: "status@broadcast"
+    },
+    message: {
+        contactMessage: {
+            displayName: "© Mr Hiruka",
+            vcard: `BEGIN:VCARD
+VERSION:3.0
+FN:Meta
+ORG:META AI;
+TEL;type=CELL;type=VOICE;waid=13135550002:+13135550002
+END:VCARD`
+        }
+    }
+};
+
 cmd({
     pattern: "video",
     react: "🎬",
@@ -11,10 +31,10 @@ cmd({
     filename: __filename
 }, async (conn, mek, m, { from, reply, q }) => {
     try {
-        if (!q) return reply("❓ What video do you want to download?");
+        if (!q) return reply("*Please give me text or link❓*");
 
         const search = await yts(q);
-        if (!search.videos.length) return reply("❌ No results found for your query.");
+        if (!search.videos.length) return reply("*❌ No results found.*");
 
         const data = search.videos[0];
         const ytUrl = data.url;
@@ -57,7 +77,7 @@ cmd({
         const sentMsg = await conn.sendMessage(from, {
             image: { url: data.thumbnail },
             caption
-        }, { quoted: m });
+        }, { quoted: fakevCard });
 
         const messageID = sentMsg.key.id;
 
