@@ -30,27 +30,27 @@ cmd({
         const caption = `
 *📽️ RANUMITHA-X-MD VIDEO DOWONLOADER 🎥*
 
-🎵 *Title:* ${data.title}
-⏱️ *Duration:* ${data.timestamp}
-📆 *Uploaded:* ${data.ago}
-📊 *Views:* ${data.views}
-🔗 *Link:* ${data.url}
+*🎵 \`Title:\`* ${data.title}
+*⏱️ \`Duration:\`* ${data.timestamp}
+*📆 \`Uploaded:\`* ${data.ago}
+*📊 \`Views:\`* ${data.views}
+*🔗 \`Link:\`* ${data.url}
 
 🔢 *Reply Below Number*
 
 1. *Video FILE 📽️*
 
-   1.1 240p (Video)
-   1.2 360p (Video)
-   1.3 480p (Video)
-   1.4 720p (Video)
+   1.1 240p Qulity 📽️
+   1.2 360p Qulity 📽️
+   1.3 480p Qulity 📽️
+   1.4 720p Qulity 📽️
 
 2. *Document FILE 📂*
  
-   2.1 240p (Document)
-   2.2 360p (Document)
-   2.3 480p (Document)
-   2.4 720p (Document)
+   2.1 240p Qulity 📂
+   2.2 360p Qulity 📂
+   2.3 480p Qulity 📂
+   2.4 720p Qulity 📂
 
 > © Powerd by 𝗥𝗔𝗡𝗨𝗠𝗜𝗧𝗛𝗔-𝗫-𝗠𝗗 🌛`;
 
