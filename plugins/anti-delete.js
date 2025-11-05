@@ -1,5 +1,10 @@
 const { cmd } = require('../command');
 const { getAnti, setAnti } = require('../data/antidel');
+const config = require('../config');
+const fs = require('fs');
+const { getBuffer, getGroupAdmins, getRandom, h2k, isUrl, Json, sleep, fetchJson } = require('../lib/functions2');
+const { writeFileSync } = require('fs');
+const path = require('path');
 
 cmd({
     pattern: "antidelete",
