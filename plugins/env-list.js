@@ -132,7 +132,7 @@ cmd({
 │ ┗ 13.2  false ❌
 │
 ╭──────────────────╮
-│ Anti Delete: ${isEnabled(config.ANTI_DELETE) ? "✅" : "❌"}                             |
+│ Anti Delete: ${isEnabled(config.ANTI_DELETE) ? "✅" : "❌"}                           |
 ╰──────────────────╯ 
 │ ┣ 14.1  true  ✅ 
 │ ┗ 14.2  false ❌
