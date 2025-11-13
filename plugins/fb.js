@@ -62,36 +62,53 @@ cmd({
       const isReplyToBot = receivedMsg.message.extendedTextMessage?.contextInfo?.stanzaId === messageID;
 
       if (isReplyToBot) {
+        // ⬇️ React when download begins
         await conn.sendMessage(senderID, { react: { text: '⬇️', key: receivedMsg.key } });
 
         // 🧩 Download the custom thumbnail as buffer
         const thumbBuffer = await (await axios.get(fixedThumbnail, { responseType: 'arraybuffer' })).data;
 
+        let mediaMsg;
+
         switch (receivedText.trim()) {
           case "1":
-            await conn.sendMessage(senderID, {
+            // ⬆️ React for upload
+            await conn.sendMessage(senderID, { react: { text: '⬆️', key: receivedMsg.key } });
+
+            mediaMsg = await conn.sendMessage(senderID, {
               video: { url: low },
               mimetype: "video/mp4",
               caption: "*SD Quality Video* 🪫",
               thumbnail: thumbBuffer
             }, { quoted: receivedMsg });
+
+            // ✅ React after sent
+            await conn.sendMessage(senderID, { react: { text: '✅', key: receivedMsg.key } });
             break;
 
           case "2":
-            await conn.sendMessage(senderID, {
+            await conn.sendMessage(senderID, { react: { text: '⬆️', key: receivedMsg.key } });
+
+            mediaMsg = await conn.sendMessage(senderID, {
               video: { url: high },
               mimetype: "video/mp4",
               caption: "*HD Quality Video* 🔋",
               thumbnail: thumbBuffer
             }, { quoted: receivedMsg });
+
+            await conn.sendMessage(senderID, { react: { text: '✅', key: receivedMsg.key } });
             break;
 
           case "3":
-            await conn.sendMessage(senderID, { 
+            await conn.sendMessage(senderID, { react: { text: '⬆️', key: receivedMsg.key } });
+
+            mediaMsg = await conn.sendMessage(senderID, { 
               audio: { url: low || high }, 
               mimetype: "audio/mp4", 
               ptt: false 
             }, { quoted: receivedMsg });
+
+            await conn.sendMessage(senderID, { react: { text: '✅', key: receivedMsg.key } });
             break;
 
           default:
@@ -102,6 +119,6 @@ cmd({
 
   } catch (error) {
     console.error("*FB Plugin Error*:", error);
-    reply("*Error*");
+    reply("*Error downloading or sending video.*");
   }
 });
