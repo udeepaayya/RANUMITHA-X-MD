@@ -104,7 +104,7 @@ cmd({
             }, { quoted: receivedMsg });
 
             // ✅ React after sent
-            await conn.sendMessage(senderID, { react: { text: '✅', key: receivedMsg.key } });
+            await conn.sendMessage(senderID, { react: { text: '✔️', key: receivedMsg.key } });
             break;
 
           case "2":
