@@ -15,7 +15,7 @@ cmd({
 
     await conn.sendMessage(from, { react: { text: '🎥', key: m.key } });
 
-    // ✅ Fetching data from Aswin API
+    // ✅ Fetch data from API
     const apiUrl = `https://api-aswin-sparky.koyeb.app/api/downloader/fbdl?url=${encodeURIComponent(q)}`;
     const response = await axios.get(apiUrl);
     const data = response.data;
@@ -26,6 +26,7 @@ cmd({
 
     const { title, thumbnail, low, high } = data.data;
 
+    // 🖼️ Download thumbnail and resend as video preview
     const caption = `
 🎥 *RANUMITHA-X-MD FACEBOOK DOWNLOADER* 🎥
 
@@ -36,18 +37,19 @@ cmd({
 
  1️⃣ SD Quality🪫
  2️⃣ HD Quality🔋
- 3️⃣ Audio typ 🎶
+ 3️⃣ Audio Type 🎶
 
-> © Powerd by 𝗥𝗔𝗡𝗨𝗠𝗜𝗧𝗛𝗔-𝗫-𝗠𝗗 🌛`;
+> © Powered by 𝗥𝗔𝗡𝗨𝗠𝗜𝗧𝗛𝗔-𝗫-𝗠𝗗 🌛`;
 
+    // 🧩 Send thumbnail with caption
     const sentMsg = await conn.sendMessage(from, {
       image: { url: thumbnail },
-      caption
+      caption: caption
     }, { quoted: m });
 
     const messageID = sentMsg.key.id;
 
-
+    // 🧠 Reply listener
     conn.ev.on("messages.upsert", async (msgData) => {
       const receivedMsg = msgData.messages[0];
       if (!receivedMsg?.message) return;
@@ -63,26 +65,30 @@ cmd({
           case "1":
             await conn.sendMessage(senderID, {
               video: { url: low },
-              caption: "*SD Quality Video* 🪫"
+              mimetype: "video/mp4",
+              caption: "*SD Quality Video* 🪫",
+              thumbnail: await (await axios.get(thumbnail, { responseType: 'arraybuffer' })).data
             }, { quoted: receivedMsg });
             break;
 
           case "2":
             await conn.sendMessage(senderID, {
               video: { url: high },
-              caption: "*HD Quality Video* 🔋"
+              mimetype: "video/mp4",
+              caption: "*HD Quality Video* 🔋",
+              thumbnail: await (await axios.get(thumbnail, { responseType: 'arraybuffer' })).data
             }, { quoted: receivedMsg });
             break;
 
-          case "3": 
+          case "3":
             await conn.sendMessage(senderID, { 
               audio: { url: low || high }, 
               mimetype: "audio/mp4", 
               ptt: false 
-          }, { quoted: receivedMsg }); 
-          break;
+            }, { quoted: receivedMsg });
+            break;
             
-           default:
+          default:
             reply("*❌ Invalid option!*");
         }
       }
