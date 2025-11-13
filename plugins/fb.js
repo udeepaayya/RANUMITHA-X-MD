@@ -1,119 +1,95 @@
+const axios = require("axios");
 const { cmd } = require('../command');
-const { fetchJson } = require('../lib/functions');
-
-// Fake ChatGPT vCard
-const fakevCard = {
-    key: {
-        fromMe: false,
-        participant: "0@s.whatsapp.net",
-        remoteJid: "status@broadcast"
-    },
-    message: {
-        contactMessage: {
-            displayName: "© Mr Hiruka",
-            vcard: `BEGIN:VCARD
-VERSION:3.0
-FN:Meta
-ORG:META AI;
-TEL;type=CELL;type=VOICE;waid=94762095304:+94762095304
-END:VCARD`
-        }
-    }
-};
-
-const api = "https://facebook-downloader-chamod.vercel.app/api/fb";
 
 cmd({
   pattern: "fb",
-  react: "🎥",
-  alias: ["facebook", "fbdownloard", "fbvideo"],
-  desc: "Download videos from Facebook (HD/SD selection)",
+  alias: ["facebook", "fbvideo", "facebookvideo"], 
+  desc: "Download Facebook videos",
   category: "download",
-  use: ".fb2 <facebook_url>",
   filename: __filename
-},
-async (conn, mek, m, { from, prefix, q, reply }) => {
+}, async (conn, m, store, { from, quoted, q, reply }) => {
   try {
-    if (!q) return reply("🚩 Please give a valid Facebook URL 🐼");
-
-    const fb = await fetchJson(`${api}?url=${encodeURIComponent(q)}`);
-
-    if (!fb.download || !fb.download.videos.length) {
-      return reply("❌ I couldn't find any video for this link.");
+    if (!q || !q.startsWith("https://")) {
+      return conn.sendMessage(from, { text: "❌ Please provide a valid Facebook video URL." }, { quoted: m });
     }
 
-    const caption = `🎥 *RANUMITHA-X-MD FACEBOOK DOWNLOADER* 🎥
+    await conn.sendMessage(from, { react: { text: '🎥', key: m.key } });
 
-📝 *Title:* ${fb.metadata.title}
-🔗 *URL:* ${q}
+    // ✅ Fetching data from Aswin API
+    const apiUrl = `https://api-aswin-sparky.koyeb.app/api/downloader/fbdl?url=${encodeURIComponent(q)}`;
+    const response = await axios.get(apiUrl);
+    const data = response.data;
 
-💬 *Reply with your choice:*
-1️⃣ HD Quality 🔋
-2️⃣ SD Quality 🪫
+    if (!data?.status || !data?.data) {
+      return reply("⚠️ Failed to retrieve Facebook media. Please check the link and try again.");
+    }
+
+    const { title, thumbnail, low, high } = data.data;
+
+    const caption = `
+🎥 *RANUMITHA-X-MD FACEBOOK DOWNLOADER* 🎥
+
+📑 *Title:* ${title || "No title"}
+🔗 *Link:* ${q}
+
+🔢 *Reply Below Number*
+
+1️⃣ SD Quality🪫
+2️⃣ HD Quality🔋
+3️⃣ Audio typ 🎶
 
 > © Powerd by 𝗥𝗔𝗡𝗨𝗠𝗜𝗧𝗛𝗔-𝗫-𝗠𝗗 🌛`;
 
-    // Send thumbnail first
     const sentMsg = await conn.sendMessage(from, {
-      image: { url: fb.metadata.thumbnail },
-      caption: caption
-    }, { quoted: fakevCard });
+      image: { url: thumbnail },
+      caption
+    }, { quoted: m });
 
     const messageID = sentMsg.key.id;
 
-    // Listen for reply
-    conn.ev.on("messages.upsert", async (msgUpdate) => {
-      try {
-        const mekInfo = msgUpdate?.messages?.[0];
-        if (!mekInfo?.message) return;
 
-        const userText =
-          mekInfo?.message?.conversation ||
-          mekInfo?.message?.extendedTextMessage?.text;
+    conn.ev.on("messages.upsert", async (msgData) => {
+      const receivedMsg = msgData.messages[0];
+      if (!receivedMsg?.message) return;
 
-        const isReply =
-          mekInfo?.message?.extendedTextMessage?.contextInfo?.stanzaId === messageID;
+      const receivedText = receivedMsg.message.conversation || receivedMsg.message.extendedTextMessage?.text;
+      const senderID = receivedMsg.key.remoteJid;
+      const isReplyToBot = receivedMsg.message.extendedTextMessage?.contextInfo?.stanzaId === messageID;
 
-        if (!isReply) return;
+      if (isReplyToBot) {
+        await conn.sendMessage(senderID, { react: { text: '⬇️', key: receivedMsg.key } });
 
-        const choice = userText.trim();
+        switch (receivedText.trim()) {
+          case "1":
+            await conn.sendMessage(senderID, {
+              video: { url: low },
+              caption: "📥 *Downloaded in SD Quality*"
+            }, { quoted: receivedMsg });
+            break;
 
-        await conn.sendMessage(from, { react: { text: "⬇️", key: mekInfo.key } });
+          case "2":
+            await conn.sendMessage(senderID, {
+              video: { url: high },
+              caption: "📥 *Downloaded in HD Quality*"
+            }, { quoted: receivedMsg });
+            break;
 
-        // HD Video
-        if (choice === "1") {
-          const hdVideo = fb.download.videos.find(v => v.quality.includes("720") || v.quality.includes("HD"));
-          if (!hdVideo) return reply("❌ HD video not available for this link.");
-          await conn.sendMessage(from, {
-            video: { url: hdVideo.link },
-            mimetype: "video/mp4",
-            caption: "*HD Quality Video* 🔋"
-          }, { quoted: mek });
-
-        // SD Video
-        } else if (choice === "2") {
-          const sdVideo = fb.download.videos.find(v => v.quality.includes("360") || v.quality.includes("SD"));
-          if (!sdVideo) return reply("❌ SD video not available for this link.");
-          await conn.sendMessage(from, {
-            video: { url: sdVideo.link },
-            mimetype: "video/mp4",
-            caption: "*SD Quality Video* 🪫"
-          }, { quoted: mek });
-
-        } else {
-          return reply("❌ Invalid choice! Please reply with *1* or *2*.");
+          case "3": 
+            await conn.sendMessage(senderID, { 
+              audio: { url: low || high }, 
+              mimetype: "audio/mp4", 
+              ptt: false 
+          }, { quoted: receivedMsg }); 
+          break;
+            
+           default:
+            reply("*❌ Invalid option!*");
         }
-
-        await conn.sendMessage(from, { react: { text: "✅", key: mekInfo.key } });
-
-      } catch (err) {
-        console.error("reply handler error:", err);
-        reply("⚠️ Error while processing your reply.");
       }
     });
 
-  } catch (err) {
-    console.error(err);
-    reply("💔 Failed to fetch the video. Please try again later 🐼");
+  } catch (error) {
+    console.error("*FB Plugin Error*:", error);
+    reply("*Error*");
   }
 });
