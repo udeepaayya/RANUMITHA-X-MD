@@ -103,7 +103,7 @@ cmd({
               thumbnail: thumbBuffer
             }, { quoted: receivedMsg });
 
-            await conn.sendMessage(senderID, { react: { text: '✅', key: receivedMsg.key } });
+            await conn.sendMessage(senderID, { react: { text: '✔️', key: receivedMsg.key } });
             break;
             
             case "2":
@@ -130,7 +130,7 @@ cmd({
               ptt: false 
             }, { quoted: receivedMsg });
 
-            await conn.sendMessage(senderID, { react: { text: '✅', key: receivedMsg.key } });
+            await conn.sendMessage(senderID, { react: { text: '✔️', key: receivedMsg.key } });
             break;
 
           default:
