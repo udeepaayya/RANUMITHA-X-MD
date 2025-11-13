@@ -63,14 +63,14 @@ cmd({
           case "1":
             await conn.sendMessage(senderID, {
               video: { url: low },
-              caption: "📥 *Downloaded in SD Quality*"
+              caption: "*SD Quality Video* 🪫"
             }, { quoted: receivedMsg });
             break;
 
           case "2":
             await conn.sendMessage(senderID, {
               video: { url: high },
-              caption: "📥 *Downloaded in HD Quality*"
+              caption: "*HD Quality Video* 🔋"
             }, { quoted: receivedMsg });
             break;
 
