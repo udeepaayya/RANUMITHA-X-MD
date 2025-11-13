@@ -134,6 +134,7 @@ cmd({
             break;
 
           default:
+            await conn.sendMessage(senderID, { react: { text: '😒', key: receivedMsg.key } });
             reply("*❌ Invalid option!*");
         }
       }
