@@ -24,9 +24,12 @@ cmd({
       return reply("⚠️ Failed to retrieve Facebook media. Please check the link and try again.");
     }
 
-    const { title, thumbnail, low, high } = data.data;
+    const { title, low, high } = data.data;
 
-    // 🖼️ Download thumbnail and resend as video preview
+    // 🎨 Fixed custom thumbnail
+    const fixedThumbnail = "https://raw.githubusercontent.com/Ranumithaofc/RANU-FILE-S-/refs/heads/main/images/RANUMITHA-X-MD_FB.jpg";
+
+    // 🖼️ Caption content
     const caption = `
 🎥 *RANUMITHA-X-MD FACEBOOK DOWNLOADER* 🎥
 
@@ -41,9 +44,9 @@ cmd({
 
 > © Powered by 𝗥𝗔𝗡𝗨𝗠𝗜𝗧𝗛𝗔-𝗫-𝗠𝗗 🌛`;
 
-    // 🧩 Send thumbnail with caption
+    // 🧩 Send custom thumbnail image with caption
     const sentMsg = await conn.sendMessage(from, {
-      image: { url: thumbnail },
+      image: { url: fixedThumbnail },
       caption: caption
     }, { quoted: m });
 
@@ -61,13 +64,16 @@ cmd({
       if (isReplyToBot) {
         await conn.sendMessage(senderID, { react: { text: '⬇️', key: receivedMsg.key } });
 
+        // 🧩 Download the custom thumbnail as buffer
+        const thumbBuffer = await (await axios.get(fixedThumbnail, { responseType: 'arraybuffer' })).data;
+
         switch (receivedText.trim()) {
           case "1":
             await conn.sendMessage(senderID, {
               video: { url: low },
               mimetype: "video/mp4",
               caption: "*SD Quality Video* 🪫",
-              thumbnail: await (await axios.get(thumbnail, { responseType: 'arraybuffer' })).data
+              thumbnail: thumbBuffer
             }, { quoted: receivedMsg });
             break;
 
@@ -76,7 +82,7 @@ cmd({
               video: { url: high },
               mimetype: "video/mp4",
               caption: "*HD Quality Video* 🔋",
-              thumbnail: await (await axios.get(thumbnail, { responseType: 'arraybuffer' })).data
+              thumbnail: thumbBuffer
             }, { quoted: receivedMsg });
             break;
 
@@ -87,7 +93,7 @@ cmd({
               ptt: false 
             }, { quoted: receivedMsg });
             break;
-            
+
           default:
             reply("*❌ Invalid option!*");
         }
