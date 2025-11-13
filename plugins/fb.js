@@ -1,10 +1,5 @@
-const axios = require("axios");
-const cheerio = require('cheerio');
-const { cmd, commands } = require('../command');
-const config = require('../config');
+const { cmd } = require('../command');
 const { fetchJson } = require('../lib/functions');
-
-const api = `https://facebook-downloader-chamod.vercel.app/api/fb`;
 
 // Fake vCard
 const fakevCard = {
@@ -26,29 +21,30 @@ END:VCARD`
     }
 };
 
+const api = "https://facebook-downloader-chamod.vercel.app/api/fb";
+
 cmd({
-  pattern: "facebook",
+  pattern: "fb",
   react: "🎥",
-  alias: ["fbb", "fbvideo", "fb"],
-  desc: "Download videos from Facebook",
+  alias: ["facebook", "fbdowonload", "fbvideo"],
+  desc: "Download videos from Facebook (HD/SD selection)",
   category: "download",
-  use: ".facebook <facebook_url>",
+  use: ".fb <facebook_url>",
   filename: __filename
 },
 async (conn, mek, m, { from, prefix, q, reply }) => {
   try {
-    if (!q) return reply("🚩 Please give me a valid Facebook URL 🐼");
+    if (!q) return reply("🚩 Please give a valid Facebook URL 🐼");
 
-    // 🟢 Fetch from API
-    const fb = await fetchJson(`${api}/download/fbdown?url=${encodeURIComponent(q)}`);
+    const fb = await fetchJson(`${api}?url=${encodeURIComponent(q)}`);
 
-    if (!fb.result || (!fb.result.sd && !fb.result.hd)) {
-      return reply("❌ I couldn't find anything. Please check the link.");
+    if (!fb.download || !fb.download.videos.length) {
+      return reply("❌ I couldn't find any video for this link.");
     }
 
     const caption = `🎥 *RANUMITHA-X-MD FACEBOOK DOWNLOADER* 🎥
 
-📝 *Title:* Facebook Video
+📝 *Title:* ${fb.metadata.title}
 🔗 *URL:* ${q}
 
 💬 *Reply with your choice:*
@@ -57,15 +53,15 @@ async (conn, mek, m, { from, prefix, q, reply }) => {
 
 > © Powerd by 𝗥𝗔𝗡𝗨𝗠𝗜𝗧𝗛𝗔-𝗫-𝗠𝗗 🌛`;
 
-    // Send thumb + caption first
+    // Send thumbnail first
     const sentMsg = await conn.sendMessage(from, {
-      image: { url: fb.result.thumb },
+      image: { url: fb.metadata.thumbnail },
       caption: caption
     }, { quoted: fakevCard });
 
     const messageID = sentMsg.key.id;
 
-    // 🟣 Wait for user reply
+    // Listen for reply
     conn.ev.on("messages.upsert", async (msgUpdate) => {
       try {
         const mekInfo = msgUpdate?.messages?.[0];
@@ -82,23 +78,24 @@ async (conn, mek, m, { from, prefix, q, reply }) => {
 
         const choice = userText.trim();
 
-        // 🕐 React to downloading
         await conn.sendMessage(from, { react: { text: "⬇️", key: mekInfo.key } });
 
-        // 🟢 HD Video
+        // HD Video
         if (choice === "1") {
-          if (!fb.result.hd) return reply("❌ HD video not available for this link.");
+          const hdVideo = fb.download.videos.find(v => v.quality.includes("720") || v.quality.includes("HD"));
+          if (!hdVideo) return reply("❌ HD video not available for this link.");
           await conn.sendMessage(from, {
-            video: { url: fb.result.hd },
+            video: { url: hdVideo.link },
             mimetype: "video/mp4",
             caption: "*HD Quality Video* 🔋"
           }, { quoted: mek });
 
-        // 🟡 SD Video
+        // SD Video
         } else if (choice === "2") {
-          if (!fb.result.sd) return reply("❌ SD video not available for this link.");
+          const sdVideo = fb.download.videos.find(v => v.quality.includes("360") || v.quality.includes("SD"));
+          if (!sdVideo) return reply("❌ SD video not available for this link.");
           await conn.sendMessage(from, {
-            video: { url: fb.result.sd },
+            video: { url: sdVideo.link },
             mimetype: "video/mp4",
             caption: "*SD Quality Video* 🪫"
           }, { quoted: mek });
@@ -107,7 +104,6 @@ async (conn, mek, m, { from, prefix, q, reply }) => {
           return reply("❌ Invalid choice! Please reply with *1* or *2*.");
         }
 
-        // ✅ React done
         await conn.sendMessage(from, { react: { text: "✅", key: mekInfo.key } });
 
       } catch (err) {
@@ -118,6 +114,6 @@ async (conn, mek, m, { from, prefix, q, reply }) => {
 
   } catch (err) {
     console.error(err);
-    reply("💔 Failed to download the video. Please try again later 🐼");
+    reply("💔 Failed to fetch the video. Please try again later 🐼");
   }
 });
