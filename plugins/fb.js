@@ -32,11 +32,11 @@ cmd({
 📑 *Title:* ${title || "No title"}
 🔗 *Link:* ${q}
 
-🔢 *Reply Below Number*
+💬 *Reply with your choice:*
 
-1️⃣ SD Quality🪫
-2️⃣ HD Quality🔋
-3️⃣ Audio typ 🎶
+ 1️⃣ SD Quality🪫
+ 2️⃣ HD Quality🔋
+ 3️⃣ Audio typ 🎶
 
 > © Powerd by 𝗥𝗔𝗡𝗨𝗠𝗜𝗧𝗛𝗔-𝗫-𝗠𝗗 🌛`;
 
