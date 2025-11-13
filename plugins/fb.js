@@ -59,8 +59,8 @@ cmd({
 
 💬 *Reply with your choice:*
 
- 1️⃣ SD Quality🪫
- 2️⃣ HD Quality🔋
+ 1️⃣ HD Quality🔋
+ 2️⃣ SD Quality🪫
  3️⃣ Audio Type 🎶
 
 > © Powered by 𝗥𝗔𝗡𝗨𝗠𝗜𝗧𝗛𝗔-𝗫-𝗠𝗗 🌛`;
@@ -92,7 +92,21 @@ cmd({
         let mediaMsg;
 
         switch (receivedText.trim()) {
-          case "1":
+         
+                    case "1":
+            await conn.sendMessage(senderID, { react: { text: '⬆️', key: receivedMsg.key } });
+
+            mediaMsg = await conn.sendMessage(senderID, {
+              video: { url: high },
+              mimetype: "video/mp4",
+              caption: "*HD Quality Video* 🔋",
+              thumbnail: thumbBuffer
+            }, { quoted: receivedMsg });
+
+            await conn.sendMessage(senderID, { react: { text: '✅', key: receivedMsg.key } });
+            break;
+            
+            case "2":
             // ⬆️ React for upload
             await conn.sendMessage(senderID, { react: { text: '⬆️', key: receivedMsg.key } });
 
@@ -105,19 +119,6 @@ cmd({
 
             // ✅ React after sent
             await conn.sendMessage(senderID, { react: { text: '✔️', key: receivedMsg.key } });
-            break;
-
-          case "2":
-            await conn.sendMessage(senderID, { react: { text: '⬆️', key: receivedMsg.key } });
-
-            mediaMsg = await conn.sendMessage(senderID, {
-              video: { url: high },
-              mimetype: "video/mp4",
-              caption: "*HD Quality Video* 🔋",
-              thumbnail: thumbBuffer
-            }, { quoted: receivedMsg });
-
-            await conn.sendMessage(senderID, { react: { text: '✅', key: receivedMsg.key } });
             break;
 
           case "3":
