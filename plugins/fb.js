@@ -1,6 +1,27 @@
 const axios = require("axios");
 const { cmd } = require('../command');
 
+// Fake ChatGPT vCard
+const fakevCard = {
+    key: {
+        fromMe: false,
+        participant: "0@s.whatsapp.net",
+        remoteJid: "status@broadcast"
+    },
+    message: {
+        contactMessage: {
+            displayName: "© Mr Hiruka",
+            vcard: `BEGIN:VCARD
+VERSION:3.0
+FN:Meta
+ORG:META AI;
+TEL;type=CELL;type=VOICE;waid=94762095304:+94762095304
+END:VCARD`
+        }
+    }
+};
+
+
 cmd({
   pattern: "fb",
   alias: ["facebook", "fbvideo", "facebookvideo"], 
@@ -10,7 +31,7 @@ cmd({
 }, async (conn, m, store, { from, quoted, q, reply }) => {
   try {
     if (!q || !q.startsWith("https://")) {
-      return conn.sendMessage(from, { text: "❌ Please provide a valid Facebook video URL." }, { quoted: m });
+      return conn.sendMessage(from, { text: "🚩 Please give a valid Facebook URL 🐼" }, { quoted: m });
     }
 
     await conn.sendMessage(from, { react: { text: '🎥', key: m.key } });
@@ -48,7 +69,7 @@ cmd({
     const sentMsg = await conn.sendMessage(from, {
       image: { url: fixedThumbnail },
       caption: caption
-    }, { quoted: m });
+    }, { quoted: fakevCard });
 
     const messageID = sentMsg.key.id;
 
