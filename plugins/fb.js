@@ -21,9 +21,8 @@ END:VCARD`
     }
 };
 
-
 // ─────────────────────────────────────────────
-// 🌀 FACEBOOK DOWNLOADER (API 1 - Aswin API)
+// 🌀 FACEBOOK DOWNLOADER (API 1 - ASWIN API)
 // ─────────────────────────────────────────────
 cmd({
   pattern: "fb",
@@ -49,6 +48,9 @@ cmd({
 
     const { title, thumbnail, low, high } = data.data;
 
+    // 🖼️ Use video thumbnail if available, else fallback
+    const thumb = thumbnail || "https://files.catbox.moe/36ndl3.jpg";
+
     const caption = `
 🎥 *RANUMITHA-X-MD FACEBOOK DOWNLOADER* 🎥
 
@@ -64,13 +66,13 @@ cmd({
 > © Powerd by 𝗥𝗔𝗡𝗨𝗠𝗜𝗧𝗛𝗔-𝗫-𝗠𝗗 🌛`;
 
     const sentMsg = await conn.sendMessage(from, {
-      image: { url: thumbnail },
+      image: { url: thumb },
       caption,
       contextInfo: {
         externalAdReply: {
           title: title || "Facebook Video",
           body: "Click below to open on Facebook",
-          thumbnailUrl: thumbnail,
+          thumbnailUrl: thumb,
           mediaType: 1,
           sourceUrl: q
         }
@@ -91,7 +93,6 @@ cmd({
       if (isReplyToBot) {
         const text = receivedText.trim();
 
-        // ⬇️ React when download starts
         await conn.sendMessage(senderID, { react: { text: '⬇️', key: receivedMsg.key } });
 
         try {
@@ -142,7 +143,7 @@ cmd({
 
 
 // ─────────────────────────────────────────────
-// 🌀 FACEBOOK DOWNLOADER (API 2 - Lance API)
+// 🌀 FACEBOOK DOWNLOADER (API 2 - LANCE API)
 // ─────────────────────────────────────────────
 cmd({
   pattern: "fb2",
@@ -174,7 +175,12 @@ cmd({
 
     const hdVideo = resultArray.find(v => v.quality?.toUpperCase() === "HD")?.url;
     const sdVideo = resultArray.find(v => v.quality?.toUpperCase() === "SD")?.url;
-    const thumbnail = "https://files.catbox.moe/36ndl3.jpg";
+
+    // 🖼️ Auto thumbnail + fallback
+    const thumbnail = content.data?.thumbnail 
+                   || content.data?.thumb 
+                   || content.data?.image 
+                   || "https://files.catbox.moe/36ndl3.jpg";
 
     const caption = `
 🎥 *RANUMITHA-X-MD FACEBOOK DOWNLOADER* 🎥
