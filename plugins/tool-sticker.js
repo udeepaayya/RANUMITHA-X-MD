@@ -35,7 +35,7 @@ END:VCARD`
 cmd(
   {
     pattern: 'vsticker',
-    alias: ['gsticker', 'g2s', 'gs', 'v2s', 'vs',],
+    alias: ['gsticker', 'g2s', 'gs', 'v2s', 'vs', 'img2s', 'i2s'],
     desc: 'Convert GIF/Video to a sticker.',
     category: 'sticker',
     use: '<reply media or URL>',
