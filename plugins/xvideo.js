@@ -4,23 +4,34 @@ const { fetchJson } = require('../lib/functions');
 const footer = "> © Powerd by 𝗥𝗔𝗡𝗨𝗠𝗜𝗧𝗛𝗔-𝗫-𝗠𝗗 🌛";
 const menuImage = "https://raw.githubusercontent.com/Ranumithaofc/RANU-FILE-S-/refs/heads/main/images/GridArt_yellow.jpg";
 
+let isChoosing = false;
+let isChoosingQuality = false;
+
 cmd({
     pattern: "xnxx",
-    alias: ["xvdl", "xvideo", "phv", "ph"],
+    alias: ["xvdl", "xvideo", "phv"],
     use: ".xnxx <video name>",
     react: "🤤",
     desc: "Search & download xnxx.com videos (18+).",
     category: "download",
     filename: __filename
 }, async (conn, mek, m, { q, from, reply }) => {
+
     try {
         if (!q) return await reply("❌ Please enter a video name!");
 
-        const searchApi = await fetchJson(`https://tharuzz-ofc-api-v2.vercel.app/api/search/xvsearch?query=${encodeURIComponent(q)}`);
+        isChoosing = false;
+        isChoosingQuality = false;
 
-        if (!searchApi.result?.xvideos?.length) return await reply("❌ No results found!");
+        const searchApi = await fetchJson(
+            `https://tharuzz-ofc-api-v2.vercel.app/api/search/xvsearch?query=${encodeURIComponent(q)}`
+        );
+
+        if (!searchApi.result?.xvideos?.length)
+            return await reply("❌ No results found!");
 
         let listText = "🫣 RANUMITHA-X-MD XNXX SEARCH RESULTS\n\n🔢 *Reply a number to choose a result.*\n\n";
+
         searchApi.result.xvideos.forEach((item, i) => {
             listText += `*${i + 1}.* | ${item.title || "No title"}\n`;
         });
@@ -34,28 +45,37 @@ cmd({
             { quoted: mek }
         );
 
-        // Listener for number reply
-        const listListener = async (update) => {
+        const handleChoose = async (update) => {
             const msg = update.messages?.[0];
             if (!msg?.message) return;
 
-            const text = msg.message.conversation || msg.message.extendedTextMessage?.text;
-            const isReply = msg.message.extendedTextMessage?.contextInfo?.stanzaId === listMsg.key.id;
+            const txt =
+                msg.message.conversation ||
+                msg.message.extendedTextMessage?.text;
+
+            const isReply =
+                msg.message.extendedTextMessage?.contextInfo?.stanzaId === listMsg.key.id;
+
             if (!isReply) return;
+            if (isChoosing) return; // 🔒 lock prevents duplicate triggers
+            isChoosing = true;
 
-            conn.ev.off("messages.upsert", listListener);
+            const index = parseInt(txt.trim()) - 1;
 
-            const index = parseInt(text.trim()) - 1;
             if (isNaN(index) || index < 0 || index >= searchApi.result.xvideos.length) {
+                isChoosing = false;
                 return await reply("❌ Invalid number!");
             }
 
             const chosen = searchApi.result.xvideos[index];
-            const downloadApi = await fetchJson(`https://tharuzz-ofc-api-v2.vercel.app/api/download/xvdl?url=${chosen.link}`);
-            const info = downloadApi.result;
 
-            const urlHigh = info.dl_Links.highquality;
-            const urlLow = info.dl_Links.lowquality;
+            const downloadApi = await fetchJson(
+                `https://tharuzz-ofc-api-v2.vercel.app/api/download/xvdl?url=${chosen.link}`
+            );
+
+            const info = downloadApi.result;
+            const HQ = info.dl_Links.highquality;
+            const LQ = info.dl_Links.lowquality;
 
             const askMsg = await conn.sendMessage(
                 from,
@@ -70,68 +90,66 @@ cmd({
                 { quoted: msg }
             );
 
-            // Listener for quality choice
-            const typeListener = async (tUpdate) => {
-                const tMsg = tUpdate.messages?.[0];
-                if (!tMsg?.message) return;
+            const handleQuality = async (u) => {
+                const t = u.messages?.[0];
+                if (!t?.message) return;
 
-                const tText = tMsg.message.conversation || tMsg.message.extendedTextMessage?.text;
-                const isReplyType = tMsg.message.extendedTextMessage?.contextInfo?.stanzaId === askMsg.key.id;
-                if (!isReplyType) return;
+                const choice =
+                    t.message.conversation ||
+                    t.message.extendedTextMessage?.text;
 
-                conn.ev.off("messages.upsert", typeListener);
+                const isReplyQ =
+                    t.message.extendedTextMessage?.contextInfo?.stanzaId === askMsg.key.id;
 
-                // HIGH QUALITY
-                if (tText.trim() === "1") {
+                if (!isReplyQ) return;
+                if (isChoosingQuality) return; // 🔒 prevents double
+                isChoosingQuality = true;
 
-                    // ⬇️ Download reaction
-                    await conn.sendMessage(from, { react: { text: "⬇️", key: tMsg.key }});
+                let sendURL;
 
-                    // ⬆️ Upload reaction
-                    await conn.sendMessage(from, { react: { text: "⬆️", key: tMsg.key }});
-
-                    // Send Video
-                    await conn.sendMessage(
-                        from,
-                        { video: { url: urlHigh }, caption: `🔞 High Quality Video\n> ${info.title}` },
-                        { quoted: tMsg }
-                    );
-
-                    // ✔️ Finished reaction
-                    await conn.sendMessage(from, { react: { text: "✔️", key: tMsg.key }});
-
-
-                // LOW QUALITY
-                } else if (tText.trim() === "2") {
-
-                    // ⬇️ Download reaction
-                    await conn.sendMessage(from, { react: { text: "⬇️", key: tMsg.key }});
-
-                    // ⬆️ Upload reaction
-                    await conn.sendMessage(from, { react: { text: "⬆️", key: tMsg.key }});
-
-                    // Send Video
-                    await conn.sendMessage(
-                        from,
-                        { video: { url: urlLow }, caption: `🔞 Low Quality Video\n> ${info.title}` },
-                        { quoted: tMsg }
-                    );
-
-                    // ✔️ Finished reaction
-                    await conn.sendMessage(from, { react: { text: "✔️", key: tMsg.key }});
-
-                } else {
-                    await conn.sendMessage(from, { text: "*❌ Invalid input.*" }, { quoted: tMsg });
+                if (choice.trim() === "1") sendURL = HQ;
+                else if (choice.trim() === "2") sendURL = LQ;
+                else {
+                    isChoosingQuality = false;
+                    return await reply("❌ Enter *1* or *2* only!");
                 }
+
+                // ⬇️ Download reaction
+                await conn.sendMessage(from, {
+                    react: { text: "⬇️", key: t.key }
+                });
+
+                // ⬆️ Upload reaction
+                await conn.sendMessage(from, {
+                    react: { text: "⬆️", key: t.key }
+                });
+
+                // Send Video
+                await conn.sendMessage(
+                    from,
+                    {
+                        video: { url: sendURL },
+                        caption: `🔞 Video\n> ${info.title}`
+                    },
+                    { quoted: t }
+                );
+
+                // ✔️ Done reaction
+                await conn.sendMessage(from, {
+                    react: { text: "✔️", key: t.key }
+                });
+
+                isChoosing = false;
+                isChoosingQuality = false;
             };
 
-            conn.ev.on("messages.upsert", typeListener);
+            conn.ev.on("messages.upsert", handleQuality);
         };
 
-        conn.ev.on("messages.upsert", listListener);
+        conn.ev.on("messages.upsert", handleChoose);
 
-    } catch (e) {
-        console.error(e);
-        await reply("*❌ Error:* " + e);
+    } catch (err) {
+        console.log(err);
+        await reply("❌ Error: " + err);
     }
 });
