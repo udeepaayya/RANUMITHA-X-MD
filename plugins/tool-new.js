@@ -474,7 +474,7 @@ async (conn, mek, m, { args, reply, senderNumber }) => {
 
 cmd({
     pattern: "calculate",
-    alias: ["calc"],
+    alias: ["calc", "cal", "mathematics", "math"],
     desc: "Evaluate a mathematical expression.",
     category: "utilities",
     filename: __filename
