@@ -121,7 +121,7 @@ cmd({
                     await conn.sendMessage(from, { react: { text: "✔️", key: tMsg.key }});
 
                 } else {
-                    await conn.sendMessage(from, { text: "❌ Invalid input. Type 1 for high, 2 for low." }, { quoted: tMsg });
+                    await conn.sendMessage(from, { text: "*❌ Invalid input.*" }, { quoted: tMsg });
                 }
             };
 
