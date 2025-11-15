@@ -6,7 +6,7 @@ const menuImage = "https://raw.githubusercontent.com/Ranumithaofc/RANU-FILE-S-/r
 
 cmd({
     pattern: "xnxx",
-    alias: ["xvdl", "xvideo", "phv"],
+    alias: ["xvdl", "xvideo", "phv", "ph"],
     use: ".xnxx <video name>",
     react: "🤤",
     desc: "Search & download xnxx.com videos (18+).",
