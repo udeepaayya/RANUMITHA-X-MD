@@ -2,6 +2,7 @@ const { cmd } = require('../command');
 const { fetchJson } = require('../lib/functions');
 
 const footer = "> © Powerd by 𝗥𝗔𝗡𝗨𝗠𝗜𝗧𝗛𝗔-𝗫-𝗠𝗗 🌛";
+const menuImage = "https://raw.githubusercontent.com/Ranumithaofc/RANU-FILE-S-/refs/heads/main/images/GridArt_yellow.jpg";
 
 cmd({
     pattern: "xnxx",
@@ -19,18 +20,20 @@ cmd({
 
         if (!searchApi.result?.xvideos?.length) return await reply("❌ No results found!");
 
-        let listText = "🫣 RANUMITHA-X-MD XNXX SEARCH RESULTS\n\n🔢 *ʀᴇᴘʟʏ ʙᴇʟᴏᴡ ᴀ ɴᴜᴍʙᴇʀ ᴄʜᴏᴏꜱᴇ ᴀ ʀᴇᴀᴜʟᴛ.*\n\n";
+        let listText = "🫣 RANUMITHA-X-MD XNXX SEARCH RESULTS\n\n🔢 *Reply a number to choose a result.*\n\n";
         searchApi.result.xvideos.forEach((item, i) => {
-            listText += `*${i + 1}\.* | ${item.title || "No title"}\n`;
+            listText += `*${i + 1}.* | ${item.title || "No title"}\n`;
         });
 
         const listMsg = await conn.sendMessage(
             from,
-            { text: listText + `\n\n${footer}` },
+            {
+                image: { url: menuImage },
+                caption: listText + `\n\n${footer}`
+            },
             { quoted: mek }
         );
 
-        // Listener for choosing video
         const listListener = async (update) => {
             const msg = update.messages?.[0];
             if (!msg?.message) return;
@@ -49,6 +52,7 @@ cmd({
             const chosen = searchApi.result.xvideos[index];
             const downloadApi = await fetchJson(`https://tharuzz-ofc-api-v2.vercel.app/api/download/xvdl?url=${chosen.link}`);
             const info = downloadApi.result;
+
             const urlHigh = info.dl_Links.highquality;
             const urlLow = info.dl_Links.lowquality;
 
@@ -56,7 +60,8 @@ cmd({
                 from,
                 {
                     image: { url: info.thumbnail },
-                    caption: `*🔞 VIDEO INFO*\n\n` +
+                    caption:
+                        `*🔞 VIDEO INFO*\n\n` +
                         `*Title:* ${info.title}\n` +
                         `*Duration:* ${info.duration}\n\n` +
                         `Reply number:\n1 | High Quality\n2 | Low Quality\n\n${footer}`
