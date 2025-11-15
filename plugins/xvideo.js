@@ -34,6 +34,7 @@ cmd({
             { quoted: mek }
         );
 
+        // Listener for number reply
         const listListener = async (update) => {
             const msg = update.messages?.[0];
             if (!msg?.message) return;
@@ -69,6 +70,7 @@ cmd({
                 { quoted: msg }
             );
 
+            // Listener for quality choice
             const typeListener = async (tUpdate) => {
                 const tMsg = tUpdate.messages?.[0];
                 if (!tMsg?.message) return;
@@ -79,10 +81,45 @@ cmd({
 
                 conn.ev.off("messages.upsert", typeListener);
 
+                // HIGH QUALITY
                 if (tText.trim() === "1") {
-                    await conn.sendMessage(from, { video: { url: urlHigh }, caption: `🔞 High Quality Video\n> ${info.title}` }, { quoted: tMsg });
+
+                    // ⬇️ Download reaction
+                    await conn.sendMessage(from, { react: { text: "⬇️", key: tMsg.key }});
+
+                    // ⬆️ Upload reaction
+                    await conn.sendMessage(from, { react: { text: "⬆️", key: tMsg.key }});
+
+                    // Send Video
+                    await conn.sendMessage(
+                        from,
+                        { video: { url: urlHigh }, caption: `🔞 High Quality Video\n> ${info.title}` },
+                        { quoted: tMsg }
+                    );
+
+                    // ✔️ Finished reaction
+                    await conn.sendMessage(from, { react: { text: "✔️", key: tMsg.key }});
+
+
+                // LOW QUALITY
                 } else if (tText.trim() === "2") {
-                    await conn.sendMessage(from, { video: { url: urlLow }, caption: `🔞 Low Quality Video\n> ${info.title}` }, { quoted: tMsg });
+
+                    // ⬇️ Download reaction
+                    await conn.sendMessage(from, { react: { text: "⬇️", key: tMsg.key }});
+
+                    // ⬆️ Upload reaction
+                    await conn.sendMessage(from, { react: { text: "⬆️", key: tMsg.key }});
+
+                    // Send Video
+                    await conn.sendMessage(
+                        from,
+                        { video: { url: urlLow }, caption: `🔞 Low Quality Video\n> ${info.title}` },
+                        { quoted: tMsg }
+                    );
+
+                    // ✔️ Finished reaction
+                    await conn.sendMessage(from, { react: { text: "✔️", key: tMsg.key }});
+
                 } else {
                     await conn.sendMessage(from, { text: "❌ Invalid input. Type 1 for high, 2 for low." }, { quoted: tMsg });
                 }
