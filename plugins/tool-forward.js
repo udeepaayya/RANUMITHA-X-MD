@@ -1,102 +1,160 @@
 const { cmd } = require("../command");
 
+// Safety Configuration
+const SAFETY = {
+  MAX_JIDS: 20,
+  BASE_DELAY: 2000,
+  EXTRA_DELAY: 4000,
+};
+
 cmd({
   pattern: "forward",
   alias: ["fwd"],
-  desc: "Forward media/message to inbox + groups",
+  desc: "Forward media/messages to single or multiple JIDs",
   category: "owner",
   filename: __filename
-}, 
-
+},
 async (client, message, match, { isOwner }) => {
   try {
 
-    if (!isOwner) return message.reply("📛 *Owner Only Command!*");
-    if (!message.quoted) return message.reply("📝 *Please reply to a message*");
+    // ===== Owner Only =====
+    if (!isOwner) return await message.reply("📛 *Owner Only Command*");
 
-    let raw = (match || "").toString().trim();
-    if (!raw) return message.reply("❌ *Please give JIDs*\nExample:\n.fwd 9471xxxxxxx@s.whatsapp.net,12036xxxxx@g.us");
+    // ===== Must reply to a message =====
+    if (!message.quoted)
+      return await message.reply("🍁 *Please reply to a message to forward*");
 
-    // Split comma / spaces
-    let splitJids = raw.split(/[\s,]+/).filter(x => x.trim());
+    // ===========================
+    //       JID PROCESSING
+    // ===========================
 
-    // Limit to 25
-    splitJids = splitJids.slice(0, 25);
+    let jidInput = "";
 
-    // Validate only these 2 EXACT formats
-    let validJids = splitJids.map(jid => {
-      jid = jid.trim();
+    if (typeof match === "string") jidInput = match.trim();
+    else if (Array.isArray(match)) jidInput = match.join(" ").trim();
+    else if (match && typeof match === "object") jidInput = match.text || "";
 
-      // Inbox JID (exact format)
-      if (/^\d{8,15}@s\.whatsapp\.net$/i.test(jid)) {
-        return jid;
-      }
+    const rawJids = jidInput.split(/[\s,]+/).filter(x => x.trim().length > 0);
 
-      // Group JID (exact format)
-      if (/^\d{10,20}@g\.us$/i.test(jid)) {
-        return jid;
-      }
+    const validJids = rawJids
+      .map(jid => {
+        const clean = jid.replace(/(@g\.us|@s\.whatsapp\.net)$/i, "");
 
-      return null;
-    }).filter(Boolean);
+        if (/^\d+$/.test(clean)) {
+          return jid.includes("@g.us")
+            ? `${clean}@g.us`
+            : jid.includes("@s.whatsapp.net")
+              ? `${clean}@s.whatsapp.net`
+              : /^\d{18,}$/.test(clean)
+                ? `${clean}@g.us`
+                : `${clean}@s.whatsapp.net`;
+        }
+        return null;
+      })
+      .filter(x => x !== null)
+      .slice(0, SAFETY.MAX_JIDS);
 
-    if (validJids.length === 0) {
-      return message.reply(
-        "❌ *Invalid JID Format!*\n\n" +
-        "📩 *Inbox JID Example:*\n94713119712@s.whatsapp.net\n\n" +
-        "👥 *Group JID Example:*\n120363405061356141@g.us"
+    if (validJids.length === 0)
+      return await message.reply(
+        "❌ *No valid JIDs found!*\n\nExamples:\n" +
+        ".fwd 120363411055156472@g.us\n" +
+        ".fwd 94713119712@s.whatsapp.net\n" +
+        ".fwd 1203xxxxxxx 1203yyyyyyy"
       );
+
+    // ===========================
+    //        MESSAGE TYPE
+    // ===========================
+
+    let messageContent = {};
+    const q = message.quoted;
+    const mtype = q.mtype;
+
+    if (["imageMessage", "videoMessage", "audioMessage", "stickerMessage", "documentMessage"].includes(mtype)) {
+
+      const buffer = await q.download();
+
+      switch (mtype) {
+        case "imageMessage":
+          messageContent = {
+            image: buffer,
+            caption: q.text || ""
+          };
+          break;
+        case "videoMessage":
+          messageContent = {
+            video: buffer,
+            caption: q.text || ""
+          };
+          break;
+        case "audioMessage":
+          messageContent = {
+            audio: buffer,
+            ptt: q.ptt || false
+          };
+          break;
+        case "stickerMessage":
+          messageContent = { sticker: buffer };
+          break;
+        case "documentMessage":
+          messageContent = {
+            document: buffer,
+            fileName: q.fileName || "file"
+          };
+          break;
+      }
     }
 
-    // Detect message type
-    let msgType = message.quoted.mtype;
-    let toSend = {};
+    else if (mtype === "extendedTextMessage" || mtype === "conversation") {
+      messageContent = { text: q.text };
+    }
 
-    if (message.quoted.download) {
-      let buff = await message.quoted.download();
-
-      if (msgType === "imageMessage") {
-        toSend = { image: buff, caption: message.quoted.text || "" };
-      } 
-      else if (msgType === "videoMessage") {
-        toSend = { video: buff, caption: message.quoted.text || "" };
-      } 
-      else if (msgType === "audioMessage") {
-        toSend = { audio: buff, ptt: message.quoted.ptt || false };
-      } 
-      else if (msgType === "stickerMessage") {
-        toSend = { sticker: buff };
-      } 
-      else if (msgType === "documentMessage") {
-        toSend = { document: buff, fileName: message.quoted.fileName || "file" };
-      } 
-      else {
-        toSend = { text: message.quoted.text || "" };
-      }
-    } 
     else {
-      toSend = { text: message.quoted.text || "" };
+      messageContent = q;
     }
 
-    let success = 0;
-    let failed = [];
+    // ===========================
+    //     SENDING PROCESS
+    // ===========================
 
-    for (let jid of validJids) {
+    let successCount = 0;
+    const failed = [];
+
+    for (let i = 0; i < validJids.length; i++) {
+      const jid = validJids[i];
+
       try {
-        await client.sendMessage(jid, toSend);
-        success++;
-        await new Promise(r => setTimeout(r, 800)); // Safe delay
-      } catch (e) {
+        await client.sendMessage(jid, messageContent);
+        successCount++;
+
+        if ((i + 1) % 10 === 0) {
+          await message.reply(`🔄 Sent to ${i + 1}/${validJids.length}...`);
+        }
+
+        const delay = (i + 1) % 10 === 0 ? SAFETY.EXTRA_DELAY : SAFETY.BASE_DELAY;
+        await new Promise(res => setTimeout(res, delay));
+
+      } catch {
         failed.push(jid);
+        await new Promise(res => setTimeout(res, SAFETY.BASE_DELAY));
       }
     }
 
-    let report = `✅ *Forward Completed*\n\n📨 Success: ${success}/${validJids.length}`;
-    if (failed.length) report += `\n❌ Failed: ${failed.join(", ")}`;
+    // ===========================
+    //         REPORT
+    // ===========================
 
-    message.reply(report);
+    let report = `✅ *Forwarding Completed*\n\n` +
+                 `📤 Success: ${successCount}/${validJids.length}\n` +
+                 `📦 Type: ${mtype || "text"}\n`;
+
+    if (failed.length > 0) {
+      report += `\n❌ Failed: ${failed.join(", ")}`;
+    }
+
+    await message.reply(report);
 
   } catch (e) {
-    message.reply("💢 Error: " + e.message);
+    await message.reply("💢 Error: " + e.message);
   }
 });
