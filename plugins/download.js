@@ -208,7 +208,7 @@ cmd({
       + `┃▸ *File Size:* ${filesize}\n`
       + `┃▸ *Uploaded:* ${uploaded}\n`
       + `╰━━━⪼\n\n`
-      + `📥 *Downloading your file...*\n> © Powerd by 𝗥𝗔𝗡𝗨𝗠𝗜𝗧𝗛𝗔-𝗫-𝗠𝗗 🌛`;
+      + `📥 *Downloading your file...*\n\n> © Powerd by 𝗥𝗔𝗡𝗨𝗠𝗜𝗧𝗛𝗔-𝗫-𝗠𝗗 🌛`;
 
     // send the file to the user (document with remote URL)
     await conn.sendMessage(from, {
