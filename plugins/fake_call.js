@@ -31,6 +31,7 @@ async function uploadToCatbox(buffer, filename='file.jpg') {
 // Plugin command
 cmd({
   pattern: "fakecall",
+  alias: ["call", "horacall"],
   desc: "Make fake call image (WHITESHADOW-MD caption)",
   category: "maker",
   react: "📞",
