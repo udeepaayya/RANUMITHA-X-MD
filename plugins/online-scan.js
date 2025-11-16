@@ -22,7 +22,7 @@ END:VCARD`
 
 cmd({
     pattern: "online",
-    alias: ["ranuonline", "onlinemembers", "onlinep", "onlinepeoples"],
+    alias: ["ranuonline", "onlinemembers", "onlinep", "onlinepeoples", "active"],
     desc: "Check who's online in the group (Admins & Owner only)",
     category: "main",
     react: "🟢",
