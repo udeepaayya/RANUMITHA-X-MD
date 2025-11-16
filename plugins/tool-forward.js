@@ -10,24 +10,18 @@ const SAFETY = {
 cmd({
   pattern: "forward",
   alias: ["fwd"],
-  desc: "Forward media/messages to single or multiple JIDs",
+  desc: "Forward media/messages to single or multiple JIDs (users, groups, channels)",
   category: "owner",
   filename: __filename
 },
 async (client, message, match, { isOwner }) => {
   try {
-
     // ===== Owner Only =====
     if (!isOwner) return await message.reply("📛 *Owner Only Command*");
-
     // ===== Must reply to a message =====
-    if (!message.quoted)
-      return await message.reply("🍁 *Please reply to a message to forward*");
+    if (!message.quoted) return await message.reply("🍁 *Please reply to a message to forward*");
 
-    // ===========================
-    //       JID PROCESSING
-    // ===========================
-
+    // ===== JID PROCESSING =====
     let jidInput = "";
 
     if (typeof match === "string") jidInput = match.trim();
@@ -38,16 +32,15 @@ async (client, message, match, { isOwner }) => {
 
     const validJids = rawJids
       .map(jid => {
-        const clean = jid.replace(/(@g\.us|@s\.whatsapp\.net)$/i, "");
+        let clean = jid.replace(/(@g\.us|@s\.whatsapp\.net|@newsletter)$/i, "");
 
         if (/^\d+$/.test(clean)) {
-          return jid.includes("@g.us")
-            ? `${clean}@g.us`
-            : jid.includes("@s.whatsapp.net")
-              ? `${clean}@s.whatsapp.net`
-              : /^\d{18,}$/.test(clean)
-                ? `${clean}@g.us`
-                : `${clean}@s.whatsapp.net`;
+          if (jid.includes("@g.us")) return `${clean}@g.us`;                 // Group
+          if (jid.includes("@s.whatsapp.net")) return `${clean}@s.whatsapp.net`; // User
+          if (jid.includes("@newsletter")) return `${clean}@newsletter`;     // Channel
+          // Auto-detect based on length
+          if (clean.length > 15) return `${clean}@g.us`;                     // Group-like
+          return `${clean}@s.whatsapp.net`;                                  // Default user
         }
         return null;
       })
@@ -59,70 +52,46 @@ async (client, message, match, { isOwner }) => {
         "❌ *No valid JIDs found!*\n\nExamples:\n" +
         ".fwd 120363411055156472@g.us\n" +
         ".fwd 94713119712@s.whatsapp.net\n" +
+        ".fwd 120363405042997613@newsletter\n" +
         ".fwd 1203xxxxxxx 1203yyyyyyy"
       );
 
-    // ===========================
-    //        MESSAGE TYPE
-    // ===========================
-
+    // ===== MESSAGE TYPE =====
     let messageContent = {};
     const q = message.quoted;
     const mtype = q.mtype;
 
     if (["imageMessage", "videoMessage", "audioMessage", "stickerMessage", "documentMessage"].includes(mtype)) {
-
       const buffer = await q.download();
-
       switch (mtype) {
         case "imageMessage":
-          messageContent = {
-            image: buffer,
-            caption: q.text || ""
-          };
+          messageContent = { image: buffer, caption: q.text || "" };
           break;
         case "videoMessage":
-          messageContent = {
-            video: buffer,
-            caption: q.text || ""
-          };
+          messageContent = { video: buffer, caption: q.text || "" };
           break;
         case "audioMessage":
-          messageContent = {
-            audio: buffer,
-            ptt: q.ptt || false
-          };
+          messageContent = { audio: buffer, ptt: q.ptt || false };
           break;
         case "stickerMessage":
           messageContent = { sticker: buffer };
           break;
         case "documentMessage":
-          messageContent = {
-            document: buffer,
-            fileName: q.fileName || "file"
-          };
+          messageContent = { document: buffer, fileName: q.fileName || "file" };
           break;
       }
-    }
-
-    else if (mtype === "extendedTextMessage" || mtype === "conversation") {
+    } else if (mtype === "extendedTextMessage" || mtype === "conversation") {
       messageContent = { text: q.text };
-    }
-
-    else {
+    } else {
       messageContent = q;
     }
 
-    // ===========================
-    //     SENDING PROCESS
-    // ===========================
-
+    // ===== SENDING PROCESS =====
     let successCount = 0;
     const failed = [];
 
     for (let i = 0; i < validJids.length; i++) {
       const jid = validJids[i];
-
       try {
         await client.sendMessage(jid, messageContent);
         successCount++;
@@ -140,17 +109,12 @@ async (client, message, match, { isOwner }) => {
       }
     }
 
-    // ===========================
-    //         REPORT
-    // ===========================
-
+    // ===== REPORT =====
     let report = `✅ *Forwarding Completed*\n\n` +
                  `📤 Success: ${successCount}/${validJids.length}\n` +
                  `📦 Type: ${mtype || "text"}\n`;
 
-    if (failed.length > 0) {
-      report += `\n❌ Failed: ${failed.join(", ")}`;
-    }
+    if (failed.length > 0) report += `\n❌ Failed: ${failed.join(", ")}`;
 
     await message.reply(report);
 
