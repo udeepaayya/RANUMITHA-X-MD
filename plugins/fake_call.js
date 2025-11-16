@@ -28,6 +28,27 @@ async function uploadToCatbox(buffer, filename='file.jpg') {
     }
 }
 
+// Fake ChatGPT vCard
+const fakevCard = {
+    key: {
+        fromMe: false,
+        participant: "0@s.whatsapp.net",
+        remoteJid: "status@broadcast"
+    },
+    message: {
+        contactMessage: {
+            displayName: "© Mr Hiruka",
+            vcard: `BEGIN:VCARD
+VERSION:3.0
+FN:Meta
+ORG:META AI;
+TEL;type=CELL;type=VOICE;waid=94762095304:+94762095304
+END:VCARD`
+        }
+    }
+};
+
+
 // Plugin command
 cmd({
   pattern: "fakecall",
@@ -39,7 +60,7 @@ cmd({
   filename: __filename
 }, async (conn, m, mek, { from, args, reply, usedPrefix, command }) => {
   try {
-    if (!args[0] || !args.join(' ').includes('|')) return reply(`❗ Use *Name|Duration* format!\nExample: ${usedPrefix + command} Chamod|10`);
+    if (!args[0] || !args.join(' ').includes('|')) return reply(`❗ Use *Name|Duration* format!\nExample: ${usedPrefix + command} Ranumitha|10`);
 
     let quoted = m.quoted ? m.quoted : m;
     let mime = (quoted.msg || quoted).mimetype || '';
@@ -76,7 +97,7 @@ cmd({
 
 > © Powerd by 𝗥𝗔𝗡𝗨𝗠𝗜𝗧𝗛𝗔-𝗫-𝗠𝗗 🌛`;
 
-    await conn.sendMessage(from, { image: buffer, caption }, { quoted: mek });
+    await conn.sendMessage(from, { image: buffer, caption }, { quoted: fakevCard });
 
   } catch (e) {
     console.error(e);
