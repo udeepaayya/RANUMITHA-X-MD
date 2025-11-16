@@ -6,40 +6,46 @@ cmd({
   desc: "Forward media/message to inbox + groups",
   category: "owner",
   filename: __filename
-}, async (client, message, match, { isOwner }) => {
+}, 
 
+async (client, message, match, { isOwner }) => {
   try {
+
     if (!isOwner) return message.reply("📛 *Owner Only Command!*");
     if (!message.quoted) return message.reply("📝 *Please reply to a message*");
 
     let raw = (match || "").toString().trim();
-    if (!raw) return message.reply("❌ *Please give JIDs*\nExample: .fwd jid1,jid2");
+    if (!raw) return message.reply("❌ *Please give JIDs*\nExample:\n.fwd 9471xxxxxxx@s.whatsapp.net,12036xxxxx@g.us");
 
-    // Split JIDs
+    // Split comma / spaces
     let splitJids = raw.split(/[\s,]+/).filter(x => x.trim());
-    if (splitJids.length === 0) return message.reply("❌ No valid JIDs found!");
 
     // Limit to 25
     splitJids = splitJids.slice(0, 25);
 
-    // Convert to valid WhatsApp JIDs
+    // Validate only these 2 EXACT formats
     let validJids = splitJids.map(jid => {
       jid = jid.trim();
 
-      // If inbox number
-      if (/^\d{8,15}$/.test(jid)) return `${jid}@s.whatsapp.net`;
+      // Inbox JID (exact format)
+      if (/^\d{8,15}@s\.whatsapp\.net$/i.test(jid)) {
+        return jid;
+      }
 
-      // If group number
-      if (/^\d{8,20}@g\.us$/i.test(jid)) return jid;
-
-      // If inbox complete
-      if (/^\d{8,15}@s\.whatsapp\.net$/i.test(jid)) return jid;
+      // Group JID (exact format)
+      if (/^\d{10,20}@g\.us$/i.test(jid)) {
+        return jid;
+      }
 
       return null;
     }).filter(Boolean);
 
     if (validJids.length === 0) {
-      return message.reply("❌ No valid JIDs!");
+      return message.reply(
+        "❌ *Invalid JID Format!*\n\n" +
+        "📩 *Inbox JID Example:*\n94713119712@s.whatsapp.net\n\n" +
+        "👥 *Group JID Example:*\n120363405061356141@g.us"
+      );
     }
 
     // Detect message type
@@ -51,18 +57,24 @@ cmd({
 
       if (msgType === "imageMessage") {
         toSend = { image: buff, caption: message.quoted.text || "" };
-      } else if (msgType === "videoMessage") {
+      } 
+      else if (msgType === "videoMessage") {
         toSend = { video: buff, caption: message.quoted.text || "" };
-      } else if (msgType === "audioMessage") {
+      } 
+      else if (msgType === "audioMessage") {
         toSend = { audio: buff, ptt: message.quoted.ptt || false };
-      } else if (msgType === "stickerMessage") {
+      } 
+      else if (msgType === "stickerMessage") {
         toSend = { sticker: buff };
-      } else if (msgType === "documentMessage") {
+      } 
+      else if (msgType === "documentMessage") {
         toSend = { document: buff, fileName: message.quoted.fileName || "file" };
-      } else {
+      } 
+      else {
         toSend = { text: message.quoted.text || "" };
       }
-    } else {
+    } 
+    else {
       toSend = { text: message.quoted.text || "" };
     }
 
@@ -73,7 +85,7 @@ cmd({
       try {
         await client.sendMessage(jid, toSend);
         success++;
-        await new Promise(r => setTimeout(r, 1000)); // Safe delay
+        await new Promise(r => setTimeout(r, 800)); // Safe delay
       } catch (e) {
         failed.push(jid);
       }
@@ -87,5 +99,4 @@ cmd({
   } catch (e) {
     message.reply("💢 Error: " + e.message);
   }
-
 });
