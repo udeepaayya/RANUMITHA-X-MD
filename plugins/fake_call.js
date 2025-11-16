@@ -6,28 +6,6 @@ const os = require('os');
 const axios = require('axios');
 const FormData = require('form-data');
 
-// Catbox uploader
-async function uploadToCatbox(buffer, filename='file.jpg') {
-    const tempPath = path.join(os.tmpdir(), filename);
-    fs.writeFileSync(tempPath, buffer);
-
-    const form = new FormData();
-    form.append('fileToUpload', fs.createReadStream(tempPath), filename);
-    form.append('reqtype', 'fileupload');
-
-    try {
-        const { data } = await axios.post("https://catbox.moe/user/api.php", form, {
-            headers: form.getHeaders()
-        });
-        fs.unlinkSync(tempPath);
-        return data; // URL string
-    } catch(e) {
-        if (fs.existsSync(tempPath)) fs.unlinkSync(tempPath);
-        console.error('Catbox upload error:', e);
-        return null;
-    }
-}
-
 // Fake ChatGPT vCard
 const fakevCard = {
     key: {
@@ -50,10 +28,32 @@ END:VCARD`
 
 
 
+// Catbox uploader
+async function uploadToCatbox(buffer, filename='file.jpg') {
+    const tempPath = path.join(os.tmpdir(), filename);
+    fs.writeFileSync(tempPath, buffer);
+
+    const form = new FormData();
+    form.append('fileToUpload', fs.createReadStream(tempPath), filename);
+    form.append('reqtype', 'fileupload');
+
+    try {
+        const { data } = await axios.post("https://catbox.moe/user/api.php", form, {
+            headers: form.getHeaders()
+        });
+        fs.unlinkSync(tempPath);
+        return data; // URL string
+    } catch(e) {
+        if (fs.existsSync(tempPath)) fs.unlinkSync(tempPath);
+        console.error('Catbox upload error:', e);
+        return null;
+    }
+}
+
+
 // Plugin command
 cmd({
   pattern: "fakecall",
-  alias: "call",
   desc: "Make fake call image (WHITESHADOW-MD caption)",
   category: "maker",
   react: "📞",
