@@ -35,7 +35,7 @@ cmd({
             }
         }
 
-        return reply(`📌 Full JID: ${chatJID}`);
+        return reply(`${chatJID}`);
 
     } catch (e) {
         console.error("JID Error:", e);
