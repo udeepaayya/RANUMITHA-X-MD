@@ -4,42 +4,47 @@ const config = require('../config');
 cmd({
     pattern: "jid",
     alias: ["id", "chatid", "gjid"],  
-    desc: "Get full JID of current chat/user/channel or build inbox JID",
+    desc: "Get phone number of sender / replied user in inbox, group or channel",
     react: "🆔",
     category: "utility",
     filename: __filename,
 }, async (conn, mek, m, { 
-    from, isGroup, reply, sender, args
+    from, isGroup, reply, sender, quoted
 }) => {
     try {
 
-        // If user sends a number → build inbox JID
-        if (args[0]) {
-            let num = args[0].replace(/[^0-9]/g, ""); // remove spaces, +, etc.
+        let target;
 
-            if (num.length < 7)
-                return reply("❌ Valid mobile number ekak denna.");
+        // ===============================
+        // 1. If REPLY → get replied user
+        // ===============================
+        if (quoted) {
+            target = quoted.sender;
 
-            return reply(`${num}@s.whatsapp.net`);
-        }
+        // ===============================
+        // 2. If CHANNEL → get channel JID number part
+        // ===============================
+        } else if (from.endsWith("@newsletter")) {
+            target = from;
 
-        let chatJID;
-
-        if (from.endsWith('@g.us')) {
-            // Group
-            chatJID = from;
-        } else if (from.endsWith('@newsletter')) {
-            // Channel
-            chatJID = from;
-        } else if (sender.endsWith('@s.whatsapp.net')) {
-            // Private Chat
-            chatJID = sender;
+        // ===============================
+        // 3. Otherwise → get sender
+        // ===============================
         } else {
-            // Unknown or special case
-            chatJID = from || sender;
+            target = sender;
         }
 
-        return reply(chatJID);
+        // Remove JID suffixes
+        let number = target
+            .replace(/@s\.whatsapp\.net/g, "")
+            .replace(/@g\.us/g, "")
+            .replace(/@newsletter/g, "")
+            .replace(/[^0-9]/g, ""); // keep numbers only
+
+        // If empty number (very rare case)
+        if (!number) return reply("❌ Phone number eka hoyaganna bari una.");
+
+        return reply(number);
 
     } catch (e) {
         console.error("JID Error:", e);
