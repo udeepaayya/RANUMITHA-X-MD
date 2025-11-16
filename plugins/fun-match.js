@@ -14,11 +14,12 @@ const fakevCard = {
 VERSION:3.0
 FN:Meta
 ORG:META AI;
-TEL;type=CELL;type=VOICE;waid=13135550002:+13135550002
+TEL;type=CELL;type=VOICE;waid=94762095304:+94762095304
 END:VCARD`
         }
     }
 };
+
 
 // Command for random boy selection
 cmd({
