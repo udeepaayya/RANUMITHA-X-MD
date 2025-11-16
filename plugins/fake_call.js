@@ -6,28 +6,6 @@ const os = require('os');
 const axios = require('axios');
 const FormData = require('form-data');
 
-// Fake ChatGPT vCard
-const fakevCard = {
-    key: {
-        fromMe: false,
-        participant: "0@s.whatsapp.net",
-        remoteJid: "status@broadcast"
-    },
-    message: {
-        contactMessage: {
-            displayName: "© Mr Hiruka",
-            vcard: `BEGIN:VCARD
-VERSION:3.0
-FN:Meta
-ORG:META AI;
-TEL;type=CELL;type=VOICE;waid=94762095304:+94762095304
-END:VCARD`
-        }
-    }
-};
-
-
-
 // Catbox uploader
 async function uploadToCatbox(buffer, filename='file.jpg') {
     const tempPath = path.join(os.tmpdir(), filename);
@@ -49,7 +27,6 @@ async function uploadToCatbox(buffer, filename='file.jpg') {
         return null;
     }
 }
-
 
 // Plugin command
 cmd({
@@ -83,12 +60,12 @@ cmd({
     if (!res.ok) return reply('*🍂 API error, try again later!*');
 
     const arrayBuffer = await res.arrayBuffer().catch(() => null);
-    if (!arrayBuffer) return reply(*'🍂 API returned no image.*');
+    if (!arrayBuffer) return reply('*🍂 API returned no image.*');
 
     const buffer = Buffer.from(arrayBuffer);
 
     const caption = `✨ *RANUMITHA-X-MD Bot* ✨
-🧑‍💻 By: *Ranumitha tech Team*
+🧑‍💻 By: *Ranumitha Team*
 
 📌 Action: Fake Call
 👤 Name: ${name}
@@ -98,7 +75,7 @@ cmd({
 
 > © Powerd by 𝗥𝗔𝗡𝗨𝗠𝗜𝗧𝗛𝗔-𝗫-𝗠𝗗 🌛`;
 
-    await conn.sendMessage(from, { image: buffer, caption }, { quoted: fakevCard });
+    await conn.sendMessage(from, { image: buffer, caption }, { quoted: mek });
 
   } catch (e) {
     console.error(e);
