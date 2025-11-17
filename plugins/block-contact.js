@@ -6,48 +6,50 @@ cmd({
   react: "🚫",
   desc: "Owner Only: Block the replied user",
   category: "owner",
-  use: "Reply to a user message and type .block",
+  use: "Reply to someone and type .block",
   filename: __filename
 },
 async (conn, mek, m, { from, isOwner, quoted }) => {
 
-  const reply = async (text) => await conn.sendMessage(from, { text }, { quoted: m });
+  const reply = async (text) => 
+    await conn.sendMessage(from, { text }, { quoted: m });
 
   // OWNER CHECK
-  if (!isOwner) return reply("🚫 *Owner Only Command!*");
+  if (!isOwner)
+    return reply("🚫 *Owner Only Command!*");
 
   try {
 
-    // MUST REPLY
+    // MUST REPLY TO BLOCK
     if (!quoted || !quoted.sender) {
       return reply("⚠️ *Reply to a user's message and type .block*");
     }
 
-    // GET REPLIED USER JID
+    // GET THE REPLIED USER JID
     let targetJid = quoted.sender;
 
-    // REACT BEFORE BLOCK
-    await conn.sendMessage(from, { react: { text: "⏳", key: m.key } });
+    // REACT WHILE PROCESSING
+    await conn.sendMessage(from, {
+      react: { text: "⏳", key: m.key }
+    });
 
-    // SUCCESS MESSAGE FIRST
+    // SUCCESS MESSAGE BEFORE ACTUAL BLOCK
     await reply("*Block Successfully ✅*");
 
-    // SMALL DELAY THEN REAL BLOCK
+    // PERFORM BLOCK AFTER SHORT DELAY
     setTimeout(async () => {
 
       if (typeof conn.updateBlockStatus === "function") {
         await conn.updateBlockStatus(targetJid, "block");
-      } 
-      else if (typeof conn.blockUser === "function") {
+      } else if (typeof conn.blockUser === "function") {
         await conn.blockUser(targetJid);
-      } 
-      else if (typeof conn.contactBlock === "function") {
+      } else if (typeof conn.contactBlock === "function") {
         await conn.contactBlock(targetJid);
       }
 
       console.log("Blocked:", targetJid);
 
-    }, 500);
+    }, 400); // 0.4s delay
 
   } catch (err) {
     await reply("❌ Block Failed!\n" + err);
