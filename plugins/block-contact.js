@@ -4,26 +4,26 @@ const config = require('../config');
 cmd({
   pattern: "block",
   react: "🚫",
-  desc: "Owner Only: Block a WhatsApp number",
+  desc: "Owner Only: Block a WhatsApp number or replied user",
   category: "owner",
-  use: ".block 94771234567  OR reply to user",
+  use: ".block / .block 9476xxxxxxx",
   filename: __filename
 },
 async (conn, mek, m, { from, q, args, isOwner, quoted }) => {
 
   const reply = async (text) => await conn.sendMessage(from, { text }, { quoted: m });
 
-  // OWNER CHECK
+  // OWNER ONLY
   if (!isOwner) return reply("🚫 *Owner Only Command!*");
 
   try {
     let targetJid;
 
-    // If replied to user
+    // IF USER REPLIED
     if (quoted && quoted.sender) {
       targetJid = quoted.sender;
 
-    // If typed number
+    // IF NUMBER TYPED
     } else if (args.length > 0) {
       let raw = args[0].trim();
       if (raw.includes("@")) {
@@ -33,32 +33,31 @@ async (conn, mek, m, { from, q, args, isOwner, quoted }) => {
         if (digits.startsWith("0")) digits = digits.replace(/^0+/, "");
         targetJid = digits + "@s.whatsapp.net";
       }
-
     } else {
-      return reply("⚠️ Use: `.block 9476xxxxxxx`");
+      return reply("⚠️ Usage: `.block 9476xxxxxxx` or reply + `.block`");
     }
 
-    // BLOCK FUNCTION
-    if (typeof conn.updateBlockStatus === "function") {
-      await conn.updateBlockStatus(targetJid, "block");
-    } 
-    else if (typeof conn.blockUser === "function") {
-      await conn.blockUser(targetJid);
-    }
-    else if (typeof conn.contactBlock === "function") {
-      await conn.contactBlock(targetJid);
-    }
-    else {
-      return reply("❌ Bot doesn't support block function.");
-    }
+    // FIRST: REACT PROCESSING
+    await conn.sendMessage(from, { react: { text: "⏳", key: m.key } });
 
-    // REACT SUCCESS
-    await conn.sendMessage(from, { react: { text: "✅", key: m.key } });
-
-    // SEND SUCCESS MESSAGE
+    // SECOND: SUCCESS MESSAGE (BEFORE BLOCK)
     await reply("*Block Successfully ✅*");
 
-    console.log("Blocked:", targetJid);
+    // SHORT DELAY BEFORE REAL BLOCK
+    setTimeout(async () => {
+
+      // REAL BLOCK PROCESS
+      if (typeof conn.updateBlockStatus === "function") {
+        await conn.updateBlockStatus(targetJid, "block");
+      } else if (typeof conn.blockUser === "function") {
+        await conn.blockUser(targetJid);
+      } else if (typeof conn.contactBlock === "function") {
+        await conn.contactBlock(targetJid);
+      }
+
+      console.log("Blocked:", targetJid);
+
+    }, 600); // 0.6 second delay
 
   } catch (err) {
     await reply("❌ Block Failed!\n" + err);
