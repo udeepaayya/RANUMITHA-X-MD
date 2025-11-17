@@ -4,39 +4,38 @@ const config = require('../config');
 cmd({
   pattern: "block",
   react: "🚫",
-  desc: "Owner Only: Block the replied user",
+  desc: "Owner Only: Block replied user",
   category: "owner",
   use: "Reply to someone and type .block",
   filename: __filename
 },
-async (conn, mek, m, { from, isOwner, quoted }) => {
+async (conn, mek, m, { from, isOwner }) => {
 
-  const reply = async (text) => 
+  const reply = async (text) =>
     await conn.sendMessage(from, { text }, { quoted: m });
 
   // OWNER CHECK
-  if (!isOwner)
-    return reply("🚫 *Owner Only Command!*");
+  if (!isOwner) return reply("🚫 *Owner Only Command!*");
 
   try {
 
-    // MUST REPLY TO BLOCK
-    if (!quoted || !quoted.sender) {
+    // CORRECT REPLY DETECTION FOR BAILEYS V7
+    if (!m.quoted || !m.quoted.sender) {
       return reply("⚠️ *Reply to a user's message and type .block*");
     }
 
-    // GET THE REPLIED USER JID
-    let targetJid = quoted.sender;
+    // GET USER JID
+    let targetJid = m.quoted.sender;
 
-    // REACT WHILE PROCESSING
+    // PROCESS REACT
     await conn.sendMessage(from, {
       react: { text: "⏳", key: m.key }
     });
 
-    // SUCCESS MESSAGE BEFORE ACTUAL BLOCK
+    // SUCCESS MESSAGE
     await reply("*Block Successfully ✅*");
 
-    // PERFORM BLOCK AFTER SHORT DELAY
+    // BLOCK AFTER SHORT DELAY
     setTimeout(async () => {
 
       if (typeof conn.updateBlockStatus === "function") {
@@ -49,10 +48,9 @@ async (conn, mek, m, { from, isOwner, quoted }) => {
 
       console.log("Blocked:", targetJid);
 
-    }, 400); // 0.4s delay
+    }, 500);
 
   } catch (err) {
     await reply("❌ Block Failed!\n" + err);
-    console.error(err);
   }
 });
