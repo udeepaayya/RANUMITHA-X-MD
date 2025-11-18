@@ -4,13 +4,12 @@ const fs = require("fs");
 const path = require("path");
 
 cmd({
-  pattern: "gdrive2",
+  pattern: "gdrive",
   desc: "Download original Google Drive files.",
   react: "🌐",
   category: "download",
   filename: __filename
 }, async (conn, m, store, { from, q, reply }) => {
-
   try {
     if (!q) return reply("❌ Please provide a Google Drive link.");
 
@@ -20,10 +19,10 @@ cmd({
     const fileId = q.match(/[-\w]{25,}/)?.[0];
     if (!fileId) return reply("⚠️ Invalid Google Drive link!");
 
-    const initialURL = `https://drive.google.com/uc?export=download&id=${fileId}`;
+    const baseURL = `https://drive.google.com/uc?export=download&id=${fileId}`;
 
     // STEP 1 – get confirmation token + cookies
-    const step1 = await axios.get(initialURL, {
+    const step1 = await axios.get(baseURL, {
       maxRedirects: 0,
       validateStatus: s => s === 200 || s === 302
     });
@@ -35,12 +34,12 @@ cmd({
 
     const cookies = step1.headers["set-cookie"]?.map(c => c.split(";")[0]).join("; ") || "";
 
-    // Build final download URL
+    // STEP 2 – build final URL
     const finalURL = confirm
       ? `https://drive.google.com/uc?export=download&confirm=${confirm}&id=${fileId}`
-      : initialURL;
+      : baseURL;
 
-    // STEP 2 – download original file
+    // STEP 3 – download original file
     const step2 = await axios.get(finalURL, {
       responseType: "arraybuffer",
       headers: { Cookie: cookies }
@@ -74,6 +73,6 @@ cmd({
 
   } catch (error) {
     console.log("GDRIVE ERROR:", error?.response?.status || error);
-    reply("❌ Could not download. File may be: \n- Private\n- Limited access\n- Not shared publicly\n- Google flagged\n\nTry another link.");
+    reply("❌ Could not download. File may be:\n- Private\n- Limited access\n- Not shared publicly\n- Google flagged\n\nTry another link.");
   }
 });
