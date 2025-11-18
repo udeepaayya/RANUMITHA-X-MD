@@ -12,7 +12,7 @@ AUTO_RECORDING: process.env.AUTO_RECORDING || "false",
 // make it true for auto recoding 
 AUTO_TYPING: process.env.AUTO_TYPING || "false",
 // true for automatic show typing    
-ALWAYS_ONLINE: process.env.ALWAYS_ONLINE || "true",
+ALWAYS_ONLINE: process.env.ALWAYS_ONLINE || "false",
 // maks true for always online 
 PREFIX: process.env.PREFIX || ".",
 // add your prifix for bot
