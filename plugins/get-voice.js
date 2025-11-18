@@ -14,24 +14,29 @@ cmd({
   filename: __filename,
 }, async (conn, mek, m, { from, reply, q }) => {
   try {
-    if (!q) return reply("⚠️ Please give an audio URL!");
+    if (!q) {
+      return await conn.sendMessage(from, { 
+        react: { text: "⚠️", key: mek.key }
+      });
+    }
 
     const audioUrl = q.trim();
 
-    reply("⬇️ Downloading audio...");
+    // ⬇️ React: Downloading
+    await conn.sendMessage(from, { react: { text: "⬇️", key: mek.key } });
 
-    // temp files
     const tempPath = path.join(__dirname, `../temp/${Date.now()}.mp3`);
     const voicePath = path.join(__dirname, `../temp/${Date.now()}.opus`);
 
-    // 1️⃣ DOWNLOAD AUDIO
+    // DOWNLOAD AUDIO
     const audioRes = await fetch(audioUrl);
     const audioBuffer = Buffer.from(await audioRes.arrayBuffer());
     fs.writeFileSync(tempPath, audioBuffer);
 
-    reply("🎙 Converting to WhatsApp voice note...");
+    // ⬆️ React: Converting
+    await conn.sendMessage(from, { react: { text: "⬆️", key: mek.key } });
 
-    // 2️⃣ CONVERT TO OPUS (WhatsApp voice pattern)
+    // CONVERT TO OPUS
     await new Promise((resolve, reject) => {
       ffmpeg(tempPath)
         .audioCodec("libopus")
@@ -44,14 +49,15 @@ cmd({
 
     const voiceBuffer = fs.readFileSync(voicePath);
 
-    // 3️⃣ SEND WHATSAPP VOICE (OGG OPCODE FORMAT)
+    // SEND VOICE NOTE
     await conn.sendMessage(from, {
       audio: voiceBuffer,
       mimetype: "audio/ogg; codecs=opus",
       ptt: true,
-    }, { quoted: mek });
+    });
 
-    reply("✅ Voice note sent!");
+    // React: Done
+    await conn.sendMessage(from, { react: { text: "✅", key: mek.key } });
 
     // cleanup
     fs.unlinkSync(tempPath);
@@ -59,6 +65,6 @@ cmd({
 
   } catch (err) {
     console.error(err);
-    reply("❌ Error converting audio. FFmpeg or URL issue.");
+    await conn.sendMessage(from, { react: { text: "❌", key: mek.key } });
   }
 });
