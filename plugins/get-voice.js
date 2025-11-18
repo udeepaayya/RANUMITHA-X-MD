@@ -7,7 +7,7 @@ const ffmpeg = require("fluent-ffmpeg");
 cmd({
   pattern: "getvoice",
   alias: ["gv"],
-  desc: "Convert any audio URL into WhatsApp Voice Note",
+  desc: "Convert any direct audio URL into WhatsApp Voice Note",
   category: "owner",
   react: "🎤",
   use: ".getvoice <audio-url>",
@@ -15,9 +15,8 @@ cmd({
 }, async (conn, mek, m, { from, reply, q }) => {
   try {
     if (!q) {
-      return await conn.sendMessage(from, { 
-        react: { text: "⚠️", key: mek.key }
-      });
+      // ⚠️ If no URL, send message
+      return await reply("*⚠️ Please give me audio URL!*");
     }
 
     const audioUrl = q.trim();
@@ -30,6 +29,7 @@ cmd({
 
     // DOWNLOAD AUDIO
     const audioRes = await fetch(audioUrl);
+    if (!audioRes.ok) throw new Error("Invalid audio URL");
     const audioBuffer = Buffer.from(await audioRes.arrayBuffer());
     fs.writeFileSync(tempPath, audioBuffer);
 
@@ -56,15 +56,16 @@ cmd({
       ptt: true,
     });
 
-    // React: Done
+    // ✅ React: Done
     await conn.sendMessage(from, { react: { text: "✔️", key: mek.key } });
 
-    // cleanup
+    // CLEANUP
     fs.unlinkSync(tempPath);
     fs.unlinkSync(voicePath);
 
   } catch (err) {
     console.error(err);
+    // ❌ React: Error
     await conn.sendMessage(from, { react: { text: "❌", key: mek.key } });
   }
 });
