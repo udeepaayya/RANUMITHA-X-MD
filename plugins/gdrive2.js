@@ -1,54 +1,77 @@
 const { cmd } = require("../command");
 const axios = require("axios");
-
-function extractDriveId(url) {
-  const regex = /\/d\/(.*?)\//;
-  const match = url.match(regex);
-  return match ? match[1] : null;
-}
+const fs = require("fs");
+const path = require("path");
 
 cmd({
   pattern: "gdrive2",
-  desc: "Download Google Drive files.",
+  desc: "Download original Google Drive files.",
   react: "🌐",
   category: "download",
   filename: __filename
 }, async (conn, m, store, { from, q, reply }) => {
-  try {
-    if (!q) return reply("❌ Please provide a valid Google Drive link.");
 
-    const fileId = extractDriveId(q);
-    if (!fileId) return reply("⚠️ Invalid Google Drive link!");
+  try {
+    if (!q) return reply("❌ Please provide a Google Drive link.");
 
     await conn.sendMessage(from, { react: { text: "⬇️", key: m.key } });
 
-    // Direct Download Generator
-    const downloadUrl = `https://drive.google.com/uc?export=download&id=${fileId}`;
+    const fileId = q.match(/[-\w]{25,}/)?.[0];
+    if (!fileId) return reply("⚠️ Invalid Google Drive link!");
 
-    // File Info API (Public)
-    const infoApi = `https://gdlp-server.vercel.app/info?id=${fileId}`;
-    const info = await axios.get(infoApi).then(r => r.data).catch(() => null);
+    const URL = `https://drive.google.com/uc?export=download&id=${fileId}`;
 
-    let fileName = info?.fileName || `gdrive_file_${fileId}`;
-    let mimeType = info?.mimeType || "application/octet-stream";
+    // STEP 1 – Get download info + confirmation token
+    const res = await axios.get(URL, {
+      responseType: "text",
+      maxRedirects: 0,
+      validateStatus: s => s === 200 || s === 302
+    });
+
+    let confirmToken = null;
+    if (res.data && res.data.includes("confirm=")) {
+      confirmToken = res.data.match(/confirm=([0-9A-Za-z-_]+)/)?.[1];
+    }
+
+    let finalUrl = URL;
+    if (confirmToken) {
+      finalUrl = `https://drive.google.com/uc?export=download&confirm=${confirmToken}&id=${fileId}`;
+    }
+
+    // STEP 2 – Download original file
+    const dl = await axios.get(finalUrl, {
+      responseType: "arraybuffer",
+    });
+
+    const disposition = dl.headers["content-disposition"] || "";
+    const matchName = disposition.match(/filename="(.+?)"/);
+    const fileName = matchName ? matchName[1] : `drive_${fileId}`;
+
+    const mime = dl.headers["content-type"] || "application/octet-stream";
+
+    const tempFile = path.join(__dirname, fileName);
+    fs.writeFileSync(tempFile, dl.data);
 
     await conn.sendMessage(from, { react: { text: "⬆️", key: m.key } });
 
     await conn.sendMessage(
       from,
       {
-        document: { url: downloadUrl },
-        mimetype: mimeType,
+        document: fs.readFileSync(tempFile),
+        mimetype: mime,
         fileName: fileName,
-        caption: "> *© Powered by 𝗥𝗔𝗡𝗨𝗠𝗜𝗧𝗛𝗔-𝗫-𝗠𝗗 🌛*"
+        caption: "> *Original Google Drive File ✓*\n> *© Ranumitha-X-MD*"
       },
       { quoted: m }
     );
 
+    fs.unlinkSync(tempFile);
+
     await conn.sendMessage(from, { react: { text: "✅", key: m.key } });
 
-  } catch (e) {
-    console.log(e);
-    reply("❌ Error downloading Google Drive file. Check the link and try again.");
+  } catch (error) {
+    console.log("ERROR (GDRIVE):", error);
+    reply("❌ Error downloading original Google Drive file. Try again.");
   }
+
 });
