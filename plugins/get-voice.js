@@ -57,7 +57,7 @@ cmd({
     });
 
     // React: Done
-    await conn.sendMessage(from, { react: { text: "✅", key: mek.key } });
+    await conn.sendMessage(from, { react: { text: "✔️", key: mek.key } });
 
     // cleanup
     fs.unlinkSync(tempPath);
