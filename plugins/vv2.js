@@ -1,38 +1,44 @@
 const { cmd } = require("../command");
-const fs = require("fs");
 
 cmd({
-    pattern: "vv2",
+    pattern: "vv",
     react: '🐳',
     alias: ["viewonce", "anti-vv"],
-    desc: "Unlock view once media",
+    desc: "Unlock any view-once media",
     category: "media",
     filename: __filename
 },
 async (client, message, m, { reply }) => {
     try {
-        // Check reply
         const quoted = message.quoted;
-        if (!quoted) return reply("*⚠️ Reply to a view once message!*");
+        if (!quoted) return reply("⚠️ *Reply to a view-once message!*");
 
-        // Check if view once
-        const msg = quoted.msg || quoted.message;
+        const qmsg = quoted.message || quoted.msg;
 
-        if (!msg || !msg.viewOnce) {
+        // NEW BAILEYS VIEW-ONCE STRUCTURE FIX
+        const vo =
+            qmsg?.viewOnceMessageV2 ||
+            qmsg?.viewOnceMessage ||
+            qmsg?.viewOnceMessageV2Extension;
+
+        if (!vo) {
             return reply("❌ *This is not a view-once message!*");
         }
 
-        let mediaType;
-        if (msg.imageMessage) mediaType = "image";
-        else if (msg.videoMessage) mediaType = "video";
-        else if (msg.audioMessage) mediaType = "audio";
-        else return reply("⚠️ Unsupported view-once format!");
+        // Extract actual media inside wrapper
+        const inner = vo.message || vo;
 
-        // Download media
-        const buffer = await quoted.download();
+        let mediaType;
+        if (inner.imageMessage) mediaType = "image";
+        else if (inner.videoMessage) mediaType = "video";
+        else if (inner.audioMessage) mediaType = "audio";
+        else return reply("⚠️ Unsupported view-once media!");
+
+        // Download
+        const buffer = await client.downloadMediaMessage({ message: inner });
         if (!buffer) return reply("❌ Download failed!");
 
-        // Send back as normal file
+        // Send back
         await client.sendMessage(message.chat, {
             [mediaType]: buffer,
             caption: "🔓 *View Once Unlocked!*"
