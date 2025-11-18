@@ -207,22 +207,27 @@ async (conn, mek, m, { from, args, isOwner, reply }) => {
 cmd({
     pattern: "always-online",
     alias: ["alwaysonline"],
-    desc: "Enable or disable the always online mode",
+    desc: "Enable or disable always online mode",
     category: "settings",
     filename: __filename
 },
-async (conn, mek, m, { from, args, isOwner, reply }) => {
-    if (!isOwner) return reply("*📛 ᴏɴʟʏ ᴛʜᴇ ᴏᴡɴᴇʀ ᴄᴀɴ ᴜsᴇ ᴛʜɪs ᴄᴏᴍᴍᴀɴᴅ!*");
+async (conn, mek, m, { args, isOwner, reply }) => {
+    if (!isOwner) return reply("*📛 Owner only command!*");
 
     const status = args[0]?.toLowerCase();
+
     if (status === "on") {
-        config.ALWAYS_ONLINE = "true";
-        await reply("*✅ always online mode is now enabled.*");
-    } else if (status === "off") {
-        config.ALWAYS_ONLINE = "false";
-        await reply("*❌ always online mode is now disabled.*");
-    } else {
-        await reply(`*🛠️ ᴇxᴀᴍᴘʟᴇ: .ᴀʟᴡᴀʏs-ᴏɴʟɪɴᴇ ᴏɴ*`);
+        config.ALWAYS_ONLINE = true;
+        fs.writeFileSync("./config.json", JSON.stringify(config, null, 2)); 
+        reply("✅ *Always Online mode ENABLED*");
+    } 
+    else if (status === "off") {
+        config.ALWAYS_ONLINE = false;
+        fs.writeFileSync("./config.json", JSON.stringify(config, null, 2)); 
+        reply("❌ *Always Online mode DISABLED*");
+    } 
+    else {
+        reply("🛠️ *Example:* .always-online on");
     }
 });
 
