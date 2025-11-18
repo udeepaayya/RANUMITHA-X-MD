@@ -2,7 +2,8 @@ const { cmd } = require("../command");
 const fs = require("fs");
 
 cmd({
-    pattern: "vv",
+    pattern: "vv2",
+    react: '🐳',
     alias: ["viewonce", "anti-vv"],
     desc: "Unlock view once media",
     category: "media",
