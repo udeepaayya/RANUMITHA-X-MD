@@ -4,7 +4,7 @@ const fs = require("fs");
 const path = require("path");
 
 cmd({
-  pattern: "gdrive",
+  pattern: "gdrive2",
   desc: "Download original Google Drive files.",
   react: "🌐",
   category: "download",
