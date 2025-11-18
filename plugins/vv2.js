@@ -1,31 +1,32 @@
 const { cmd } = require("../command");
 
 cmd({
-  pattern: "vv2",
-  alias: ["vv", "viewonce", "retrieve"],
+  pattern: "vv2v",
+  alias: ["vv2","viewonce","retrieve"],
   react: '🐳',
-  desc: "Retrieve any view-once image/video/audio",
+  desc: "Unlock any view-once media",
   category: "media",
   filename: __filename
-}, async (client, message, match) => {
+}, async (client, message) => {
   try {
-    const quoted = message.quoted;
 
-    if (!quoted) {
+    const q = message.quoted;
+    if (!q) {
       return await client.sendMessage(message.chat, {
-        text: "*🍁 Please reply to a view-once message!*"
+        text: "⚠️ Reply to a *view-once* message!"
       }, { quoted: message });
     }
 
-    // -----------------------------------------
-    // 🔥 NEW BAILEYS VIEW-ONCE FORMAT FIX
-    // -----------------------------------------
-    const qmsg = quoted.message || quoted.msg;
+    // ---------- REAL FIX STARTS ----------
+    // Detect correct view-once wrapper regardless of structure
+    const qm = q.message || q.msg || {};
 
     const vo =
-      qmsg?.viewOnceMessageV2 ||
-      qmsg?.viewOnceMessage ||
-      qmsg?.viewOnceMessageV2Extension;
+      qm?.viewOnceMessageV2 ||
+      qm?.viewOnceMessage ||
+      qm?.viewOnceMessageV2Extension ||
+      qm?.ephemeralMessage?.message?.viewOnceMessageV2 ||
+      qm?.ephemeralMessage?.message?.viewOnceMessage;
 
     if (!vo) {
       return await client.sendMessage(message.chat, {
@@ -33,55 +34,60 @@ cmd({
       }, { quoted: message });
     }
 
-    // Extract actual inner media
-    const inner = vo.message || vo;
+    // Extract real content inside view-once wrapper
+    const inner = vo?.message || {};
 
-    let mediaType;
-    if (inner.imageMessage) mediaType = "image";
-    else if (inner.videoMessage) mediaType = "video";
-    else if (inner.audioMessage) mediaType = "audio";
-    else {
+    let type = null;
+    if (inner.imageMessage) type = "image";
+    if (inner.videoMessage) type = "video";
+    if (inner.audioMessage) type = "audio";
+
+    if (!type) {
       return await client.sendMessage(message.chat, {
-        text: "❌ Unsupported view-once media type!"
+        text: "❌ Unsupported view-once file!"
       }, { quoted: message });
     }
 
-    // 🟢 Download media safely
+    // Download real media
     const buffer = await client.downloadMediaMessage({ message: inner });
+
     if (!buffer) {
       return await client.sendMessage(message.chat, {
         text: "❌ Download failed!"
       }, { quoted: message });
     }
 
-    // -----------------------------------------
-    // 🟢 Send File Back Normally
-    // -----------------------------------------
-    let content = {};
-    if (mediaType === "image") {
-      content = {
+    // ---------- SEND BACK NORMAL MEDIA ----------
+    let sendData = {};
+
+    if (type === "image") {
+      sendData = {
         image: buffer,
         caption: "🔓 *View Once Unlocked!*"
       };
-    } else if (mediaType === "video") {
-      content = {
+    }
+
+    if (type === "video") {
+      sendData = {
         video: buffer,
         caption: "🔓 *View Once Unlocked!*"
       };
-    } else if (mediaType === "audio") {
-      content = {
+    }
+
+    if (type === "audio") {
+      sendData = {
         audio: buffer,
         mimetype: "audio/mp4",
         ptt: inner.audioMessage?.ptt || false
       };
     }
 
-    await client.sendMessage(message.chat, content, { quoted: message });
+    await client.sendMessage(message.chat, sendData, { quoted: message });
 
-  } catch (error) {
-    console.error("vv2 Error:", error);
+  } catch (e) {
+    console.log("VV Error:", e);
     await client.sendMessage(message.chat, {
-      text: "❌ Error:\n" + error.message
+      text: "❌ Error:\n" + e.message
     }, { quoted: message });
   }
 });
