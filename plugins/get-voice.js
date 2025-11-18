@@ -16,7 +16,7 @@ cmd({
   try {
     if (!q) {
       // ⚠️ If no URL, send message
-      return await reply("*⚠️ Please give me audio URL!*");
+      return await reply("*📎 Please give me audio URL!*");
     }
 
     const audioUrl = q.trim();
