@@ -1,81 +1,81 @@
 const { cmd } = require("../command");
 let maybeDownloadContentFromMessage;
 try {
-  maybeDownloadContentFromMessage = require('@adiwajshing/baileys').downloadContentFromMessage;
-} catch (e) {}
+    maybeDownloadContentFromMessage = require("@adiwajshing/baileys").downloadContentFromMessage;
+} catch {}
 
 cmd({
-  pattern: "vv",
-  alias: ["viewonce", "rview"],
-  react: "🫟",
-  desc: "Owner Only - retrieve quoted view-once message",
-  category: "owner",
-  filename: __filename
+    pattern: "vv",
+    alias: ["viewonce", "rview"],
+    react: "🫟",
+    desc: "ViewOnce Bypass (Owner + Bot Only)",
+    category: "owner",
+    filename: __filename
 }, async (client, message, match, { from, isOwner }) => {
-  try {
-    const botNumber = client.user.id.split(":")[0] + "@s.whatsapp.net";
 
-    // Allow Owner + Bot Number
-    const sender = message.sender || message.key.participant || message.participant;
-    const isBot = sender === botNumber;
+    try {
+        const botNumber = client.user.id.split(":")[0] + "@s.whatsapp.net";
+        const sender = message.sender || message.key.participant || message.participant;
+        const isBot = sender === botNumber;
 
-    if (!isOwner && !isBot) {
-      return await client.sendMessage(from, {
-        text: "*🚫 Owner Only Command!*"
-      }, { quoted: message });
+        if (!isOwner && !isBot)
+            return await message.reply("🚫 *Owner Only Command!*");
+
+        if (!message.quoted)
+            return await message.reply("🍁 *Please reply to a view-once message!*");
+
+        let quoted = message.quoted;
+
+        // -------------------------------
+        // ✅ FIX: Extract REAL Media Layer
+        // -------------------------------
+        let realMsg = quoted.message;
+
+        if (!realMsg) return await message.reply("❌ *Invalid message!*");
+
+        if (realMsg.viewOnceMessage)
+            realMsg = realMsg.viewOnceMessage.message;
+
+        if (realMsg.viewOnceMessageV2)
+            realMsg = realMsg.viewOnceMessageV2.message;
+
+        if (realMsg.viewOnceMessageV2Extension)
+            realMsg = realMsg.viewOnceMessageV2Extension.message;
+
+        const mediaType = Object.keys(realMsg)[0]; // imageMessage / videoMessage / audioMessage
+
+        if (!mediaType || !realMsg[mediaType].mediaKey)
+            return await message.reply("❌ *This message has no media key (not a valid view-once media).*");
+
+        let buffer;
+
+        // -------------------------------
+        // 📥 Download media safely
+        // -------------------------------
+        const stream = await maybeDownloadContentFromMessage(realMsg[mediaType], mediaType.replace("Message",""));
+        const chunks = [];
+        for await (const chunk of stream) chunks.push(chunk);
+        buffer = Buffer.concat(chunks);
+
+        // -------------------------------
+        // 📤 Send media back
+        // -------------------------------
+        let payload = {};
+
+        if (mediaType === "imageMessage") {
+            payload = { image: buffer, caption: realMsg[mediaType].caption || "" };
+        } else if (mediaType === "videoMessage") {
+            payload = { video: buffer, caption: realMsg[mediaType].caption || "" };
+        } else if (mediaType === "audioMessage") {
+            payload = { audio: buffer, mimetype: "audio/mp4", ptt: false };
+        } else {
+            return await message.reply("❌ *Unsupported media type!*");
+        }
+
+        await client.sendMessage(from, payload, { quoted: message });
+
+    } catch (e) {
+        console.log("VV ERROR:", e);
+        await message.reply("❌ *VV Error:* " + e.message);
     }
-
-    if (!message.quoted) {
-      return await client.sendMessage(from, {
-        text: "*🍁 Please reply to a view-once message!*"
-      }, { quoted: message });
-    }
-
-    const quoted = message.quoted;
-    let buffer;
-
-    if (typeof quoted.download === "function") {
-      buffer = await quoted.download();
-    } else if (typeof client.downloadMediaMessage === "function") {
-      try {
-        buffer = await client.downloadMediaMessage(quoted, "buffer", {});
-      } catch (err) {
-        buffer = await client.downloadMediaMessage(quoted.message || quoted, "buffer", {});
-      }
-    } else if (maybeDownloadContentFromMessage && quoted.message) {
-      const messageType = Object.keys(quoted.message)[0];
-      const stream = await maybeDownloadContentFromMessage(
-        quoted.message[messageType],
-        messageType.replace(/Message$/, '').toLowerCase()
-      );
-      const chunks = [];
-      for await (const chunk of stream) chunks.push(chunk);
-      buffer = Buffer.concat(chunks);
-    } else {
-      throw new Error("No download method available.");
-    }
-
-    const mtype = quoted.mtype || Object.keys(quoted.message || {})[0] || "";
-    let content = {};
-
-    if (mtype.includes("image")) {
-      content = { image: buffer, caption: quoted.text || quoted.caption || "" };
-    } else if (mtype.includes("video")) {
-      content = { video: buffer, caption: quoted.text || quoted.caption || "" };
-    } else if (mtype.includes("audio")) {
-      content = { audio: buffer, mimetype: "audio/mp4", ptt: quoted.ptt || false };
-    } else {
-      return await client.sendMessage(from, {
-        text: "❌ Only image, video and audio view-once are supported!"
-      }, { quoted: message });
-    }
-
-    await client.sendMessage(from, content, { quoted: message });
-
-  } catch (error) {
-    console.error("vv Error:", error);
-    await client.sendMessage(from, {
-      text: "❌ Error fetching vv message:\n" + (error.message || error)
-    }, { quoted: message });
-  }
 });
