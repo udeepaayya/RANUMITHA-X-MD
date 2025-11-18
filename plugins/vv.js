@@ -2,59 +2,71 @@ const { cmd } = require("../command");
 
 cmd({
   pattern: "vv",
-  alias: ["viewonce", 'rview'],
-  react: '🫟',
-  desc: "Owner Only - retrieve quoted message back to user",
+  alias: ["viewonce", "rview"],
+  react: "🫟",
+  desc: "Owner Only - Retrieve view once media",
   category: "owner",
   filename: __filename
 }, async (client, message, match, { from, isOwner }) => {
   try {
+
+    // Owner check
     if (!isOwner) {
       return await client.sendMessage(from, {
-        text: "*🚫 *Owner Only Command!*"
+        text: "*🚫 Owner Only Command!*"
       }, { quoted: message });
     }
 
-    if (!match.quoted) {
+    // Check reply
+    if (!message.quoted) {
       return await client.sendMessage(from, {
-        text: "*🍁 Please reply to a view once message!*"
+        text: "*🍁 Please reply to a view-once message!*"
       }, { quoted: message });
     }
 
-    const buffer = await match.quoted.download();
-    const mtype = match.quoted.mtype;
+    const quoted = message.quoted;
+
+    // Download buffer FIXED
+    const buffer = await quoted.download();  
+
+    const mtype = quoted.mtype;
     const options = { quoted: message };
 
     let messageContent = {};
+
     switch (mtype) {
       case "imageMessage":
         messageContent = {
           image: buffer,
-          caption: match.quoted.text || '',
-          mimetype: match.quoted.mimetype || "image/jpeg"
+          caption: quoted.text || "",
+          mimetype: quoted.mimetype || "image/jpeg"
         };
         break;
+
       case "videoMessage":
         messageContent = {
           video: buffer,
-          caption: match.quoted.text || '',
-          mimetype: match.quoted.mimetype || "video/mp4"
+          caption: quoted.text || "",
+          mimetype: quoted.mimetype || "video/mp4"
         };
         break;
+
       case "audioMessage":
         messageContent = {
           audio: buffer,
           mimetype: "audio/mp4",
-          ptt: match.quoted.ptt || false
+          ptt: quoted.ptt || false
         };
         break;
+
       default:
         return await client.sendMessage(from, {
-          text: "❌ Only image, video, and audio messages are supported"
+          text: "❌ Only image, video, and audio messages are supported!"
         }, { quoted: message });
     }
 
     await client.sendMessage(from, messageContent, options);
+
   } catch (error) {
     console.error("vv Error:", error);
     await client.sendMessage(from, {
