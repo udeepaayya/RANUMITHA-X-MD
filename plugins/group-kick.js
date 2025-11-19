@@ -33,7 +33,7 @@ async (conn, mek, m, { from, isGroup, isBotAdmins, isAdmins, reply }) => {
 
         // Success message
         await conn.sendMessage(from, { 
-            text: `✅ *Successfully removed*\n📞 Number: +${num}`
+            text: `✅ *Successfully removed*\n📞 Number: +${mentionedJid}`
         });
 
     } catch (err) {
