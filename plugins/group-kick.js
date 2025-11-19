@@ -23,7 +23,7 @@ async (conn, mek, m, { from, isGroup, isBotAdmins, isAdmins, reply }) => {
         // Get replied user JID
         const mentionedJid = mek.message.extendedTextMessage.contextInfo.participant;
 
-        if (!mentionedJid) return reply("⚠️ *Could not detect the user!*");
+        if (!mentionedJid) return reply("⚠️ *Reply to the person you want to kick and send a kick!*");
 
         // Kick user
         await conn.groupParticipantsUpdate(from, [mentionedJid], "remove");
@@ -33,7 +33,7 @@ async (conn, mek, m, { from, isGroup, isBotAdmins, isAdmins, reply }) => {
 
         // Success message
         await conn.sendMessage(from, { 
-            text: `✅ *Successfully removed*\n📞 Number: +${mentionedJid}`
+            text: `✅ *removed Successfully*`
         });
 
     } catch (err) {
