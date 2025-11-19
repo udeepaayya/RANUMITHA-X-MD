@@ -3,44 +3,49 @@ const { cmd } = require('../command');
 cmd({
     pattern: "kick",
     alias: ["remove", "k"],
-    desc: "Removes a member from the group",
+    desc: "Remove user from the group (Owner Only)",
     category: "admin",
     react: "❌",
     filename: __filename
 },
-async (conn, mek, m, {
-    from, isGroup, isBotAdmins, reply, quoted, senderNumber
-}) => {
 
-    if (!isGroup) return reply("❌ This command can only be used in groups.");
+async (conn, mek, m, { from, isGroup, isBotAdmins, reply, quoted, senderNumber }) => {
 
-    // Only BOT OWNER
+    if (!isGroup) return reply("❌ Group command only.");
+
+    // bot owner only
     const botOwner = conn.user.id.split(":")[0];
-    if (senderNumber !== botOwner) {
-        return reply("❌ Only the bot owner can use this command.");
-    }
+    if (senderNumber !== botOwner)
+        return reply("❌ Only bot owner can use this command.");
 
-    if (!isBotAdmins) return reply("❌ I need to be an admin to remove members.");
+    if (!isBotAdmins)
+        return reply("❌ Bot must be admin.");
 
-    if (!quoted) return reply("❌ Please reply to the user's message you want to remove.");
+    if (!quoted)
+        return reply("❌ Reply to the user you want to remove.");
 
-    // --- FIXED JID CLEANER ---
-    let raw = quoted.sender || "";
-    raw = raw.split("@")[0];       // remove '@s.whatsapp.net'
-    raw = raw.replace(/[:\D]/g, ""); // remove ':24', spaces, symbols
-
-    const jid = raw + "@s.whatsapp.net";
+    // CLEAN sender JID
+    let num = quoted.sender.split("@")[0];
+    num = num.replace(/[^0-9]/g, "");  // remove device suffix, +, spaces, symbols
+    const jid = num + "@s.whatsapp.net";
 
     try {
-        await conn.groupParticipantsUpdate(from, [jid], "remove");
-
-        return reply(
-            `✅ Successfully removed @${raw}`,
-            { mentions: [jid] }
+        const res = await conn.groupParticipantsUpdate(
+            from,
+            [jid],
+            "remove"
         );
 
-    } catch (e) {
-        console.error("KICK ERROR:", e);
-        return reply("❌ Failed to remove the member. (API Reject)");
+        // WhatsApp returns status codes
+        if (res[0]?.status === 200) {
+            return reply(`✅ Successfully removed @${num}`, { mentions: [jid] });
+        } else {
+            return reply(`❌ Failed (status: ${res[0]?.status})`);
+        }
+
+    } catch (err) {
+        console.log("REMOVE ERROR:", err);
+        return reply("❌ WhatsApp rejected the request.");
     }
+
 });
