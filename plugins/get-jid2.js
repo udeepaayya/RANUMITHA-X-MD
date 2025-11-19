@@ -3,7 +3,7 @@ const { cmd } = require('../command');
 cmd({
     pattern: "jid2",
     alias: ["id2", "chatid2", "gjid2"],
-    desc: "Always return inbox JID in the format number@s.whatsapp.net",
+    desc: "Convert any number to full WhatsApp JID (All countries supported)",
     react: "🆔",
     category: "utility",
     filename: __filename,
@@ -13,22 +13,29 @@ cmd({
         let num;
 
         if (!input) {
-            // Extract number from current chat JID
+            // Extract digits from current chat JID
             num = from.replace(/\D/g, "");
         } else {
-            // Extract number from provided input
+            // Extract digits from provided input
             num = input.replace(/\D/g, "");
         }
 
-        if (num.length < 8) return reply("⚠️ Invalid number.");
+        if (num.length < 5) return reply("⚠️ Invalid number.");
 
-        // ALWAYS inbox JID format
+        // Remove leading zeros UNLESS it's a valid country code
+        if (num.startsWith("00")) {
+            num = num.slice(2); // Convert 00XX to just XX
+        }
+
+        // Convert +XXXXXXXXXX → XXXXXXXXXX
+        // Already done by replace(/\D/g, "")
+
+        // Final JID
         let jid = `${num}@s.whatsapp.net`;
 
         return reply(jid);
 
     } catch (e) {
-        console.error("JID Error:", e);
         reply(`⚠️ ${e.message}`);
     }
 });
