@@ -27,7 +27,7 @@ async (conn, mek, m, { from, isGroup, isAdmins, isBotAdmins, reply, q }) => {
 
         // Success message
         await conn.sendMessage(from, { 
-            text: `✅ *+${number} user added successfully!*`
+            text: `✅ *@${number} user added successfully!*`
         });
 
     } catch (err) {
