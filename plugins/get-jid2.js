@@ -3,7 +3,7 @@ const { cmd } = require('../command');
 cmd({
     pattern: "jid2",
     alias: ["id2", "chatid2", "gjid2"],
-    desc: "Convert any number to full WhatsApp JID (All countries supported)",
+    desc: "Return correct Sri Lankan inbox JID",
     react: "🆔",
     category: "utility",
     filename: __filename,
@@ -13,24 +13,30 @@ cmd({
         let num;
 
         if (!input) {
-            // Extract digits from current chat JID
             num = from.replace(/\D/g, "");
         } else {
-            // Extract digits from provided input
             num = input.replace(/\D/g, "");
         }
 
         if (num.length < 5) return reply("⚠️ Invalid number.");
 
-        // Remove leading zeros UNLESS it's a valid country code
-        if (num.startsWith("00")) {
-            num = num.slice(2); // Convert 00XX to just XX
+        // 🇱🇰 AUTO FIX SRI LANKA NUMBERS
+        // If number starts with 07XXXXXXXX
+        if (num.startsWith("0") && num.length === 10) {
+            num = "94" + num.slice(1);
         }
 
-        // Convert +XXXXXXXXXX → XXXXXXXXXX
-        // Already done by replace(/\D/g, "")
+        // If number is 9 digits mobile (771853633)
+        if (num.length === 9) {
+            num = "94" + num;
+        }
 
-        // Final JID
+        // If number is 10 digits starting with 7 (7718536330) — fix too
+        if (num.length === 10 && num.startsWith("7")) {
+            num = "94" + num;
+        }
+
+        // ALWAYS send as inbox JID
         let jid = `${num}@s.whatsapp.net`;
 
         return reply(jid);
