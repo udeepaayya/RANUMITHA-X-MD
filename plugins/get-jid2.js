@@ -3,43 +3,29 @@ const { cmd } = require('../command');
 cmd({
     pattern: "jid2",
     alias: ["id2", "chatid2", "gjid2"],
-    desc: "Get full JID from number, group, channel, or current chat",
+    desc: "Always return inbox JID in the format number@s.whatsapp.net",
     react: "🆔",
     category: "utility",
     filename: __filename,
-}, async (conn, mek, m, { from, isGroup, reply }) => {
+}, async (conn, mek, m, { from, reply }) => {
     try {
         let input = m.text.split(" ")[1];
-        let chatJID;
+        let num;
 
         if (!input) {
-            // No input → return current chat JID correctly
-            if (isGroup) {
-                chatJID = from; // group
-            } 
-            else if (from.endsWith("@newsletter")) {
-                chatJID = from; // channel
-            } 
-            else {
-                // FORCE inbox JID only
-                let num = from.replace(/\D/g, "");
-                chatJID = `${num}@s.whatsapp.net`;
-            }
-        } 
-        else {
-            // Input provided
-            input = input.replace(/\D/g, "");
-            if (input.length < 8) return reply("⚠️ Please provide a valid number.");
-
-            // Group JID starts with 1203
-            if (input.startsWith("1203")) {
-                chatJID = `${input}@g.us`;
-            } else {
-                chatJID = `${input}@s.whatsapp.net`; // Always inbox for numbers
-            }
+            // Extract number from current chat JID
+            num = from.replace(/\D/g, "");
+        } else {
+            // Extract number from provided input
+            num = input.replace(/\D/g, "");
         }
 
-        return reply(chatJID);
+        if (num.length < 8) return reply("⚠️ Invalid number.");
+
+        // ALWAYS inbox JID format
+        let jid = `${num}@s.whatsapp.net`;
+
+        return reply(jid);
 
     } catch (e) {
         console.error("JID Error:", e);
