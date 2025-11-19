@@ -12,39 +12,35 @@ async (conn, mek, m, {
     from, isGroup, isBotAdmins, reply, quoted, senderNumber
 }) => {
 
-    // Group check
     if (!isGroup) return reply("❌ This command can only be used in groups.");
 
-    // Bot owner check
+    // Only BOT OWNER
     const botOwner = conn.user.id.split(":")[0];
     if (senderNumber !== botOwner) {
         return reply("❌ Only the bot owner can use this command.");
     }
 
-    // Bot admin check
     if (!isBotAdmins) return reply("❌ I need to be an admin to remove members.");
 
-    // Get number to kick
-    let number;
+    if (!quoted) return reply("❌ Please reply to the user's message you want to remove.");
 
-    if (quoted) {
-        number = quoted.sender.split("@")[0];     // Reply to user → get number
-    } else {
-        return reply("❌ Please *reply to a user's message* to remove them.");
-    }
+    // --- FIXED JID CLEANER ---
+    let raw = quoted.sender || "";
+    raw = raw.split("@")[0];       // remove '@s.whatsapp.net'
+    raw = raw.replace(/[:\D]/g, ""); // remove ':24', spaces, symbols
 
-    const jid = number + "@s.whatsapp.net";
+    const jid = raw + "@s.whatsapp.net";
 
     try {
         await conn.groupParticipantsUpdate(from, [jid], "remove");
 
-        await reply(
-            `✅ *Successfully Removed*\n\n👤 Number: *@${number}*`,
+        return reply(
+            `✅ Successfully removed @${raw}`,
             { mentions: [jid] }
         );
 
     } catch (e) {
-        console.error("Kick Error:", e);
-        reply("❌ Failed to remove the member.");
+        console.error("KICK ERROR:", e);
+        return reply("❌ Failed to remove the member. (API Reject)");
     }
 });
