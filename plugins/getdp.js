@@ -25,24 +25,35 @@ cmd({
     pattern: "getdp",
     alias: ["targetdp", "getpp", "getprofile"],
     react: "🖼️",
-    desc: "Get the WhatsApp profile picture, name, number, and about of the person or group",
+    desc: "Get profile picture, name, number, about (reply supported)",
     category: "utility",
     use: '.getdp',
     filename: __filename
 },
 async (conn, mek, m, { from, reply }) => {
     try {
+
+        let targetJid;
+
+        // 🟢 1. If user replied to someone
+        if (mek.message?.extendedTextMessage?.contextInfo?.participant) {
+            targetJid = mek.message.extendedTextMessage.contextInfo.participant;
+        } else {
+            // 🟡 2. Otherwise, default = chat JID
+            targetJid = from;
+        }
+
         let ppUrl;
         let caption = "";
 
-        // 1️⃣ If it's a group
-        if (from.endsWith('@g.us')) {
-            const groupMetadata = await conn.groupMetadata(from);
+        // 🔵 If target is group
+        if (targetJid.endsWith("@g.us")) {
+            const groupMetadata = await conn.groupMetadata(targetJid);
             const name = groupMetadata.subject || "Group";
             const bio = `Group with ${groupMetadata.participants.length} members`;
 
             try {
-                ppUrl = await conn.profilePictureUrl(from, 'image');
+                ppUrl = await conn.profilePictureUrl(targetJid, 'image');
             } catch {
                 ppUrl = 'https://i.ibb.co/KhYC4FY/1221bc0bdd2354b42b293317ff2adbcf-icon.png';
             }
@@ -50,20 +61,18 @@ async (conn, mek, m, { from, reply }) => {
             caption = `*👥 GROUP INFO*\n\n📛 *Name:* ${name}\n💬 *About:* ${bio}\n\n> © Powered by 𝗥𝗔𝗡𝗨𝗠𝗜𝗧𝗛𝗔-𝗫-𝗠𝗗 🌛`;
 
         } else {
-            // 2️⃣ Individual chat (inbox)
-            const userJid = from;
-
+            // 🔴 Individual (reply-user)
             try {
-                ppUrl = await conn.profilePictureUrl(userJid, 'image');
+                ppUrl = await conn.profilePictureUrl(targetJid, 'image');
             } catch {
                 ppUrl = 'https://i.ibb.co/KhYC4FY/1221bc0bdd2354b42b293317ff2adbcf-icon.png';
             }
 
-            const number = `+${userJid.replace(/@.+/, '')}`;
+            const number = `+${targetJid.replace(/@.+/, '')}`;
             caption = `*👤 CONTACT INFO*\n\n📞 *Number:* ${number}\n\n> © Powered by 𝗥𝗔𝗡𝗨𝗠𝗜𝗧𝗛𝗔-𝗫-𝗠𝗗 🌛`;
         }
 
-        // Send profile picture with caption
+        // Send DP
         await conn.sendMessage(from, {
             image: { url: ppUrl },
             caption
