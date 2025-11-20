@@ -93,8 +93,8 @@ async (conn, mek, m, { from, isOwner, reply }) => {
 
 cmd({
 pattern: "delete",
+alias: ["delx"],
 react: "❌",
-alias: ["del"],
 desc: "delete message",
 category: "group",
 use: '.del',
