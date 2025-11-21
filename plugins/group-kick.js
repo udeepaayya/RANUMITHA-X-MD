@@ -23,17 +23,21 @@ async (conn, mek, m, { from, isGroup, isBotAdmins, isAdmins, reply }) => {
         // Get replied user JID
         const mentionedJid = mek.message.extendedTextMessage.contextInfo.participant;
 
-        if (!mentionedJid) return reply("⚠️ *Reply to the person you want to kick and send a kick!*");
+        if (!mentionedJid) {
+            return reply("⚠️ *Reply to the person you want to kick and send .kick*");
+        }
+
+        // ⛔ Bot number check
+        if (mentionedJid === conn.user.id) {
+            return reply("😒 *It's me!*");
+        }
 
         // Kick user
         await conn.groupParticipantsUpdate(from, [mentionedJid], "remove");
 
-        // Format number
-        const num = mentionedJid.split("@")[0];
-
         // Success message
         await conn.sendMessage(from, { 
-            text: `✅ *removed Successfully*`
+            text: `✅ *Removed Successfully*`
         });
 
     } catch (err) {
