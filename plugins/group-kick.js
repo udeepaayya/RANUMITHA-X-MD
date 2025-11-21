@@ -3,7 +3,7 @@ const { cmd } = require('../command');
 cmd({
     pattern: "kick",
     alias: ["remove", "k"],
-    desc: "Removes a replied user",
+    desc: "Removes a replied user from the group",
     category: "admin",
     react: "❌",
     filename: __filename
@@ -15,32 +15,31 @@ async (conn, mek, m, { from, isGroup, isBotAdmins, isAdmins, reply }) => {
         if (!isAdmins) return reply("📛 *Only admins can use this command!*");
         if (!isBotAdmins) return reply("📛 *Bot must be admin!*");
 
-        // Check reply to message
+        // Must reply to someone
         if (!mek.message?.extendedTextMessage) {
-            return reply("🔁 *Reply to a user's message and type .kick*");
+            return reply("🔁 *Reply to someone's message and type .kick*");
         }
 
-        // Get replied JID
+        // Target user JID
         const target = mek.message.extendedTextMessage.contextInfo.participant;
-        if (!target) return reply("⚠️ *Reply to someone!*");
 
-        // BOT JID detect
-        const botJid = conn.user.id.split(":")[0] + "@s.whatsapp.net";
+        // AUTO-DETECT BOT NUMBER
+        const botNumber = conn.user.id.split(":")[0] + "@s.whatsapp.net";
 
-        // IF ADMIN TRIES TO KICK BOT
-        if (target === botJid) {
-            return reply("🤖 *It's me! I can't remove myself 😆*");
+        // BOT SELF-PROTECT
+        if (target === botNumber) {
+            return reply("🤖 *It's me! You can't remove me 😆*");
         }
 
-        // Kick normal users
+        // Kick other members
         await conn.groupParticipantsUpdate(from, [target], "remove");
 
         await conn.sendMessage(from, { 
             text: `✅ *Removed Successfully*`
         });
 
-    } catch (e) {
-        console.log(e);
-        reply("❌ *Failed to remove user!*");
+    } catch (err) {
+        console.log(err);
+        reply("❌ *Failed to remove the user!*");
     }
 });
