@@ -1,55 +1,59 @@
-const { cmd } = require('../command')
+const { cmd } = require('../command');
 
-
+// ======= ANTI-LINK TOGGLE COMMAND =======
 cmd({
-  pattern: "antilinkx",
-  alias: ["antilinksx"],
+  pattern: "antilink",
+  alias: ["antilinks"],
   desc: "Enable or disable ANTI_LINK in groups",
   category: "group",
   react: "🚫",
   filename: __filename
-}, async (conn, mek, m, { isGroup, isAdmins, isBotAdmins, args, reply }) => {
+}, async (conn, mek, m, { from, isGroup, isAdmins, isBotAdmins, args, reply }) => {
   try {
-    if (!isGroup) return reply('This command can only be used in a group.');
-    if (!isBotAdmins) return reply('Bot must be an admin to use this command.');
-    if (!isAdmins) return reply('You must be an admin to use this command.');
+    if (!isGroup) return reply("📛 *Group command only!*");
+    if (!isAdmins) return reply("📛 *Only admins can use this command!*");
+    if (!isBotAdmins) return reply("📛 *Bot must be admin!*");
+
+    if (!global.ANTI_LINK_GROUPS) global.ANTI_LINK_GROUPS = {};
 
     if (args[0] === "on") {
-      if (!global.ANTI_LINK_GROUPS) global.ANTI_LINK_GROUPS = {};
-      global.ANTI_LINK_GROUPS[m.chat] = true;
-      reply("✅ ANTI_LINK has been enabled for this group.");
+      global.ANTI_LINK_GROUPS[from] = true;
+      reply("✅ *ANTI_LINK has been enabled for this group.*");
     } else if (args[0] === "off") {
-      if (global.ANTI_LINK_GROUPS) delete global.ANTI_LINK_GROUPS[m.chat];
-      reply("❌ ANTI_LINK has been disabled for this group.");
+      delete global.ANTI_LINK_GROUPS[from];
+      reply("❌ *ANTI_LINK has been disabled for this group.*");
     } else {
-      reply("Usage: *.antilink on/off*");
+      reply("⚠️ Usage: *.antilink on/off*");
     }
   } catch (e) {
-    reply(`Error: ${e.message}`);
+    reply(`❌ Error: ${e.message}`);
   }
 });
 
-// Anti-link message listener
-conn.on('message', async (message) => {
+// ======= ANTI-LINK MESSAGE HANDLER =======
+conn.on('message', async (mek) => {
   try {
-    const m = message;
-    const from = m.chat;
-    const isGroup = m.isGroup;
-    const sender = m.sender;
-    const text = m.text || m.caption || "";
+    const from = mek.chat;
+    const isGroup = mek.isGroup;
+    const sender = mek.sender;
+    const text = mek.text || mek.caption || "";
 
     if (!isGroup) return;
     if (!global.ANTI_LINK_GROUPS || !global.ANTI_LINK_GROUPS[from]) return;
 
+    // Get group participants and check if sender is admin
     const groupMetadata = await conn.groupMetadata(from);
-    const isSenderAdmin = groupMetadata.participants.find(p => p.id === sender)?.admin !== null;
+    const participant = groupMetadata.participants.find(p => p.id === sender);
+    const isSenderAdmin = participant?.admin !== null;
 
-    // Regex to detect WhatsApp/URLs
+    // Regex to detect links
     const linkRegex = /(https?:\/\/|www\.)[^\s]+/i;
 
     if (!isSenderAdmin && linkRegex.test(text)) {
-      await conn.deleteMessage(from, { id: m.id, remoteJid: from, fromMe: false });
-      await conn.sendMessage(from, { text: `🚫 Link not allowed!` }, { quoted: m });
+      // Delete message
+      await conn.deleteMessage(from, { id: mek.id, remoteJid: from, fromMe: false });
+      // Send warning
+      await conn.sendMessage(from, { text: `🚫 Link not allowed!` }, { quoted: mek });
     }
   } catch (err) {
     console.log("Anti-link error:", err.message);
