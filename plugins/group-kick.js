@@ -12,7 +12,7 @@ async (conn, mek, m, { from, isGroup, isBotAdmins, isAdmins, reply }) => {
     try {
 
         if (!isGroup) return reply("📛 *Group command only!*");
-        if (!isAdmins) return reply("📛 *Only admins can use this command!*");
+        if (!isAdmins) return reply("📛 *Only admins/owner can use this command!*");
         if (!isBotAdmins) return reply("📛 *Bot must be admin!*");
 
         if (!mek.message?.extendedTextMessage) {
