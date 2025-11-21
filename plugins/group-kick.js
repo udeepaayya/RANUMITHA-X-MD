@@ -15,27 +15,21 @@ async (conn, mek, m, { from, isGroup, isBotAdmins, isAdmins, reply }) => {
         if (!isAdmins) return reply("📛 *Only admins can use this command!*");
         if (!isBotAdmins) return reply("📛 *Bot must be admin!*");
 
-        // Check reply
         if (!mek.message?.extendedTextMessage) {
-            return reply("🔁 *Reply to a user's message and type .kick*");
+            return reply("Reply to message and type *.kick*");
         }
 
-        // Get replied user JID
         const mentionedJid = mek.message.extendedTextMessage.contextInfo.participant;
+        if (!mentionedJid) return reply("⚠️ *Reply to the person you want to kick!*");
 
-        if (!mentionedJid) {
-            return reply("⚠️ *Reply to the person you want to kick and send .kick*");
-        }
-
-        // ⛔ Bot number check
-        if (mentionedJid === conn.user.id) {
-            return reply("*😒 It's me!*");
+        // 🛡️ BOT SELF-KICK PROTECTION
+        if (mentionedJid === conn.user.jid) {
+            return reply("*😒 It's me..*");
         }
 
         // Kick user
         await conn.groupParticipantsUpdate(from, [mentionedJid], "remove");
 
-        // Success message
         await conn.sendMessage(from, { 
             text: `✅ *Removed Successfully*`
         });
