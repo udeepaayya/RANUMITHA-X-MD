@@ -29,7 +29,7 @@ async (conn, mek, m, { from, isGroup, isBotAdmins, isAdmins, reply }) => {
 
         // If someone tries to kick bot
         if (mentionedJid === botJid) {
-            return reply("🤖 *It's me! I can't remove myself 😆*");
+            return reply("😒 *It's me!*");
         }
 
         // Remove other users normally
