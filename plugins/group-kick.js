@@ -22,14 +22,13 @@ async (conn, mek, m, { from, isGroup, isBotAdmins, isAdmins, reply }) => {
 
         // Get replied user JID
         const mentionedJid = mek.message.extendedTextMessage.contextInfo.participant;
+        if (!mentionedJid) return reply("⚠️ *Reply to the person you want to kick and send a kick!*");
 
-        if (!mentionedJid) {
-            return reply("⚠️ *Reply to the person you want to kick and send .kick*");
-        }
+        // BOT number protect
+        const botNumber = conn.user.id?.split(":")[0] + "@s.whatsapp.net";
 
-        // ⛔ Bot number check
-        if (mentionedJid === conn.user.id) {
-            return reply("😒 *It's me!*");
+        if (mentionedJid === botNumber) {
+            return reply("🤖 *It's me! I can't remove myself 😆*");
         }
 
         // Kick user
