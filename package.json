@@ -18,7 +18,7 @@
     "pino": "^10.1.0",
     "pm2": "^6.0.13",
     "util": "^0.12.4",
-    "jimp": "^0.6.8",
+    "jimp": "^1.6.0",
     "express": "latest",
     "moment-timezone": "^0.6.0",
     "axios": "^1.7.9",
