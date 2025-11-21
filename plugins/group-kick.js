@@ -17,7 +17,7 @@ async (conn, mek, m, { from, isGroup, isBotAdmins, isAdmins, reply }) => {
 
         // Check reply
         if (!mek.message?.extendedTextMessage) {
-            return reply("🔁 *Reply to a user's message and type .kick*");
+            return reply("*✨ Reply to a user's message and type .kick*");
         }
 
         // Get replied user's JID
