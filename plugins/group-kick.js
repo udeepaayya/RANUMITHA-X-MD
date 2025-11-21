@@ -20,16 +20,19 @@ async (conn, mek, m, { from, isGroup, isBotAdmins, isAdmins, reply }) => {
             return reply("🔁 *Reply to a user's message and type .kick*");
         }
 
-        // Get replied user JID
+        // Get replied user's JID
         const mentionedJid = mek.message.extendedTextMessage.contextInfo.participant;
         if (!mentionedJid) return reply("⚠️ *Reply to the person you want to kick!*");
 
-        // Bot number check
-        if (mentionedJid === conn.user.id) {
-            return reply("🤖 *It's me!*");
+        // BOT number detect
+        const botJid = conn.user.id?.split(":")[0] + "@s.whatsapp.net";
+
+        // If someone tries to kick bot
+        if (mentionedJid === botJid) {
+            return reply("🤖 *It's me! I can't remove myself 😆*");
         }
 
-        // Kick user
+        // Remove other users normally
         await conn.groupParticipantsUpdate(from, [mentionedJid], "remove");
 
         await conn.sendMessage(from, { 
