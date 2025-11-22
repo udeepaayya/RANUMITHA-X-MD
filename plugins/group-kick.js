@@ -16,20 +16,19 @@ async (conn, mek, m, { from, isGroup, isBotAdmins, isAdmins, reply }) => {
 
         let mentionedJid;
 
-        // If user is mentioned in the command
+        // Mentioned
         if (mek.message?.extendedTextMessage?.contextInfo?.mentionedJid?.length) {
             mentionedJid = mek.message.extendedTextMessage.contextInfo.mentionedJid[0];
         }
-        // If no mention, check if it's a reply
+        // Reply
         else if (mek.message?.extendedTextMessage?.contextInfo?.participant) {
             mentionedJid = mek.message.extendedTextMessage.contextInfo.participant;
         } else {
             return reply("⚠️ *Reply to a user's message or mention them to kick!*"); 
         }
 
-        // BOT number detect
+        // Bot detect
         const botJid = conn.user.id?.split(":")[0] + "@s.whatsapp.net";
-
         if (mentionedJid === botJid) {
             return reply("😒 *It's me!*");
         }
@@ -37,7 +36,8 @@ async (conn, mek, m, { from, isGroup, isBotAdmins, isAdmins, reply }) => {
         await conn.groupParticipantsUpdate(from, [mentionedJid], "remove");
 
         await conn.sendMessage(from, { 
-            text: `✅ *Removed Successfully*`
+            text: `✅ *Successfully Removed:* @${mentionedJid.split("@")[0]}`,
+            mentions: [mentionedJid]
         });
 
     } catch (err) {
