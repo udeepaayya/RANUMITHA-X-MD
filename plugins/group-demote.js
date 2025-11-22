@@ -9,7 +9,7 @@ cmd({
     filename: __filename
 },
 async (conn, mek, m, {
-    from, quoted, body, isCmd, command, args, q,
+    from, quoted, body, args, q,
     isGroup, sender, botNumber, participants, isAdmins, isBotAdmins, reply
 }) => {
     try {
@@ -24,29 +24,29 @@ async (conn, mek, m, {
 
         let number;
 
-        // Get number from reply or mention
+        // Get number from reply or text
         if (m.quoted) {
-            number = m.quoted.sender.split("@")[0];
-        } else if (q && q.includes("@")) {
-            number = q.replace(/[@\s]/g, '');
+            number = m.quoted.sender.replace(/\D/g, ''); // Remove +, @, spaces
+        } else if (q) {
+            number = q.replace(/\D/g, ''); // Remove non-digit characters
         } else {
             return reply("❌ Please reply to a message or provide a number to demote.");
         }
 
         const jid = number + "@s.whatsapp.net";
 
-        // Find the target in the group
-        const target = participants.find(p => p.id === jid);
+        // Find target in participants using endsWith to handle number formats
+        const target = participants.find(p => p.id.endsWith(number));
         if (!target) return reply("❌ User not found in the group.");
 
         // Prevent demoting bot or owner
         if (jid === botNumber) return reply("❌ I cannot demote myself.");
         if (target.isOwner) return reply("❌ Cannot demote the group owner.");
 
-        // Check if the target is admin
+        // Check if target is actually an admin
         if (!target.admin) return reply("❌ That user is not an admin.");
 
-        // Demote
+        // Demote the user
         await conn.groupParticipantsUpdate(from, [jid], "demote");
         reply(`✅ Successfully demoted @${number} to a normal member.`, { mentions: [jid] });
 
