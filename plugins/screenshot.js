@@ -28,22 +28,33 @@ cmd({
   alias: ["ss", "ssweb"],
   desc: "Capture a full-page screenshot of a website.",
   category: "utility",
-  use: ".screenshot <url>",
+  use: ".screenshot <url> or reply .ss to a link",
   filename: __filename,
 }, async (conn, mek, msg, { from, args, reply }) => {
   try {
-    const url = args[0];
-    if (!url) return reply("❌ Please provide a URL\nExample: .screenshot https://google.com");
-    if (!url.startsWith("http")) return reply("❌ URL must start with http:// or https://");
+    let url = args[0];
 
-    // Send simple processing message
+    // ---- NEW FEATURE: Reply URL Extract ----
+    if (!url && msg?.quoted?.text) {
+        const quotedText = msg.quoted.text.trim();
+        if (quotedText.startsWith("http://") || quotedText.startsWith("https://")) {
+            url = quotedText;
+        }
+    }
+
+    if (!url)
+        return reply("❌ Please provide a URL\nOr reply to a link with *.ss*");
+
+    if (!url.startsWith("http"))
+        return reply("❌ URL must start with http:// or https://");
+
     await reply("🔄 Capturing screenshot... Please wait!");
 
-    // Send screenshot directly
     await conn.sendMessage(from, {
       image: { url: `https://image.thum.io/get/fullpage/${url}` },
-      caption: "- 🖼️ *Screenshot Generated Successfully!*\n\n" +
-               "> © Powered by 𝗥𝗔𝗡𝗨𝗠𝗜𝗧𝗛𝗔-𝗫-𝗠𝗗 🌛"
+      caption:
+        "🖼️ *Screenshot Generated Successfully!*\n\n" +
+        "© Powered by 𝗥𝗔𝗡𝗨𝗠𝗜𝗧𝗛𝗔-𝗫-𝗠𝗗 🌛"
     }, { quoted: fakevCard });
 
   } catch (error) {
