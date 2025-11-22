@@ -1,46 +1,51 @@
 const { cmd } = require('../command');
 
 cmd({
-  pattern: "pp",
-  alias: ["ppp", "pn"],
-  react: "🛡️",
-  desc: "Promote a user to admin (Owner & Admin only)",
-  category: "group",
-  use: ".promote (reply to a user)",
-  filename: __filename
+    pattern: "promote",
+    alias: ["p", "admin", "makeadmin"],
+    desc: "Promote a user to admin (reply or mention)",
+    category: "admin",
+    react: "⬆️",
+    filename: __filename
 },
-async (conn, mek, m, {
-  from, isGroup, isAdmins, isOwner, participants, reply
-}) => {
-  try {
-    // ✅ Check if in group
-    if (!isGroup) return reply("❌ This command can only be used in groups.");
+async (conn, mek, m, { from, isGroup, isBotAdmins, isAdmins, participants, reply }) => {
+    try {
+        // Only in groups
+        if (!isGroup) return reply("📛 *Group command only!*");
 
-    // ✅ Check if user is bot owner or group admin
-    if (!isOwner && !isAdmins)
-      return reply("❌ Only bot owner or group admins can use this command!");
+        // Only group admins can use
+        if (!isAdmins) return reply("📛 *Only group admins can use this command!*");
 
-    // ✅ Check if bot is admin
-    const botNumber = conn.user.id.split(":")[0] + "@s.whatsapp.net";
-    const botAdmin = participants.find(p => p.id === botNumber && p.admin);
-    if (!botAdmin) return reply("❌ Firstly give me admin!");
+        // Bot must be admin
+        if (!isBotAdmins) return reply("📛 *Bot must be admin first!*");
 
-    // ✅ Check if replied to a user
-    const quoted = m.quoted ? m.quoted.sender : false;
-    if (!quoted) return reply("⚠️ Please reply to a user to promote them.");
+        // Get user to promote (from mention or reply)
+        let quoted = mek.message?.extendedTextMessage?.contextInfo?.mentionedJid?.[0] 
+                   || mek.message?.extendedTextMessage?.contextInfo?.participant;
 
-    // ✅ Check if user is already admin (YOUR REQUESTED CODE HERE)
-    const groupAdmins = participants.filter(p => p.admin).map(p => p.id);
-    if (groupAdmins.includes(quoted)) {
-      return reply("✅ That user is already an admin!");
+        if (!quoted) return reply("⚠️ *Reply to a user's message or tag them to promote!*"); 
+
+        // Bot cannot promote itself
+        const botJid = conn.user.id.split(":")[0] + "@s.whatsapp.net";
+        if (quoted === botJid) return reply("⚠️ I can't promote myself!");
+
+        // ✅ Check if user is already admin
+        const groupAdmins = participants.filter(p => p.admin).map(p => p.id);
+        if (groupAdmins.includes(quoted)) {
+            return reply("✅ That user is already an admin!");
+        }
+
+        // Promote user
+        await conn.groupParticipantsUpdate(from, [quoted], "promote");
+
+        // Success message
+        await conn.sendMessage(from, { 
+            text: `✅ *Successfully Promoted:* @${quoted.split("@")[0]}`,
+            mentions: [quoted]
+        });
+
+    } catch (err) {
+        console.log(err);
+        reply("❌ *Failed to promote user!*");
     }
-
-    // ✅ Promote user
-    await conn.groupParticipantsUpdate(from, [quoted], "promote");
-    reply("🎉 User has been promoted to admin successfully!");
-
-  } catch (e) {
-    console.error(e);
-    reply(`❌ *Error Occurred!* \n\n${e.message}`);
-  }
 });
