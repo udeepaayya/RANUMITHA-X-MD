@@ -10,9 +10,9 @@ cmd({
 },
 async (conn, mek, m, { from, isGroup, isBotAdmins, isAdmins, participants, reply }) => {
     try {
-        if (!isGroup) return reply("⚠️ This command is only for groups!");
-        if (!isBotAdmins) return reply("⚠️ I must be an admin to do this!");
-        if (!isAdmins) return reply("⚠️ You must be an admin to use this!");
+        if (!isGroup) return reply("⚠️ This command works only in groups!");
+        if (!isBotAdmins) return reply("⚠️ I must be an admin to demote someone!");
+        if (!isAdmins) return reply("⚠️ You must be an admin to use this command!");
 
         let user;
         if (m.quoted) {
