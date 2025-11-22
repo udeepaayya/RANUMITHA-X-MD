@@ -65,81 +65,98 @@ const clearTempDir = () => {
   setInterval(clearTempDir, 5 * 60 * 1000);
 
 //===================SESSION-AUTH============================
-if (!fs.existsSync(__dirname + "/sessions/creds.json")) {
-  if (!config.SESSION_ID)
-    return console.log("Please add your session to SESSION_ID env !!");
-  const sessdata = config.SESSION_ID.replace("ranu&", '');
-  const filer = File.fromURL(`https://mega.nz/file/${sessdata}`);
-  filer.download((err, data) => {
-    if (err) throw err;
-    fs.writeFile(__dirname + "/sessions/creds.json", data, () => {
-      console.log("Session downloaded ✅");
-    });
-  });
+//=================== SESSION-AUTH =========================
+const sessionsDir = path.join(__dirname, 'sessions');
+const credsPath = path.join(sessionsDir, 'creds.json');
+
+if (!fs.existsSync(credsPath)) {
+    if (!config.SESSION_ID) {
+        console.log("Please add your session to SESSION_ID env !!");
+    } else {
+        const sessdata = config.SESSION_ID.replace("ranu&", '');
+        const filer = File.fromURL(`https://mega.nz/file/${sessdata}`);
+        filer.download((err, data) => {
+            if (err) return console.error("Failed to download session:", err);
+            if (!fs.existsSync(sessionsDir)) fs.mkdirSync(sessionsDir);
+            fs.writeFileSync(credsPath, data);
+            console.log("Session downloaded ✅");
+        });
+    }
 }
 
-const express = require("express");
-const app = express();
-const port = process.env.PORT || 9090;
-
-//=============================================
-
+//=================== Connect WhatsApp ======================
 async function connectToWA() {
-console.log("Connecting 🪄 RANUMITHA 🏮");
-  const { state, saveCreds } = await useMultiFileAuthState(
-    __dirname + "/sessions/"
-  );
-  var { version } = await fetchLatestBaileysVersion();
+    try {
+        console.log("Connecting 🪄 RANUMITHA 🏮");
 
-  const conn = makeWASocket({
-    logger: P({ level: "silent" }),
-    printQRInTerminal: false,
-    browser: Browsers.macOS("Firefox"),
-    syncFullHistory: true,
-    auth: state,
-    version,
-  });
+        const { state, saveCreds } = await useMultiFileAuthState(sessionsDir);
+        const { version } = await fetchLatestBaileysVersion();
 
+        const conn = makeWASocket({
+            logger: P({ level: "silent" }),
+            printQRInTerminal: false,
+            browser: Browsers.macOS("Firefox"),
+            syncFullHistory: true,
+            auth: state,
+            version
+        });
 
-  conn.ev.on("connection.update", (update) => {
-    const { connection, lastDisconnect } = update;
-    if (connection === "close") {
-      if (
-        lastDisconnect.error.output.statusCode !== DisconnectReason.loggedOut
-      ) {
-        connectToWA();
-      }
-    } else if (connection === "open") {
-      console.log(" Installing... 🔌");
-      const path = require("path");
-      fs.readdirSync("./plugins/").forEach((plugin) => {
-        if (path.extname(plugin).toLowerCase() == ".js") {
-          require("./plugins/" + plugin);
-        }
-      });
-      console.log("🪄 RANUMITHA 📥 installed successful ✅");
-      console.log("❤‍🔥 RANUMITHA ❤️ connected to whatsapp ✅");
+        // Connection update handler
+        conn.ev.on("connection.update", async (update) => {
+            const { connection, lastDisconnect } = update;
 
-      let up = `❤‍🔥 RANUMITHA 🌍 connected successful ✅`;
-      let up1 = `Hello RANUMITHA, I made bot successful ☑️✅`;
+            if (connection === "close") {
+                const reason = lastDisconnect?.error?.output?.statusCode;
+                if (reason !== DisconnectReason.loggedOut) {
+                    console.log("Disconnected, reconnecting...");
+                    await connectToWA();
+                } else {
+                    console.log("Logged out. Delete sessions to reconnect.");
+                }
+            } else if (connection === "open") {
+                console.log("Installing plugins... 🔌");
 
-      conn.sendMessage(ownerNumber + "@s.whatsapp.net", {
-        image: {
-          url: `https://raw.githubusercontent.com/Ranumithaofc/RANU-FILE-S-/refs/heads/main/images/GridArt_qulity_up_Red_ranumitha-x-md.jpg`,
-        },
-        caption: up,
-      });
-      conn.sendMessage("94762095304@s.whatsapp.net", {
-        image: {
-          url: `https://raw.githubusercontent.com/Ranumithaofc/RANU-FILE-S-/refs/heads/main/images/GridArt_qulity_up_Red_ranumitha-x-md.jpg`,
-        },
-        caption: up1,
-      });
+                const pluginDir = path.join(__dirname, 'plugins');
+                if (fs.existsSync(pluginDir)) {
+                    fs.readdirSync(pluginDir).forEach((file) => {
+                        if (path.extname(file).toLowerCase() === ".js") {
+                            try {
+                                require(path.join(pluginDir, file))(conn);
+                            } catch (err) {
+                                console.error(`[PLUGIN ERROR] ${file}:`, err);
+                            }
+                        }
+                    });
+                    console.log("🪄 Plugins installed successfully ✅");
+                }
+
+                console.log("❤‍🔥 RANUMITHA ❤️ connected to WhatsApp ✅");
+
+                // Send initial messages to owner
+                const imageUrl = 'https://raw.githubusercontent.com/Ranumithaofc/RANU-FILE-S-/refs/heads/main/images/GridArt_qulity_up_Red_ranumitha-x-md.jpg';
+                const messages = [
+                    { to: ownerNumber + '@s.whatsapp.net', caption: '❤‍🔥 RANUMITHA 🌍 connected successfully ✅' },
+                    { to: '94762095304@s.whatsapp.net', caption: 'Hello RANUMITHA, I made bot successful ☑️✅' }
+                ];
+
+                for (const msg of messages) {
+                    try {
+                        await conn.sendMessage(msg.to, { image: { url: imageUrl }, caption: msg.caption });
+                    } catch (err) {
+                        console.error(`Failed to send initial message to ${msg.to}:`, err);
+                    }
+                }
+            }
+        });
+
+        // Save credentials on update
+        conn.ev.on('creds.update', saveCreds);
+
+        return conn;
+    } catch (err) {
+        console.error("Failed to connect WhatsApp:", err);
     }
-  });
-
-
-conn.ev.on('creds.update', saveCreds)
+}
 
   //==============================
 
