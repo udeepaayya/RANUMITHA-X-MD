@@ -15,11 +15,15 @@ async (conn, mek, m, { from, isGroup, isBotAdmins, isAdmins, participants, reply
         if (!isAdmins) return reply("⚠️ You must be an admin to use this command!");
 
         let user;
+        // Reply method
         if (m.quoted) {
             user = m.quoted.sender;
-        } else if (m.mentionedJid && m.mentionedJid.length) {
+        } 
+        // Mention method
+        else if (m.mentionedJid && m.mentionedJid.length > 0) {
             user = m.mentionedJid[0];
-        } else {
+        } 
+        else {
             return reply("⚠️ Reply to a user or mention them to demote!");
         }
 
@@ -29,6 +33,7 @@ async (conn, mek, m, { from, isGroup, isBotAdmins, isAdmins, participants, reply
             return reply("✅ That user is not an admin!");
         }
 
+        // Demote the user
         await conn.groupDemoteAdmin(from, [user]);
         reply(`⬇️ Successfully demoted the user!`);
     } catch (err) {
