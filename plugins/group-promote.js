@@ -1,9 +1,9 @@
 const { cmd } = require('../command');
 
 cmd({
-  pattern: "pp",
-  alias: ["ppp", "pn"],
-  react: "🛡️",
+  pattern: "p",
+  alias: ["promote", "makeadmin", "admin"],
+  react: "⬆️",
   desc: "Promote a user to admin (Owner & Admin only)",
   category: "group",
   use: ".promote (reply to a user)",
