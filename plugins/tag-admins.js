@@ -25,7 +25,7 @@ END:VCARD`
 cmd({
     pattern: "tagadmins",
     react: "👑",
-    alias: ["gc_tagadmins"],
+    alias: ["gc_tagadmins", "tagadmin", "admins"],
     desc: "To Tag all Admins of the Group",
     category: "group",
     use: '.tagadmins [message]',
