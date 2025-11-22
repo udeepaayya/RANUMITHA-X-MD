@@ -53,7 +53,7 @@ cmd({
     await conn.sendMessage(from, {
       image: { url: `https://image.thum.io/get/fullpage/${url}` },
       caption:
-        "🖼️ *Screenshot Generated Successfully!*\n\n" +
+        "- 🖼️ *Screenshot Generated Successfully!*\n\n" +
         "> © Powerd by 𝗥𝗔𝗡𝗨𝗠𝗜𝗧𝗛𝗔-𝗫-𝗠𝗗 🌛"
     }, { quoted: fakevCard });
 
