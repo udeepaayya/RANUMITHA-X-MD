@@ -2,7 +2,7 @@ const { cmd } = require('../command');
 
 cmd({
     pattern: "d",
-    alias: ["demote", "removeadmin", "radmin",],
+    alias: ["demote", "removeadmin", "radmin"],
     desc: "Demote an admin to normal user (reply or mention)",
     category: "admin",
     react: "⬇️",
@@ -27,12 +27,12 @@ async (conn, mek, m, { from, isGroup, isBotAdmins, isAdmins, participants, reply
 
         // Bot cannot demote itself
         const botJid = conn.user.id.split(":")[0] + "@s.whatsapp.net";
-        if (quoted === botJid) return reply("😒 *It's me!*");
+        if (quoted === botJid) return reply("😒 *I can't demote myself!*");
 
-        // ✅ Check if user is already not an admin
+        // Check if user is actually an admin
         const groupAdmins = participants.filter(p => p.admin).map(p => p.id);
         if (!groupAdmins.includes(quoted)) {
-            return reply("✅ That user is not an admin!");
+            return reply("⚠️ That user is not an admin!");
         }
 
         // Demote user
