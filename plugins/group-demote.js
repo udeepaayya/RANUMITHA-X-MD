@@ -9,50 +9,44 @@ cmd({
     filename: __filename
 },
 async (conn, mek, m, {
-    from, quoted, body, args, q,
+    from, quoted, mentionedJid,
     isGroup, sender, botNumber, participants, isAdmins, isBotAdmins, reply
 }) => {
     try {
-        // Only usable in groups
+        // Only in groups
         if (!isGroup) return reply("❌ This command can only be used in groups.");
 
-        // Only admins can use it
+        // Only group admins
         if (!isAdmins) return reply("❌ Only group admins can use this command.");
 
         // Bot must be admin
-        if (!isBotAdmins) return reply("❌ I need to be an admin to use this command.");
+        if (!isBotAdmins) return reply("❌ I need to be an admin to demote someone.");
 
-        let number;
+        let targetJid;
 
-        // Get number from reply, mention, or args
-        if (m.quoted) {
-            number = m.quoted.sender.replace(/\D/g, '');
-        } else if (m.mentionedJid && m.mentionedJid.length) {
-            number = m.mentionedJid[0].split('@')[0];
-        } else if (args && args[0]) {
-            number = args[0].replace(/\D/g, '');
+        // Get the user from reply or mention
+        if (quoted) {
+            targetJid = quoted.sender;
+        } else if (mentionedJid && mentionedJid.length) {
+            targetJid = mentionedJid[0];
         } else {
-            return reply("❌ Please reply to a message, mention, or provide a number to demote.");
+            return reply("❌ Please reply to a message or mention a user to demote.");
         }
 
-        if (!number) return reply("❌ Invalid number provided.");
-
-        const jid = number + "@s.whatsapp.net";
-
         // Find the target in participants
-        const target = participants.find(p => p.id.includes(number));
-        if (!target) return reply(`❌ User ${number} not found in this group.`);
+        const target = participants.find(p => p.id === targetJid);
+        if (!target) return reply("❌ User not found in this group.");
 
         // Prevent demoting bot or owner
-        if (jid === botNumber) return reply("❌ I cannot demote myself.");
+        if (targetJid === botNumber) return reply("❌ I cannot demote myself.");
         if (target.isOwner) return reply("❌ Cannot demote the group owner.");
 
-        // Check if the target is actually an admin
+        // Check if the target is an admin
         if (!target.admin) return reply("❌ That user is not an admin.");
 
-        // Perform the demote
-        await conn.groupParticipantsUpdate(from, [jid], "demote");
-        reply(`✅ Successfully demoted @${number} to a normal member.`, { mentions: [jid] });
+        // Demote the user
+        await conn.groupParticipantsUpdate(from, [targetJid], "demote");
+        reply(`✅ Successfully demoted @${targetJid.split("@")[0]} to a normal member.`, { mentions: [targetJid] });
 
     } catch (error) {
         console.error("Demote command error:", error);
