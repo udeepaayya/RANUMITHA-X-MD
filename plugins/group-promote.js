@@ -10,33 +10,38 @@ cmd({
 },
 async (conn, mek, m, { from, isGroup, isBotAdmins, isAdmins, participants, reply }) => {
     try {
+        // Only in groups
         if (!isGroup) return reply("📛 *Group command only!*");
+
+        // Only group admins can use
         if (!isAdmins) return reply("📛 *Only group admins can use this command!*");
+
+        // Bot must be admin
         if (!isBotAdmins) return reply("📛 *Bot must be admin first!*");
 
-        // Get user from mention or reply
-        let user = mek.message?.extendedTextMessage?.contextInfo?.mentionedJid?.[0] 
+        // Get user to promote (from mention or reply)
+        let quoted = mek.message?.extendedTextMessage?.contextInfo?.mentionedJid?.[0] 
                    || mek.message?.extendedTextMessage?.contextInfo?.participant;
 
-        if (!user) return reply("⚠️ *Reply to a user's message or tag them to promote!*"); 
+        if (!quoted) return reply("⚠️ *Reply to a user's message or tag them to promote!*"); 
 
         // Bot cannot promote itself
         const botJid = conn.user.id.split(":")[0] + "@s.whatsapp.net";
-        if (user === botJid) return;
+        if (quoted === botJid) return reply("⚠️ I can't promote myself!");
 
-        // Already admin check
+        // ✅ Check if user is already admin
         const groupAdmins = participants.filter(p => p.admin).map(p => p.id);
-        if (groupAdmins.includes(user)) {
-            return reply("*✅ That user is already an admin!*");
+        if (groupAdmins.includes(quoted)) {
+            return reply("✅ That user is already an admin!");
         }
 
         // Promote user
-        await conn.groupParticipantsUpdate(from, [user], "promote");
+        await conn.groupParticipantsUpdate(from, [quoted], "promote");
 
         // Success message
         await conn.sendMessage(from, { 
-            text: `✅ *Successfully Promoted:* @${user.split("@")[0]}`,
-            mentions: [user]
+            text: `✅ *Successfully Promoted:* @${quoted.split("@")[0]}`,
+            mentions: [quoted]
         });
 
     } catch (err) {
