@@ -27,7 +27,7 @@ async (conn, mek, m, { from, isGroup, isBotAdmins, isAdmins, participants, reply
 
         // Bot cannot promote itself
         const botJid = conn.user.id.split(":")[0] + "@s.whatsapp.net";
-        if (quoted === botJid) return reply("⚠️ I can't promote myself!");
+        if (quoted === botJid) return reply("😒 *It's me!*");
 
         // ✅ Check if user is already admin
         const groupAdmins = participants.filter(p => p.admin).map(p => p.id);
