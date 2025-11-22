@@ -34,7 +34,7 @@ async (conn, mek, m, { from, isGroup, isBotAdmins, isAdmins, participants, reply
         // Already admin? → send message
         const groupAdmins = participants.filter(p => p.admin).map(p => p.id);
         if (groupAdmins.includes(user)) {
-            return reply("✅ That user is already an admin!");
+            return reply("*✅ That user is already an admin!*");
         }
 
         // Promote user
