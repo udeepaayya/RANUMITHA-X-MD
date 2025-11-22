@@ -14,24 +14,17 @@ async (conn, mek, m, { from, isGroup, isBotAdmins, isAdmins, participants, reply
         if (!isAdmins) return reply("📛 *Only group admins can use this command!*");
         if (!isBotAdmins) return reply("📛 *Bot must be admin first!*");
 
-        let user;
+        // Get user from mention or reply
+        let user = mek.message?.extendedTextMessage?.contextInfo?.mentionedJid?.[0] 
+                   || mek.message?.extendedTextMessage?.contextInfo?.participant;
 
-        // @tag
-        if (mek.message?.extendedTextMessage?.contextInfo?.mentionedJid?.length) {
-            user = mek.message.extendedTextMessage.contextInfo.mentionedJid[0];
-        }
-        // Reply
-        else if (mek.message?.extendedTextMessage?.contextInfo?.participant) {
-            user = mek.message.extendedTextMessage.contextInfo.participant;
-        } else {
-            return reply("⚠️ *Reply to a user's message or tag them to promote!*"); 
-        }
+        if (!user) return reply("⚠️ *Reply to a user's message or tag them to promote!*"); 
 
         // Bot cannot promote itself
         const botJid = conn.user.id.split(":")[0] + "@s.whatsapp.net";
         if (user === botJid) return;
 
-        // Already admin? → send message
+        // Already admin check
         const groupAdmins = participants.filter(p => p.admin).map(p => p.id);
         if (groupAdmins.includes(user)) {
             return reply("*✅ That user is already an admin!*");
