@@ -54,7 +54,7 @@ cmd({
       image: { url: `https://image.thum.io/get/fullpage/${url}` },
       caption:
         "🖼️ *Screenshot Generated Successfully!*\n\n" +
-        "© Powered by 𝗥𝗔𝗡𝗨𝗠𝗜𝗧𝗛𝗔-𝗫-𝗠𝗗 🌛"
+        "> © Powerd by 𝗥𝗔𝗡𝗨𝗠𝗜𝗧𝗛𝗔-𝗫-𝗠𝗗 🌛"
     }, { quoted: fakevCard });
 
   } catch (error) {
