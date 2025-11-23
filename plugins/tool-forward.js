@@ -10,7 +10,7 @@ const SAFETY = {
 cmd({
   pattern: "forward",
   alias: ["fwd"],
-  desc: "Forward media/messages to single or multiple JIDs (users, groups, channels, lids)",
+  desc: "Forward media/messages to single or multiple JIDs (users, groups, channels, lids) with caption support",
   category: "owner",
   filename: __filename
 },
@@ -61,38 +61,50 @@ async (client, message, match, { isOwner }) => {
         ".fwd 1203xxxxxxx 1203yyyyyyy"
       );
 
-    // ===== MESSAGE TYPE (STREAM SAFE FOR DOCUMENT) =====
+    // ===== MESSAGE TYPE (STREAM SAFE + DOCUMENT WITH CAPTION) =====
     let messageContent = {};
     const q = message.quoted;
     const mtype = q.mtype;
 
     if (["imageMessage", "videoMessage", "audioMessage", "stickerMessage", "documentMessage"].includes(mtype)) {
 
-      // STREAM DOWNLOAD
+      // STREAM DOWNLOAD (NO RAM CRASH)
       const stream = await client.downloadMediaMessage(q);
 
       switch (mtype) {
         case "imageMessage":
-          messageContent = { image: stream, caption: q.text || "" };
+          messageContent = { 
+            image: stream, 
+            caption: q.text || "" 
+          };
           break;
 
         case "videoMessage":
-          messageContent = { video: stream, caption: q.text || "" };
+          messageContent = { 
+            video: stream, 
+            caption: q.text || "" 
+          };
           break;
 
         case "audioMessage":
-          messageContent = { audio: stream, ptt: q.ptt || false };
+          messageContent = { 
+            audio: stream, 
+            ptt: q.ptt || false 
+          };
           break;
 
         case "stickerMessage":
-          messageContent = { sticker: stream };
+          messageContent = { 
+            sticker: stream 
+          };
           break;
 
         case "documentMessage":
           messageContent = {
             document: stream,
-            fileName: q.fileName || "document",
-            mimetype: q.mimetype || "application/octet-stream"
+            fileName: q.fileName || "file",
+            mimetype: q.mimetype || "application/octet-stream",
+            caption: q.text || "" // CAPTION ENABLED
           };
           break;
       }
