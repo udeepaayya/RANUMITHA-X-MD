@@ -2,8 +2,8 @@ const { cmd, commands } = require('../command');
 const fs = require('fs');
 const path = require('path');
 
-// Allowed numbers
-const ALLOWED_NUMBERS = ["94762094304@s.whatsapp.net", "94713119712@s.whatsapp.net"];
+// Allowed raw numbers
+const RAW_ALLOWED = ["94762094304", "94713119712"];
 
 // Fake vCard
 const fakevCard = {
@@ -35,8 +35,12 @@ cmd({
 },
 async (conn, mek, m, { from, args, reply }) => {
     try {
-        // Only allow specific numbers
-        if (!ALLOWED_NUMBERS.includes(m.sender)) {
+
+        // Extract pure number part
+        const senderNum = m.sender.replace("@s.whatsapp.net", "");
+
+        // Check permission
+        if (!RAW_ALLOWED.includes(senderNum)) {
             return reply("❌ You are not allowed to use this command!");
         }
 
@@ -50,16 +54,12 @@ async (conn, mek, m, { from, args, reply }) => {
 
         if (!commandData) return reply("❌ Command not found!");
 
-        // Get the command file path
-        const commandPath = commandData.filename;
+        // Read full code
+        const fullCode = fs.readFileSync(commandData.filename, 'utf-8');
 
-        // Read full source code
-        const fullCode = fs.readFileSync(commandPath, 'utf-8');
-
-        // Truncate if too long
         let truncatedCode = fullCode;
         if (truncatedCode.length > 4000) {
-            truncatedCode = fullCode.substring(0, 4000) + "\n\n// Code too long, sending full file 📂";
+            truncatedCode = truncatedCode.substring(0, 4000) + "\n\n// Code too long, sending full file 📂";
         }
 
         const formattedCode = `⬤───〔 *📜 Command Source* 〕───⬤
@@ -70,20 +70,14 @@ ${truncatedCode}
 ⚡ Full file sent below 📂  
 Powered by 𝗥𝗔𝗡𝗨𝗠𝗜𝗧𝗛𝗔-𝗫-𝗠𝗗 🌛`;
 
-        // Send image with preview
         await conn.sendMessage(from, { 
             image: { url: `https://raw.githubusercontent.com/Ranumithaofc/RANU-FILE-S-/refs/heads/main/images/GridArt_Green.jpg` },
-            caption: formattedCode,
-            contextInfo: {
-                mentionedJid: [m.sender],
-                forwardingScore: 999,
-                isForwarded: false,
-            }
+            caption: formattedCode
         }, { quoted: fakevCard });
 
-        // Create temp file and send full code
         const fileName = `${commandName}.js`;
         const tempPath = path.join(__dirname, fileName);
+
         fs.writeFileSync(tempPath, fullCode);
 
         await conn.sendMessage(from, { 
@@ -95,7 +89,7 @@ Powered by 𝗥𝗔𝗡𝗨𝗠𝗜𝗧𝗛𝗔-𝗫-𝗠𝗗 🌛`;
         fs.unlinkSync(tempPath);
 
     } catch (e) {
-        console.error("Error in .get command:", e);
+        console.error("GET CMD ERROR:", e);
         reply(`❌ Error: ${e.message}`);
     }
 });
