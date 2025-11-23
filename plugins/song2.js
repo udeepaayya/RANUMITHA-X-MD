@@ -27,17 +27,24 @@ END:VCARD`
 // 🟣 Command definition
 cmd({
   pattern: "song2",
-  alias: ["play2", "song2","play2"],
+  alias: ["play2", "song2"],
   react: "🎵",
-  desc: "Download YouTube song (Audio) via Nekolabs API",
+  desc: "Download YouTube song (Audio) via Nekolabs API (with Shorts support)",
   category: "download",
-  use: ".play <song name or link>",
+  use: ".play2 <song name or link>",
   filename: __filename,
 }, async (conn, mek, m, { from, reply, q }) => {
   try {
     if (!q) return reply("⚠️ Please provide a song name or YouTube link.");
 
-    const apiUrl = `https://api.nekolabs.my.id/downloader/youtube/play/v1?q=${encodeURIComponent(q)}`;
+    // 🟢 Normalize YouTube Shorts URL
+    let query = q.trim();
+    if (query.includes("youtube.com/shorts/")) {
+      const videoId = query.split("/shorts/")[1].split(/[?&]/)[0];
+      query = `https://www.youtube.com/watch?v=${videoId}`;
+    }
+
+    const apiUrl = `https://api.nekolabs.my.id/downloader/youtube/play/v1?q=${encodeURIComponent(query)}`;
     const res = await fetch(apiUrl);
     const data = await res.json();
 
@@ -48,7 +55,7 @@ cmd({
     const meta = data.result.metadata;
     const dlUrl = data.result.downloadUrl;
 
-    // 🟣 Try fetching thumbnail
+    // 🟣 Fetch thumbnail
     let buffer;
     try {
       const thumbRes = await fetch(meta.cover);
@@ -125,7 +132,6 @@ cmd({
           const audioBuffer = Buffer.from(await audioRes.arrayBuffer());
           fs.writeFileSync(tempPath, audioBuffer);
 
-          // convert to opus (WhatsApp voice note format)
           await new Promise((resolve, reject) => {
             ffmpeg(tempPath)
               .audioCodec("libopus")
@@ -140,7 +146,7 @@ cmd({
 
           type = {
             audio: voiceBuffer,
-            mimetype: "audio/ogg; codecs=opus", // ✅ True WhatsApp format
+            mimetype: "audio/ogg; codecs=opus",
             ptt: true,
           };
 
@@ -163,7 +169,7 @@ cmd({
     });
 
   } catch (err) {
-    console.error("song cmd error:", err);
+    console.error("song2 cmd error:", err);
     reply("⚠️ An error occurred while processing your request.");
   }
 });
