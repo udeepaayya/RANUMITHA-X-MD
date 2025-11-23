@@ -21,7 +21,7 @@ async (client, message, match, { isOwner }) => {
     if (!isOwner) return await message.reply("📛 *Owner Only Command*");
 
     // ===== Must reply to a message =====
-    if (!message.quoted) return await message.reply("🍁 *Please reply to a message to forward*");
+    if (!message.quoted) return await message.reply("🍁 *Reply to a document or media*");
 
     // ===== JID PROCESSING =====
     let jidInput = "";
@@ -41,9 +41,8 @@ async (client, message, match, { isOwner }) => {
           if (jid.includes("@g.us")) return `${clean}@g.us`;                 
           if (jid.includes("@s.whatsapp.net")) return `${clean}@s.whatsapp.net`; 
           if (jid.includes("@newsletter")) return `${clean}@newsletter`;     
-          if (jid.includes("@lid")) return `${clean}@lid`;                    // LID support
+          if (jid.includes("@lid")) return `${clean}@lid`;                   
 
-          // Auto-detect based on number length  
           if (clean.length > 15) return `${clean}@g.us`;                     
           return `${clean}@s.whatsapp.net`;                                  
         }
@@ -62,30 +61,42 @@ async (client, message, match, { isOwner }) => {
         ".fwd 1203xxxxxxx 1203yyyyyyy"
       );
 
-    // ===== MESSAGE TYPE =====
+    // ===== MESSAGE TYPE (STREAM SAFE FOR DOCUMENT) =====
     let messageContent = {};
     const q = message.quoted;
     const mtype = q.mtype;
 
     if (["imageMessage", "videoMessage", "audioMessage", "stickerMessage", "documentMessage"].includes(mtype)) {
-      const buffer = await q.download();
+
+      // STREAM DOWNLOAD
+      const stream = await client.downloadMediaMessage(q);
+
       switch (mtype) {
         case "imageMessage":
-          messageContent = { image: buffer, caption: q.text || "" };
+          messageContent = { image: stream, caption: q.text || "" };
           break;
+
         case "videoMessage":
-          messageContent = { video: buffer, caption: q.text || "" };
+          messageContent = { video: stream, caption: q.text || "" };
           break;
+
         case "audioMessage":
-          messageContent = { audio: buffer, ptt: q.ptt || false };
+          messageContent = { audio: stream, ptt: q.ptt || false };
           break;
+
         case "stickerMessage":
-          messageContent = { sticker: buffer };
+          messageContent = { sticker: stream };
           break;
+
         case "documentMessage":
-          messageContent = { document: buffer, fileName: q.fileName || "file" };
+          messageContent = {
+            document: stream,
+            fileName: q.fileName || "document",
+            mimetype: q.mimetype || "application/octet-stream"
+          };
           break;
       }
+
     } else if (mtype === "extendedTextMessage" || mtype === "conversation") {
       messageContent = { text: q.text };
     } else {
@@ -117,9 +128,9 @@ async (client, message, match, { isOwner }) => {
     }
 
     // ===== REPORT =====
-    let report = `✅ *Forwarding Completed*\n\n` +
+    let report = `✅ *Forward Completed*\n\n` +
                  `📤 Success: ${successCount}/${validJids.length}\n` +
-                 `📦 Type: ${mtype || "text"}\n`;
+                 `📄 Type: ${mtype}\n`;
 
     if (failed.length > 0) report += `\n❌ Failed: ${failed.join(", ")}`;
 
