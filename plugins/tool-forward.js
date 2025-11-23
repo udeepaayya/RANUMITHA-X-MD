@@ -41,7 +41,7 @@ async (client, message, match, { isOwner }) => {
           if (jid.includes("@g.us")) return `${clean}@g.us`;                 
           if (jid.includes("@s.whatsapp.net")) return `${clean}@s.whatsapp.net`; 
           if (jid.includes("@newsletter")) return `${clean}@newsletter`;     
-          if (jid.includes("@lid")) return `${clean}@lid`;                    
+          if (jid.includes("@lid")) return `${clean}@lid`;                    // LID support
 
           // Auto-detect based on number length  
           if (clean.length > 15) return `${clean}@g.us`;                     
@@ -62,34 +62,30 @@ async (client, message, match, { isOwner }) => {
         ".fwd 1203xxxxxxx 1203yyyyyyy"
       );
 
-    // ===== MESSAGE TYPE (2GB SAFE STREAM SUPPORT) =====
+    // ===== MESSAGE TYPE =====
     let messageContent = {};
     const q = message.quoted;
     const mtype = q.mtype;
 
     if (["imageMessage", "videoMessage", "audioMessage", "stickerMessage", "documentMessage"].includes(mtype)) {
-
-      // STREAM DOWNLOAD (NO RAM CRASH)
-      const stream = await client.downloadMediaMessage(q);
-
+      const buffer = await q.download();
       switch (mtype) {
         case "imageMessage":
-          messageContent = { image: stream, caption: q.text || "" };
+          messageContent = { image: buffer, caption: q.text || "" };
           break;
         case "videoMessage":
-          messageContent = { video: stream, caption: q.text || "" };
+          messageContent = { video: buffer, caption: q.text || "" };
           break;
         case "audioMessage":
-          messageContent = { audio: stream, ptt: q.ptt || false };
+          messageContent = { audio: buffer, ptt: q.ptt || false };
           break;
         case "stickerMessage":
-          messageContent = { sticker: stream };
+          messageContent = { sticker: buffer };
           break;
         case "documentMessage":
-          messageContent = { document: stream, fileName: q.fileName || "file" };
+          messageContent = { document: buffer, fileName: q.fileName || "file" };
           break;
       }
-
     } else if (mtype === "extendedTextMessage" || mtype === "conversation") {
       messageContent = { text: q.text };
     } else {
