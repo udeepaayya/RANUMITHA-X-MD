@@ -10,7 +10,7 @@ const SAFETY = {
 cmd({
   pattern: "forward",
   alias: ["fwd"],
-  desc: "Forward media/messages to single or multiple JIDs (users, groups, channels, lids) with caption support",
+  desc: "Forward media/messages to single or multiple JIDs (users, groups, channels, lids)",
   category: "owner",
   filename: __filename
 },
@@ -21,7 +21,7 @@ async (client, message, match, { isOwner }) => {
     if (!isOwner) return await message.reply("📛 *Owner Only Command*");
 
     // ===== Must reply to a message =====
-    if (!message.quoted) return await message.reply("🍁 *Reply to a document or media*");
+    if (!message.quoted) return await message.reply("🍁 *Please reply to a message to forward*");
 
     // ===== JID PROCESSING =====
     let jidInput = "";
@@ -41,8 +41,9 @@ async (client, message, match, { isOwner }) => {
           if (jid.includes("@g.us")) return `${clean}@g.us`;                 
           if (jid.includes("@s.whatsapp.net")) return `${clean}@s.whatsapp.net`; 
           if (jid.includes("@newsletter")) return `${clean}@newsletter`;     
-          if (jid.includes("@lid")) return `${clean}@lid`;                   
+          if (jid.includes("@lid")) return `${clean}@lid`;                    // LID support
 
+          // Auto-detect based on number length  
           if (clean.length > 15) return `${clean}@g.us`;                     
           return `${clean}@s.whatsapp.net`;                                  
         }
@@ -61,54 +62,30 @@ async (client, message, match, { isOwner }) => {
         ".fwd 1203xxxxxxx 1203yyyyyyy"
       );
 
-    // ===== MESSAGE TYPE (STREAM SAFE + DOCUMENT WITH CAPTION) =====
+    // ===== MESSAGE TYPE =====
     let messageContent = {};
     const q = message.quoted;
     const mtype = q.mtype;
 
     if (["imageMessage", "videoMessage", "audioMessage", "stickerMessage", "documentMessage"].includes(mtype)) {
-
-      // STREAM DOWNLOAD (NO RAM CRASH)
-      const stream = await client.downloadMediaMessage(q);
-
+      const buffer = await q.download();
       switch (mtype) {
         case "imageMessage":
-          messageContent = { 
-            image: stream, 
-            caption: q.text || "" 
-          };
+          messageContent = { image: buffer, caption: q.text || "" };
           break;
-
         case "videoMessage":
-          messageContent = { 
-            video: stream, 
-            caption: q.text || "" 
-          };
+          messageContent = { video: buffer, caption: q.text || "" };
           break;
-
         case "audioMessage":
-          messageContent = { 
-            audio: stream, 
-            ptt: q.ptt || false 
-          };
+          messageContent = { audio: buffer, ptt: q.ptt || false };
           break;
-
         case "stickerMessage":
-          messageContent = { 
-            sticker: stream 
-          };
+          messageContent = { sticker: buffer };
           break;
-
         case "documentMessage":
-          messageContent = {
-            document: stream,
-            fileName: q.fileName || "file",
-            mimetype: q.mimetype || "application/octet-stream",
-            caption: q.text || "" // CAPTION ENABLED
-          };
+          messageContent = { document: buffer, fileName: q.fileName || "file" };
           break;
       }
-
     } else if (mtype === "extendedTextMessage" || mtype === "conversation") {
       messageContent = { text: q.text };
     } else {
@@ -140,9 +117,9 @@ async (client, message, match, { isOwner }) => {
     }
 
     // ===== REPORT =====
-    let report = `✅ *Forward Completed*\n\n` +
+    let report = `✅ *Forwarding Completed*\n\n` +
                  `📤 Success: ${successCount}/${validJids.length}\n` +
-                 `📄 Type: ${mtype}\n`;
+                 `📦 Type: ${mtype || "text"}\n`;
 
     if (failed.length > 0) report += `\n❌ Failed: ${failed.join(", ")}`;
 
