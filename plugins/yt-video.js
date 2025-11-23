@@ -25,21 +25,28 @@ END:VCARD`
 cmd({
     pattern: "video",
     react: "🎬",
-    desc: "Download YouTube MP4",
+    desc: "Download YouTube MP4 (Supports Shorts)",
     category: "download",
-    use: ".video <query>",
+    use: ".video <query or link>",
     filename: __filename
 }, async (conn, mek, m, { from, reply, q }) => {
     try {
         if (!q) return reply("*Please give me text or link❓*");
 
-        const search = await yts(q);
-        if (!search.videos.length) return reply("*❌ No results found.*");
+        let search;
+        if (q.match(/(?:youtube\.com\/shorts\/|youtu\.be\/|youtube\.com\/watch\?v=)/)) {
+            // Direct link
+            search = { videos: [{ url: q }] };
+        } else {
+            // Search by text
+            search = await yts(q);
+            if (!search.videos.length) return reply("*❌ No results found.*");
+        }
 
         const data = search.videos[0];
         const ytUrl = data.url;
 
-        // Define API links for multiple qualities
+        // API links for multiple qualities
         const formats = {
             "240p": `https://sadiya-tech-apis.vercel.app/download/ytdl?url=${encodeURIComponent(ytUrl)}&format=240&apikey=YOU_API_KEY`,
             "360p": `https://sadiya-tech-apis.vercel.app/download/ytdl?url=${encodeURIComponent(ytUrl)}&format=360&apikey=YOU_API_KEY`,
@@ -50,11 +57,11 @@ cmd({
         const caption = `
 *📽️ RANUMITHA-X-MD VIDEO DOWONLOADER 🎥*
 
-*🎵 \`Title:\`* ${data.title}
-*⏱️ \`Duration:\`* ${data.timestamp}
-*📆 \`Uploaded:\`* ${data.ago}
-*📊 \`Views:\`* ${data.views}
-*🔗 \`Link:\`* ${data.url}
+*🎵 \`Title:\`* ${data.title || "Short Video"}
+*⏱️ \`Duration:\`* ${data.timestamp || "Unknown"}
+*📆 \`Uploaded:\`* ${data.ago || "Unknown"}
+*📊 \`Views:\`* ${data.views || "Unknown"}
+*🔗 \`Link:\`* ${ytUrl}
 
 🔢 *Reply Below Number*
 
@@ -75,7 +82,7 @@ cmd({
 > © Powerd by 𝗥𝗔𝗡𝗨𝗠𝗜𝗧𝗛𝗔-𝗫-𝗠𝗗 🌛`;
 
         const sentMsg = await conn.sendMessage(from, {
-            image: { url: data.thumbnail },
+            image: { url: data.thumbnail || 'https://i.imgur.com/1XcT5zK.png' },
             caption
         }, { quoted: fakevCard });
 
@@ -112,7 +119,6 @@ cmd({
                         return reply("*❌ Invalid option!*");
                 }
 
-                // React ⬇️ when download starts
                 await conn.sendMessage(senderID, { react: { text: '⬇️', key: receivedMsg.key } });
 
                 const { data: apiRes } = await axios.get(formats[selectedFormat]);
@@ -124,14 +130,13 @@ cmd({
 
                 const result = apiRes.result;
 
-                // React ⬆️ before uploading
                 await conn.sendMessage(senderID, { react: { text: '⬆️', key: receivedMsg.key } });
 
                 if (isDocument) {
                     await conn.sendMessage(senderID, {
                         document: { url: result.download },
                         mimetype: "video/mp4",
-                        fileName: `${data.title}.mp4`
+                        fileName: `${data.title || 'Short Video'}.mp4`
                     }, { quoted: receivedMsg });
                 } else {
                     await conn.sendMessage(senderID, {
@@ -141,7 +146,6 @@ cmd({
                     }, { quoted: receivedMsg });
                 }
 
-                // React ✅ after upload complete
                 await conn.sendMessage(senderID, { react: { text: '✅', key: receivedMsg.key } });
             }
         });
