@@ -10,7 +10,7 @@ const SAFETY = {
 cmd({
   pattern: "forward",
   alias: ["fwd"],
-  desc: "Forward media/messages to multiple JIDs (users, groups, channels, lids)",
+  desc: "Forward media/messages to single or multiple JIDs (users, groups, channels, lids)",
   category: "owner",
   filename: __filename
 },
@@ -39,13 +39,13 @@ async (client, message, match, { isOwner }) => {
         if (/^\d+$/.test(clean)) {
 
           if (jid.includes("@g.us")) return `${clean}@g.us`;                 
-          if (jid.includes("@s.whatsapp.net")) return `${clean}@s.whatsapp.net`;
-          if (jid.includes("@newsletter")) return `${clean}@newsletter`;
-          if (jid.includes("@lid")) return `${clean}@lid`;  // LID SUPPORT
+          if (jid.includes("@s.whatsapp.net")) return `${clean}@s.whatsapp.net`; 
+          if (jid.includes("@newsletter")) return `${clean}@newsletter`;     
+          if (jid.includes("@lid")) return `${clean}@lid`;                    
 
-          // AUTO DETECT
-          if (clean.length > 15) return `${clean}@g.us`; 
-          return `${clean}@s.whatsapp.net`;
+          // Auto-detect based on number length  
+          if (clean.length > 15) return `${clean}@g.us`;                     
+          return `${clean}@s.whatsapp.net`;                                  
         }
         return null;
       })
@@ -58,33 +58,38 @@ async (client, message, match, { isOwner }) => {
         ".fwd 120363411055156472@g.us\n" +
         ".fwd 94713119712@s.whatsapp.net\n" +
         ".fwd 120363405042997613@newsletter\n" +
-        ".fwd 210883045232740@lid\n"
+        ".fwd 210883045232740@lid\n" +
+        ".fwd 1203xxxxxxx 1203yyyyyyy"
       );
 
-    // ===== MESSAGE TYPE =====
+    // ===== MESSAGE TYPE (2GB SAFE STREAM SUPPORT) =====
     let messageContent = {};
     const q = message.quoted;
     const mtype = q.mtype;
 
     if (["imageMessage", "videoMessage", "audioMessage", "stickerMessage", "documentMessage"].includes(mtype)) {
-      const buffer = await q.download();
+
+      // STREAM DOWNLOAD (NO RAM CRASH)
+      const stream = await client.downloadMediaMessage(q);
+
       switch (mtype) {
         case "imageMessage":
-          messageContent = { image: buffer, caption: q.text || "" };
+          messageContent = { image: stream, caption: q.text || "" };
           break;
         case "videoMessage":
-          messageContent = { video: buffer, caption: q.text || "" };
+          messageContent = { video: stream, caption: q.text || "" };
           break;
         case "audioMessage":
-          messageContent = { audio: buffer, ptt: q.ptt || false };
+          messageContent = { audio: stream, ptt: q.ptt || false };
           break;
         case "stickerMessage":
-          messageContent = { sticker: buffer };
+          messageContent = { sticker: stream };
           break;
         case "documentMessage":
-          messageContent = { document: buffer, fileName: q.fileName || "file" };
+          messageContent = { document: stream, fileName: q.fileName || "file" };
           break;
       }
+
     } else if (mtype === "extendedTextMessage" || mtype === "conversation") {
       messageContent = { text: q.text };
     } else {
@@ -97,8 +102,8 @@ async (client, message, match, { isOwner }) => {
 
     for (let i = 0; i < validJids.length; i++) {
       const jid = validJids[i];
-
       try {
+
         await client.sendMessage(jid, messageContent);
         successCount++;
 
@@ -110,25 +115,17 @@ async (client, message, match, { isOwner }) => {
         await new Promise(res => setTimeout(res, delay));
 
       } catch {
-
         failed.push(jid);
-
-        // 🔥 SEND FAIL MESSAGE TO THAT SAME JID
-        try {
-          await client.sendMessage(jid, { text: "*❌ Forward failed,Please check Jid!*" });
-        } catch {}
-
         await new Promise(res => setTimeout(res, SAFETY.BASE_DELAY));
       }
     }
 
     // ===== REPORT =====
-    let report =
-      `✅ *Forwarding Completed*\n\n` +
-      `📤 Success: ${successCount}/${validJids.length}\n` +
-      `📦 Type: ${mtype || "text"}`;
+    let report = `✅ *Forwarding Completed*\n\n` +
+                 `📤 Success: ${successCount}/${validJids.length}\n` +
+                 `📦 Type: ${mtype || "text"}\n`;
 
-    if (failed.length > 0) report += `\n\n❌ Failed: ${failed.join(", ")}`;
+    if (failed.length > 0) report += `\n❌ Failed: ${failed.join(", ")}`;
 
     await message.reply(report);
 
