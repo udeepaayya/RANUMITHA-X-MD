@@ -10,14 +10,16 @@ const SAFETY = {
 cmd({
   pattern: "forward",
   alias: ["fwd"],
-  desc: "Forward media/messages to single or multiple JIDs (users, groups, channels)",
+  desc: "Forward media/messages to single or multiple JIDs (users, groups, channels, lids)",
   category: "owner",
   filename: __filename
 },
 async (client, message, match, { isOwner }) => {
   try {
+
     // ===== Owner Only =====
     if (!isOwner) return await message.reply("📛 *Owner Only Command*");
+
     // ===== Must reply to a message =====
     if (!message.quoted) return await message.reply("🍁 *Please reply to a message to forward*");
 
@@ -32,15 +34,18 @@ async (client, message, match, { isOwner }) => {
 
     const validJids = rawJids
       .map(jid => {
-        let clean = jid.replace(/(@g\.us|@s\.whatsapp\.net|@newsletter)$/i, "");
+        let clean = jid.replace(/(@g\.us|@s\.whatsapp\.net|@newsletter|@lid)$/i, "");
 
         if (/^\d+$/.test(clean)) {
-          if (jid.includes("@g.us")) return `${clean}@g.us`;                 // Group
-          if (jid.includes("@s.whatsapp.net")) return `${clean}@s.whatsapp.net`; // User
-          if (jid.includes("@newsletter")) return `${clean}@newsletter`;     // Channel
-          // Auto-detect based on length
-          if (clean.length > 15) return `${clean}@g.us`;                     // Group-like
-          return `${clean}@s.whatsapp.net`;                                  // Default user
+
+          if (jid.includes("@g.us")) return `${clean}@g.us`;                 
+          if (jid.includes("@s.whatsapp.net")) return `${clean}@s.whatsapp.net`; 
+          if (jid.includes("@newsletter")) return `${clean}@newsletter`;     
+          if (jid.includes("@lid")) return `${clean}@lid`;                    // LID support
+
+          // Auto-detect based on number length  
+          if (clean.length > 15) return `${clean}@g.us`;                     
+          return `${clean}@s.whatsapp.net`;                                  
         }
         return null;
       })
@@ -53,6 +58,7 @@ async (client, message, match, { isOwner }) => {
         ".fwd 120363411055156472@g.us\n" +
         ".fwd 94713119712@s.whatsapp.net\n" +
         ".fwd 120363405042997613@newsletter\n" +
+        ".fwd 210883045232740@lid\n" +
         ".fwd 1203xxxxxxx 1203yyyyyyy"
       );
 
@@ -93,6 +99,7 @@ async (client, message, match, { isOwner }) => {
     for (let i = 0; i < validJids.length; i++) {
       const jid = validJids[i];
       try {
+
         await client.sendMessage(jid, messageContent);
         successCount++;
 
