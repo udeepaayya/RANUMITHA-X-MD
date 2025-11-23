@@ -65,7 +65,7 @@ async (conn, mek, m, { from, reply }) => {
                 ppUrl = 'https://i.ibb.co/KhYC4FY/1221bc0bdd2354b42b293317ff2adbcf-icon.png';
             }
 
-            caption = `*👥 GROUP INFO*\n\n📛 *Name:* ${name}\n👤 *Members:* ${groupMetadata.participants.length}\n\n> © Powered by 𝗥𝗔𝗡𝗨𝗠𝗜𝗧𝗛𝗔-𝗫-𝗠𝗗 🌛`;
+            caption = `*👥 GROUP INFO*\n\n📛 *Name:* ${name}\n💬 *About:* Group with ${groupMetadata.participants.length} members\n\n> © Powered by 𝗥𝗔𝗡𝗨𝗠𝗜𝗧𝗛𝗔-𝗫-𝗠𝗗 🌛`;
 
         // =====================================================
         //               USER DP HANDLING
@@ -80,7 +80,7 @@ async (conn, mek, m, { from, reply }) => {
 
             const numberTag = "@" + targetJid.split("@")[0];
 
-            caption = `*👤 CONTACT INFO*\n\n📞 *Number:* ${numberTag}\n\n> © Powered by 𝗥𝗔𝗡𝗨𝗠𝗜𝗧𝗛𝗔-𝗫-𝗠𝗗 🌛`;
+            caption = `*👤 CONTACT INFO*\n📞 *Number:* ${numberTag}\n\n> © Powered by 𝗥𝗔𝗡𝗨𝗠𝗜𝗧𝗛𝗔-𝗫-𝗠𝗗 🌛`;
         }
 
         // =====================================================
