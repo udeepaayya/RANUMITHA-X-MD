@@ -25,9 +25,9 @@ cmd({
     pattern: "getdp",
     alias: ["targetdp", "getpp", "getprofile"],
     react: "🖼️",
-    desc: "Get profile picture, name, number, about (reply supported)",
+    desc: "Get profile picture, name, number, about (reply & tag supported)",
     category: "utility",
-    use: '.getdp',
+    use: '.getdp @tag / reply',
     filename: __filename
 },
 async (conn, mek, m, { from, reply }) => {
@@ -35,18 +35,23 @@ async (conn, mek, m, { from, reply }) => {
 
         let targetJid;
 
-        // 🟢 1. If user replied to someone
+        // 🟢 1. If reply-user
         if (mek.message?.extendedTextMessage?.contextInfo?.participant) {
             targetJid = mek.message.extendedTextMessage.contextInfo.participant;
+
+        // 🟢 2. If @mention user
+        } else if (mek.message?.extendedTextMessage?.contextInfo?.mentionedJid?.length > 0) {
+            targetJid = mek.message.extendedTextMessage.contextInfo.mentionedJid[0];
+
+        // 🟡 3. Otherwise default = chat
         } else {
-            // 🟡 2. Otherwise, default = chat JID
             targetJid = from;
         }
 
         let ppUrl;
         let caption = "";
 
-        // 🔵 If target is group
+        // 🔵 If group
         if (targetJid.endsWith("@g.us")) {
             const groupMetadata = await conn.groupMetadata(targetJid);
             const name = groupMetadata.subject || "Group";
@@ -61,7 +66,8 @@ async (conn, mek, m, { from, reply }) => {
             caption = `*👥 GROUP INFO*\n\n📛 *Name:* ${name}\n💬 *About:* ${bio}\n\n> © Powered by 𝗥𝗔𝗡𝗨𝗠𝗜𝗧𝗛𝗔-𝗫-𝗠𝗗 🌛`;
 
         } else {
-            // 🔴 Individual (reply-user)
+
+            // 🔴 Individual
             try {
                 ppUrl = await conn.profilePictureUrl(targetJid, 'image');
             } catch {
