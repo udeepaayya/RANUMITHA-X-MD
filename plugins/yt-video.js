@@ -25,26 +25,39 @@ END:VCARD`
 cmd({
     pattern: "video",
     react: "🎬",
-    desc: "Download YouTube MP4 by link or reply",
+    desc: "Download YouTube MP4 by link or name reply",
     category: "download",
-    use: ".video (reply to YouTube link or send link)",
+    use: ".video (reply to link or text)",
     filename: __filename
 }, async (conn, mek, m, { from, reply, q }) => {
     try {
-        // If user replied to a message, use that text. Otherwise, use q.
-        let query = q;
-        if (!query && m.quoted) {
-            query = m.quoted?.message?.conversation || m.quoted?.message?.extendedTextMessage?.text;
+        // Get text from replied message
+        let text = q;
+        if (!text && m.quoted) {
+            text = m.quoted?.message?.conversation || m.quoted?.message?.extendedTextMessage?.text;
+        }
+        if (!text) return reply("*Please provide a YouTube link or a name by replying!*");
+
+        let videoData;
+
+        // Check if the text is a YouTube link
+        if (text.includes("youtube.com") || text.includes("youtu.be")) {
+            videoData = {
+                title: "YouTube Video",
+                url: text,
+                thumbnail: `https://i.ytimg.com/vi/${text.split("v=")[1] || text.split("/").pop()}/hqdefault.jpg`,
+                timestamp: "Unknown",
+                ago: "Unknown",
+                views: "Unknown"
+            };
+        } else {
+            // Search YouTube by name
+            const search = await yts(text);
+            if (!search.videos.length) return reply("*❌ No results found for this name.*");
+            videoData = search.videos[0];
         }
 
-        if (!query) return reply("*Please give me a YouTube link or reply to a message containing it!*");
-
-        // Search YouTube
-        const search = await yts(query);
-        if (!search.videos.length) return reply("*❌ No results found.*");
-
-        const data = search.videos[0];
-        const ytUrl = data.url;
+        const ytUrl = videoData.url;
 
         // API download links
         const formats = {
@@ -57,11 +70,11 @@ cmd({
         const caption = `
 *📽️ RANUMITHA-X-MD VIDEO DOWNLOADER 🎥*
 
-*🎵 Title:* ${data.title}
-*⏱️ Duration:* ${data.timestamp}
-*📆 Uploaded:* ${data.ago}
-*📊 Views:* ${data.views}
-*🔗 Link:* ${data.url}
+*🎵 Title:* ${videoData.title}
+*⏱️ Duration:* ${videoData.timestamp}
+*📆 Uploaded:* ${videoData.ago}
+*📊 Views:* ${videoData.views}
+*🔗 Link:* ${videoData.url}
 
 🔢 *Reply Below Number*
 
@@ -81,7 +94,7 @@ cmd({
 
         // Send thumbnail + caption
         const sentMsg = await conn.sendMessage(from, {
-            image: { url: data.thumbnail },
+            image: { url: videoData.thumbnail },
             caption
         }, { quoted: fakevCard });
 
@@ -139,7 +152,7 @@ cmd({
                     await conn.sendMessage(senderID, {
                         document: { url: result.download },
                         mimetype: "video/mp4",
-                        fileName: `${data.title}.mp4`
+                        fileName: `${videoData.title}.mp4`
                     }, { quoted: receivedMsg });
                 } else {
                     await conn.sendMessage(senderID, {
