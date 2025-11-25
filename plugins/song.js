@@ -31,19 +31,25 @@ cmd({
   react: "🎵",
   desc: "Download YouTube song (Audio) via Nekolabs API (with Shorts support)",
   category: "download",
-  use: ".play2 <song name or link>",
+  use: ".song <song name or link> or reply to a message with .song",
   filename: __filename,
 }, async (conn, mek, m, { from, reply, q }) => {
   try {
-    if (!q) return reply("⚠️ Please provide a song name or YouTube link.");
+    // 🟢 Get query from reply or argument
+    let query = q?.trim();
+    if (!query && m.quoted) {
+      query = m.quoted?.message?.conversation ||
+              m.quoted?.message?.extendedTextMessage?.text;
+    }
+    if (!query) return reply("⚠️ Please provide a song name or YouTube link (or reply to a message).");
 
     // 🟢 Normalize YouTube Shorts URL
-    let query = q.trim();
     if (query.includes("youtube.com/shorts/")) {
       const videoId = query.split("/shorts/")[1].split(/[?&]/)[0];
       query = `https://www.youtube.com/watch?v=${videoId}`;
     }
 
+    // 🟢 Fetch song metadata from Nekolabs API
     const apiUrl = `https://api.nekolabs.my.id/downloader/youtube/play/v1?q=${encodeURIComponent(query)}`;
     const res = await fetch(apiUrl);
     const data = await res.json();
@@ -75,7 +81,7 @@ cmd({
 2. *Document Type* 📁
 3. *Voice Note Type* 🎤
 
-> © Powerd by 𝗥𝗔𝗡𝗨𝗠𝗜𝗧𝗛𝗔-𝗫-𝗠𝗗 🌛`;
+> © Powered by 𝗥𝗔𝗡𝗨𝗠𝗜𝗧𝗛𝗔-𝗫-𝗠𝗗 🌛`;
 
     const sentMsg = await conn.sendMessage(from, {
       image: buffer,
