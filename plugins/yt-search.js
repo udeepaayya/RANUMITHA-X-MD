@@ -37,33 +37,38 @@ cmd({
   filename: __filename
 },
 
-async (conn, mek, m, { from, q, reply }) => {
+async(conn, mek, m,{from, quoted, body, isCmd, args, q, isGroup, sender, reply}) => { 
+    
+    try { 
+        
+        if (!q) return reply('*Please give me words to search*')
 
-  try {
+        // Search YouTube
+        let yts = require("yt-search")
+        let arama = await yts(q);
 
-    if (!q) return reply('*Please give me words to search*');
+        // Build message text
+        var mesaj = '';
+        arama.all.map((video) => {
+          mesaj += '> *🔥 ' + video.title + '*\n'
+          mesaj += '🔗 ' + video.url + '\n\n'
+        });
 
-    let yts = require("yt-search")
-    let arama = await yts(q);
+        // Send Image + Result List
+        await conn.sendMessage(
+          from,
+          {
+            image: { 
+              url: "https://raw.githubusercontent.com/Ranumithaofc/RANU-FILE-S-/refs/heads/main/images/RANUMITHA-X-MD%20YTS.jpg"
+            },
+            caption: mesaj
+          },
+          { quoted: fakevCard }
+        );
 
-    var mesaj = '';
-    arama.all.map((video) => {
-      mesaj += '> *🔥 ' + video.title + '*\n'
-      mesaj += '🔗 ' + video.url + '\n\n'
-    })
+    } catch (e) { 
+        l(e)
+        reply('*Error !!*')
+    }
 
-    // --- IMAGE + TEXT MESSAGE ---
-    await conn.sendMessage(
-      from,
-      {
-        image: { url: "https://raw.githubusercontent.com/Ranumithaofc/RANU-FILE-S-/refs/heads/main/images/RANUMITHA-X-MD%20YTS.jpg" },
-        caption: mesaj
-      },
-      { quoted: fakevCard }
-    );
-
-  } catch (e) {
-    l(e)
-    reply('*Error !!*')
-  }
 });
