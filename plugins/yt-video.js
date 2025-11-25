@@ -25,41 +25,40 @@ END:VCARD`
 cmd({
     pattern: "video",
     react: "🎬",
-    desc: "Download YouTube MP4 by link or name reply",
+    desc: "Download YouTube MP4",
     category: "download",
-    use: ".video (reply to link or text)",
+    use: ".video <query>",
     filename: __filename
 }, async (conn, mek, m, { from, reply, q }) => {
     try {
-        // Get text from replied message
-        let text = q;
-        if (!text && m.quoted) {
-            text = m.quoted?.message?.conversation || m.quoted?.message?.extendedTextMessage?.text;
-        }
-        if (!text) return reply("*Please provide a YouTube link or a name by replying!*");
+        // 1️⃣ Determine the query (text or replied message)
+        let query = q?.trim();
 
-        let videoData;
-
-        // Check if the text is a YouTube link
-        if (text.includes("youtube.com") || text.includes("youtu.be")) {
-            videoData = {
-                title: "YouTube Video",
-                url: text,
-                thumbnail: `https://i.ytimg.com/vi/${text.split("v=")[1] || text.split("/").pop()}/hqdefault.jpg`,
-                timestamp: "Unknown",
-                ago: "Unknown",
-                views: "Unknown"
-            };
-        } else {
-            // Search YouTube by name
-            const search = await yts(text);
-            if (!search.videos.length) return reply("*❌ No results found for this name.*");
-            videoData = search.videos[0];
+        if (!query && m?.quoted) {
+            query =
+                m.quoted.message?.conversation ||
+                m.quoted.message?.extendedTextMessage?.text ||
+                m.quoted.text;
         }
 
-        const ytUrl = videoData.url;
+        if (!query) {
+            return reply("⚠️ Please provide a video name or YouTube link (or reply to a message).");
+        }
 
-        // API download links
+        // 2️⃣ Convert Shorts link to normal link
+        if (query.includes("youtube.com/shorts/")) {
+            const videoId = query.split("/shorts/")[1].split(/[?&]/)[0];
+            query = `https://www.youtube.com/watch?v=${videoId}`;
+        }
+
+        // 3️⃣ YouTube search
+        const search = await yts(query);
+        if (!search.videos.length) return reply("*❌ No results found.*");
+
+        const data = search.videos[0];
+        const ytUrl = data.url;
+
+        // 4️⃣ Define API links for download
         const formats = {
             "240p": `https://sadiya-tech-apis.vercel.app/download/ytdl?url=${encodeURIComponent(ytUrl)}&format=240&apikey=YOU_API_KEY`,
             "360p": `https://sadiya-tech-apis.vercel.app/download/ytdl?url=${encodeURIComponent(ytUrl)}&format=360&apikey=YOU_API_KEY`,
@@ -67,40 +66,40 @@ cmd({
             "720p": `https://sadiya-tech-apis.vercel.app/download/ytdl?url=${encodeURIComponent(ytUrl)}&format=720&apikey=YOU_API_KEY`
         };
 
+        // 5️⃣ Send selection menu (image + caption)
         const caption = `
 *📽️ RANUMITHA-X-MD VIDEO DOWNLOADER 🎥*
 
-*🎵 Title:* ${videoData.title}
-*⏱️ Duration:* ${videoData.timestamp}
-*📆 Uploaded:* ${videoData.ago}
-*📊 Views:* ${videoData.views}
-*🔗 Link:* ${videoData.url}
+*🎵 \`Title:\`* ${data.title}
+*⏱️ \`Duration:\`* ${data.timestamp}
+*📆 \`Uploaded:\`* ${data.ago}
+*📊 \`Views:\`* ${data.views}
+*🔗 \`Link:\`* ${data.url}
 
 🔢 *Reply Below Number*
 
 1. *Video FILE 📽️*
-   1.1 240p 📽️
-   1.2 360p 📽️
-   1.3 480p 📽️
-   1.4 720p 📽️
+   1.1 240p Qulity 📽️
+   1.2 360p Qulity 📽️
+   1.3 480p Qulity 📽️
+   1.4 720p Qulity 📽️
 
 2. *Document FILE 📂*
-   2.1 240p 📂
-   2.2 360p 📂
-   2.3 480p 📂
-   2.4 720p 📂
+   2.1 240p Qulity 📂
+   2.2 360p Qulity 📂
+   2.3 480p Qulity 📂
+   2.4 720p Qulity 📂
 
 > © Powered by 𝗥𝗔𝗡𝗨𝗠𝗜𝗧𝗛𝗔-𝗫-𝗠𝗗 🌛`;
 
-        // Send thumbnail + caption
         const sentMsg = await conn.sendMessage(from, {
-            image: { url: videoData.thumbnail },
+            image: { url: data.thumbnail },
             caption
         }, { quoted: fakevCard });
 
         const messageID = sentMsg.key.id;
 
-        // Listen for user reply selection
+        // 6️⃣ Listen for user replies
         conn.ev.on("messages.upsert", async (msgData) => {
             const receivedMsg = msgData.messages[0];
             if (!receivedMsg?.message) return;
@@ -121,12 +120,10 @@ cmd({
                     case "1.2": selectedFormat = "360p"; break;
                     case "1.3": selectedFormat = "480p"; break;
                     case "1.4": selectedFormat = "720p"; break;
-
                     case "2.1": selectedFormat = "240p"; isDocument = true; break;
                     case "2.2": selectedFormat = "360p"; isDocument = true; break;
                     case "2.3": selectedFormat = "480p"; isDocument = true; break;
                     case "2.4": selectedFormat = "720p"; isDocument = true; break;
-
                     default:
                         return reply("*❌ Invalid option!*");
                 }
@@ -134,7 +131,6 @@ cmd({
                 // React ⬇️ when download starts
                 await conn.sendMessage(senderID, { react: { text: '⬇️', key: receivedMsg.key } });
 
-                // Call API to get download link
                 const { data: apiRes } = await axios.get(formats[selectedFormat]);
 
                 if (!apiRes?.status || !apiRes.result?.download) {
@@ -147,12 +143,11 @@ cmd({
                 // React ⬆️ before uploading
                 await conn.sendMessage(senderID, { react: { text: '⬆️', key: receivedMsg.key } });
 
-                // Send video or document
                 if (isDocument) {
                     await conn.sendMessage(senderID, {
                         document: { url: result.download },
                         mimetype: "video/mp4",
-                        fileName: `${videoData.title}.mp4`
+                        fileName: `${data.title}.mp4`
                     }, { quoted: receivedMsg });
                 } else {
                     await conn.sendMessage(senderID, {
