@@ -63,8 +63,7 @@ cmd({
         const customThumb = "https://raw.githubusercontent.com/Ranumithaofc/RANU-FILE-S-/refs/heads/main/images/RANUMITHA-X-MD%20TIKTOK%20LOGO.jpg";
 
         // 1️⃣ Send menu with full details
-        const caption = `
-*🍇 RANUMITHA-X-MD TIKTOK DOWNLOADER 🍇*
+        const caption = `*🍇 RANUMITHA-X-MD TIKTOK DOWNLOADER 🍇*
 
 👤 \`User:\` ${author.nickname}
 📖 \`Title:\` ${title}
