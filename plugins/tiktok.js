@@ -58,17 +58,19 @@ cmd({
         const audioUrl = meta.music?.playUrl || videoNoWatermark; // fallback audio
         const musicTitle = meta.music?.title || "Original Sound";
         const duration = meta.duration || "Unknown";
-        const thumb = meta.cover || "https://i.imgur.com/DPG6J9O.png"; // fallback thumbnail
+        const thumb = meta.cover || "https://raw.githubusercontent.com/Ranumithaofc/RANU-FILE-S-/refs/heads/main/images/RANUMITHA-X-MD_FB.jpg"; // fallback thumbnail
 
         // 1️⃣ Send menu with full details
         const caption = `
 *🫧 RANUMITHA-X-MD TIKTOK DOWNLOADER 🫧*
 
-👤 *User:* ${author.nickname} (@${author.username})
+👤 *User:* ${author.nickname}
 📖 *Title:* ${title}
 ⏱️ *Duration:* ${duration}
 🎵 *Music:* ${musicTitle}
-👍 *Likes:* ${like} | 💬 *Comments:* ${comment} | 🔁 *Shares:* ${share}
+👍 *Likes:* ${like} 
+💬 *Comments:* ${comment} 
+🔁 *Shares:* ${share}
 🔗 *Link:* ${tiktokUrl}
 
 💬 *Reply with your choice:*
