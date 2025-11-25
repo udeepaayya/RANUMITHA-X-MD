@@ -8,36 +8,44 @@ cmd({
   pattern: "csong",
   alias: ["chsong", "channelplay"],
   react: "🎤",
-  desc: "Send song as voice-like audio to channel",
+  desc: "Send YouTube song as voice-style audio to a channel",
   category: "channel",
   filename: __filename
 },
 async (client, message, match, { reply }) => {
   try {
+    // ===== Safe match parsing =====
+    let songQuery = "";
+    if (typeof match === "string") songQuery = match.trim();
+    else if (Array.isArray(match)) songQuery = match.join(" ").trim();
+    else if (match && typeof match === "object") songQuery = match.text || "";
+    else songQuery = "";
 
-    if (!match || !match.includes("/"))
-      return reply("⚠️ Format:\n.csong <song>/<channel JID>");
+    if (!songQuery || !songQuery.includes("/"))
+      return reply("⚠️ Format:\n.csong <song>/<channel JID>\nExample: .csong Shape of You/1203xxxxxxx@newsletter");
 
-    const [songName, channelJid] = match.split("/").map(x => x.trim());
+    const [songName, channelJid] = songQuery.split("/").map(x => x.trim());
 
     if (!channelJid.endsWith("@newsletter"))
-      return reply("❌ Invalid Channel JID");
+      return reply("❌ Invalid Channel JID! Must end with @newsletter");
 
-    // API FETCH
-    const api = `https://api.nekolabs.my.id/downloader/youtube/play/v1?q=${encodeURIComponent(songName)}`;
-    const res = await fetch(api);
+    // ===== Fetch song metadata =====
+    const apiUrl = `https://api.nekolabs.my.id/downloader/youtube/play/v1?q=${encodeURIComponent(songName)}`;
+    const res = await fetch(apiUrl);
     const data = await res.json();
 
-    if (!data?.success) return reply("❌ Song not found");
+    if (!data?.success) return reply("❌ Song not found!");
 
     const meta = data.result.metadata;
-    const url = data.result.downloadUrl;
+    const dlUrl = data.result.downloadUrl || data.result.audio?.[0]?.url;
 
-    // THUMBNAIL
+    if (!dlUrl) return reply("❌ Audio URL missing!");
+
+    // ===== Thumbnail fetch (optional) =====
     let thumb = null;
     try {
-      const r = await fetch(meta.cover);
-      thumb = Buffer.from(await r.arrayBuffer());
+      const t = await fetch(meta.cover);
+      thumb = Buffer.from(await t.arrayBuffer());
     } catch { thumb = null; }
 
     const caption = `🎶 *RANUMITHA-X-MD SONG SENDER* 🎶
@@ -49,46 +57,44 @@ async (client, message, match, { reply }) => {
 
 > © RANUMITHA-X-MD`;
 
-    // Send Caption/Thumbnail
-    await client.sendMessage(
-      channelJid,
-      thumb ? { image: thumb, caption } : { text: caption }
-    );
+    // ===== Send caption + thumbnail =====
+    await client.sendMessage(channelJid, thumb ? { image: thumb, caption } : { text: caption });
 
-    // ===== DOWNLOAD Source MP3 =====
-    const mp3 = path.join(__dirname, `../temp/${Date.now()}.mp3`);
-    const voice = path.join(__dirname, `../temp/${Date.now()}.opus`);
+    // ===== Download song =====
+    const mp3Path = path.join(__dirname, `../temp/${Date.now()}.mp3`);
+    const voicePath = path.join(__dirname, `../temp/${Date.now()}.opus`);
 
-    const audioRes = await fetch(url);
-    fs.writeFileSync(mp3, Buffer.from(await audioRes.arrayBuffer()));
+    const audioRes = await fetch(dlUrl);
+    fs.writeFileSync(mp3Path, Buffer.from(await audioRes.arrayBuffer()));
 
-    // ===== CONVERT to OPUS (VOICE MODE) =====
+    // ===== Convert to voice-style OGG/OPUS =====
     await new Promise((resolve, reject) => {
-      ffmpeg(mp3)
+      ffmpeg(mp3Path)
         .audioCodec("libopus")
+        .format("opus")
         .audioBitrate("64k")
-        .format("opus")   // voice-like
-        .save(voice)
+        .save(voicePath)
         .on("end", resolve)
         .on("error", reject);
     });
 
-    const voiceData = fs.readFileSync(voice);
+    const voiceBuffer = fs.readFileSync(voicePath);
 
-    // ===== SEND TO CHANNEL (VOICE STYLE AUDIO) =====
+    // ===== Send voice-style audio (ptt=false) =====
     await client.sendMessage(channelJid, {
-      audio: voiceData,
+      audio: voiceBuffer,
       mimetype: "audio/ogg; codecs=opus",
-      ptt: false     // IMPORTANT: Channel accepts only if ptt=false
+      ptt: false
     });
 
-    fs.unlinkSync(mp3);
-    fs.unlinkSync(voice);
+    // ===== Cleanup temp files =====
+    fs.unlinkSync(mp3Path);
+    fs.unlinkSync(voicePath);
 
     reply(`✅ Voice-style song sent!\n🎧 ${meta.title}`);
 
   } catch (e) {
-    console.log(e);
+    console.log("csong error:", e);
     reply("💢 Error: " + e.message);
   }
 });
