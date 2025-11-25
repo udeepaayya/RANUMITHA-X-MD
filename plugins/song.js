@@ -1,11 +1,8 @@
-const config = require('../config')
-const l = console.log
-const { cmd, commands } = require('../command')
-const dl = require('@bochilteam/scraper')  
-const ytdl = require('yt-search');
-const fs = require('fs-extra')
-var videotime = 60000 // 1000 min
-const { getBuffer, getGroupAdmins, getRandom, h2k, isUrl, Json, runtime, sleep, fetchJson} = require('../lib/functions')
+const { cmd } = require("../command");
+const fetch = require("node-fetch");
+const fs = require("fs");
+const path = require("path");
+const ffmpeg = require("fluent-ffmpeg");
 
 // Fake vCard
 const fakevCard = {
@@ -27,58 +24,163 @@ END:VCARD`
     }
 };
 
+// 🟣 Command definition
 cmd({
-    pattern: "yts",
-    alias: ["ytsearch"],
-    use: '.yts ranumitha',
-    react: "🔎",
-    desc: "Search and get details from youtube.",
-    category: "search",
-    filename: __filename
+  pattern: "song",
+  alias: ["play", "song1", "play1"],
+  react: "🎵",
+  desc: "Download YouTube song (Audio) via Nekolabs API (with Shorts support)",
+  category: "download",
+  use: ".song <song name or link> or reply to a message with .song",
+  filename: __filename,
+}, async (conn, mek, m, { from, reply, q }) => {
+  try {
+    // 🟢 Get query from argument or replied message
+    let query = q?.trim();
+    if (!query && m.quoted) {
+      query = m.quoted?.message?.conversation ||
+              m.quoted?.message?.extendedTextMessage?.text;
+    }
+    if (!query) return reply("⚠️ Please provide a song name or YouTube link (or reply to a message).");
 
-},
-
-async(conn, mek, m,{from, l, quoted, body, isCmd, args, q, reply}) => {
-try{
-
-    // ----------------------------
-    //  SEARCH QUERY HANDLING
-    // ----------------------------
-    let query = q; // normal input
-
-    if (!query && quoted) {
-        // Simple text message
-        if (quoted.message.conversation) {
-            query = quoted.message.conversation;
-        }
-        // Extended text message (caption / extended)
-        else if (quoted.message.extendedTextMessage && quoted.message.extendedTextMessage.text) {
-            query = quoted.message.extendedTextMessage.text;
-        }
+    // 🟢 Detect if query is a YouTube/Shorts link
+    let isYouTubeLink = false;
+    if (query.match(/(youtube\.com|youtu\.be)/i)) {
+      isYouTubeLink = true;
+      // normalize shorts link
+      if (query.includes("youtube.com/shorts/")) {
+        const videoId = query.split("/shorts/")[1].split(/[?&]/)[0];
+        query = `https://www.youtube.com/watch?v=${videoId}`;
+      }
     }
 
-    if (!query) return reply("⚠️ Please provide a song name (or reply to a message).");
+    // 🟢 Fetch song metadata from Nekolabs API
+    const apiUrl = `https://api.nekolabs.my.id/downloader/youtube/play/v1?q=${encodeURIComponent(query)}`;
+    const res = await fetch(apiUrl);
+    const data = await res.json();
 
-    // SEARCH
-    let arama;
+    if (!data?.success || !data?.result?.downloadUrl) {
+      return reply("❌ Song not found or API error. Try again later.");
+    }
+
+    const meta = data.result.metadata;
+    const dlUrl = data.result.downloadUrl;
+
+    // 🟣 Fetch thumbnail
+    let buffer;
     try {
-        arama = await ytdl(query);
-    } catch(e) {
-        l(e)
-        return await conn.sendMessage(from , { text: '*Error !!*' }, { quoted: fakevCard } )
+      const thumbRes = await fetch(meta.cover);
+      buffer = Buffer.from(await thumbRes.arrayBuffer());
+    } catch {
+      buffer = null;
     }
 
-    // BUILD MESSAGE
-    let mesaj = '';
-    arama.all.map(video => {
-        mesaj += `> *🔥 ${video.title}*\n🔗 ${video.url}\n\n`;
+    const caption = `🎶 *RANUMITHA-X-MD SONG DOWNLOADER* 🎶
+📑 *Title:* ${meta.title}
+📡 *Channel:* ${meta.channel}
+⏱ *Duration:* ${meta.duration}
+🌐 *Url:* ${meta.url}
+
+🔽 *Reply with your choice:*
+1. *Audio Type* 🎵
+2. *Document Type* 📁
+3. *Voice Note Type* 🎤
+
+> © Powered by 𝗥𝗔𝗡𝗨𝗠𝗜𝗧𝗛𝗔-𝗫-𝗠𝗗 🌛`;
+
+    const sentMsg = await conn.sendMessage(from, {
+      image: buffer,
+      caption: caption,
+    }, { quoted: fakevCard });
+
+    const messageID = sentMsg.key.id;
+
+    // 🟢 Listen for user reply
+    conn.ev.on("messages.upsert", async (msgUpdate) => {
+      try {
+        const mekInfo = msgUpdate?.messages?.[0];
+        if (!mekInfo?.message) return;
+
+        const userText =
+          mekInfo?.message?.conversation ||
+          mekInfo?.message?.extendedTextMessage?.text;
+
+        const isReply =
+          mekInfo?.message?.extendedTextMessage?.contextInfo?.stanzaId === messageID;
+
+        if (!isReply) return;
+
+        const choice = userText.trim();
+        await conn.sendMessage(from, { react: { text: "⬇️", key: mekInfo.key } });
+
+        const safeTitle = meta.title.replace(/[\\/:*?"<>|]/g, "").slice(0, 80);
+        const audioFileName = `${safeTitle}.mp3`;
+        const tempPath = path.join(__dirname, `../temp/${Date.now()}.mp3`);
+        const voicePath = path.join(__dirname, `../temp/${Date.now()}.opus`);
+
+        let type;
+
+        // ✅ Choice 1: Audio
+        if (choice === "1") {
+          type = {
+            audio: { url: dlUrl },
+            mimetype: "audio/mpeg",
+            fileName: audioFileName,
+          };
+
+        // ✅ Choice 2: Document
+        } else if (choice === "2") {
+          type = {
+            document: { url: dlUrl },
+            mimetype: "audio/mpeg",
+            fileName: audioFileName,
+            caption: meta.title,
+          };
+
+        // ✅ Choice 3: Voice note (convert to .opus)
+        } else if (choice === "3") {
+          const audioRes = await fetch(dlUrl);
+          const audioBuffer = Buffer.from(await audioRes.arrayBuffer());
+          fs.writeFileSync(tempPath, audioBuffer);
+
+          await new Promise((resolve, reject) => {
+            ffmpeg(tempPath)
+              .audioCodec("libopus")
+              .format("opus")
+              .audioBitrate("64k")
+              .save(voicePath)
+              .on("end", resolve)
+              .on("error", reject);
+          });
+
+          const voiceBuffer = fs.readFileSync(voicePath);
+
+          type = {
+            audio: voiceBuffer,
+            mimetype: "audio/ogg; codecs=opus",
+            ptt: true,
+          };
+
+          // clean temp
+          fs.unlinkSync(tempPath);
+          fs.unlinkSync(voicePath);
+
+        } else {
+          return reply("*❌ Invalid choice!*");
+        }
+
+        await conn.sendMessage(from, { react: { text: "⬆️", key: mekInfo.key } });
+        await conn.sendMessage(from, type, { quoted: mek });
+        await conn.sendMessage(from, { react: { text: "✔️", key: mekInfo.key } });
+
+      } catch (err) {
+        console.error("reply handler error:", err);
+        reply("⚠️ Error while processing your reply.");
+      }
     });
 
-    // SEND RESULT
-    await conn.sendMessage(from , { text: mesaj }, { quoted: fakevCard });
-
-} catch (e) {
-    l(e)
-    reply('*Error !!*')
-}
+  } catch (err) {
+    console.error("song cmd error:", err);
+    reply("⚠️ An error occurred while processing your request.");
+  }
 });
