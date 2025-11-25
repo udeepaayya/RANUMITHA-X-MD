@@ -24,6 +24,7 @@ END:VCARD`
 
 cmd({
     pattern: "video",
+    alias: "ytvideo",
     react: "🎬",
     desc: "Download YouTube MP4",
     category: "download",
@@ -158,7 +159,7 @@ cmd({
                 }
 
                 // React ✅ after upload complete
-                await conn.sendMessage(senderID, { react: { text: '✅', key: receivedMsg.key } });
+                await conn.sendMessage(senderID, { react: { text: '✔️', key: receivedMsg.key } });
             }
         });
 
