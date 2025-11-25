@@ -21,7 +21,7 @@ async (conn, mek, m, { text }) => {
     if (res.data.status && res.data.data.length > 0) {
       let msg = `🔎 *Google Search Results*\n\n`;
       res.data.data.slice(0, 5).forEach((item, i) => {
-        msg += `*${i+1}.* ${item.title}\n${item.link}\n_${item.snippet}_\n\n> © Powerd by 𝗥𝗔𝗡𝗨𝗠𝗜𝗧𝗛𝗔-𝗫-𝗠𝗗 🌛`;
+        msg += `*${i+1}.* ${item.title}\n${item.link}\n_${item.snippet}_\n\n`;
       });
       m.reply(msg);
     } else {
