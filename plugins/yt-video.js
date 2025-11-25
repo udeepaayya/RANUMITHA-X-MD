@@ -27,13 +27,16 @@ cmd({
     react: "🎬",
     desc: "Download YouTube MP4",
     category: "download",
-    use: ".video <query>",
+    use: ".video <query or link> (or reply to a message)",
     filename: __filename
 }, async (conn, mek, m, { from, reply, q }) => {
     try {
-        if (!q) return reply("*Please give me text or link❓*");
+        // Get query either from text or replied message
+        const query = q || (m.quoted?.message?.conversation || m.quoted?.message?.extendedTextMessage?.text);
+        if (!query) return reply("*Please give me text or link❓*");
 
-        const search = await yts(q);
+        // Search YouTube
+        const search = await yts(query);
         if (!search.videos.length) return reply("*❌ No results found.*");
 
         const data = search.videos[0];
@@ -48,32 +51,31 @@ cmd({
         };
 
         const caption = `
-*📽️ RANUMITHA-X-MD VIDEO DOWONLOADER 🎥*
+*📽️ RANUMITHA-X-MD VIDEO DOWNLOADER 🎥*
 
-*🎵 \`Title:\`* ${data.title}
-*⏱️ \`Duration:\`* ${data.timestamp}
-*📆 \`Uploaded:\`* ${data.ago}
-*📊 \`Views:\`* ${data.views}
-*🔗 \`Link:\`* ${data.url}
+*🎵 Title:* ${data.title}
+*⏱️ Duration:* ${data.timestamp}
+*📆 Uploaded:* ${data.ago}
+*📊 Views:* ${data.views}
+*🔗 Link:* ${data.url}
 
 🔢 *Reply Below Number*
 
 1. *Video FILE 📽️*
-
-   1.1 240p Qulity 📽️
-   1.2 360p Qulity 📽️
-   1.3 480p Qulity 📽️
-   1.4 720p Qulity 📽️
+   1.1 240p 📽️
+   1.2 360p 📽️
+   1.3 480p 📽️
+   1.4 720p 📽️
 
 2. *Document FILE 📂*
- 
-   2.1 240p Qulity 📂
-   2.2 360p Qulity 📂
-   2.3 480p Qulity 📂
-   2.4 720p Qulity 📂
+   2.1 240p 📂
+   2.2 360p 📂
+   2.3 480p 📂
+   2.4 720p 📂
 
-> © Powerd by 𝗥𝗔𝗡𝗨𝗠𝗜𝗧𝗛𝗔-𝗫-𝗠𝗗 🌛`;
+> © Powered by 𝗥𝗔𝗡𝗨𝗠𝗜𝗧𝗛𝗔-𝗫-𝗠𝗗 🌛`;
 
+        // Send thumbnail + caption
         const sentMsg = await conn.sendMessage(from, {
             image: { url: data.thumbnail },
             caption
@@ -115,6 +117,7 @@ cmd({
                 // React ⬇️ when download starts
                 await conn.sendMessage(senderID, { react: { text: '⬇️', key: receivedMsg.key } });
 
+                // Call API to get download link
                 const { data: apiRes } = await axios.get(formats[selectedFormat]);
 
                 if (!apiRes?.status || !apiRes.result?.download) {
@@ -127,6 +130,7 @@ cmd({
                 // React ⬆️ before uploading
                 await conn.sendMessage(senderID, { react: { text: '⬆️', key: receivedMsg.key } });
 
+                // Send video or document
                 if (isDocument) {
                     await conn.sendMessage(senderID, {
                         document: { url: result.download },
