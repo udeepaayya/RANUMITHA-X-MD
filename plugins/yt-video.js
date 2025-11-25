@@ -25,15 +25,19 @@ END:VCARD`
 cmd({
     pattern: "video",
     react: "🎬",
-    desc: "Download YouTube MP4",
+    desc: "Download YouTube MP4 by link or reply",
     category: "download",
-    use: ".video <query or link> (or reply to a message)",
+    use: ".video (reply to YouTube link or send link)",
     filename: __filename
 }, async (conn, mek, m, { from, reply, q }) => {
     try {
-        // Get query either from text or replied message
-        const query = q || (m.quoted?.message?.conversation || m.quoted?.message?.extendedTextMessage?.text);
-        if (!query) return reply("*Please give me text or link❓*");
+        // If user replied to a message, use that text. Otherwise, use q.
+        let query = q;
+        if (!query && m.quoted) {
+            query = m.quoted?.message?.conversation || m.quoted?.message?.extendedTextMessage?.text;
+        }
+
+        if (!query) return reply("*Please give me a YouTube link or reply to a message containing it!*");
 
         // Search YouTube
         const search = await yts(query);
@@ -42,7 +46,7 @@ cmd({
         const data = search.videos[0];
         const ytUrl = data.url;
 
-        // Define API links for multiple qualities
+        // API download links
         const formats = {
             "240p": `https://sadiya-tech-apis.vercel.app/download/ytdl?url=${encodeURIComponent(ytUrl)}&format=240&apikey=YOU_API_KEY`,
             "360p": `https://sadiya-tech-apis.vercel.app/download/ytdl?url=${encodeURIComponent(ytUrl)}&format=360&apikey=YOU_API_KEY`,
@@ -83,7 +87,7 @@ cmd({
 
         const messageID = sentMsg.key.id;
 
-        // Listen for user replies
+        // Listen for user reply selection
         conn.ev.on("messages.upsert", async (msgData) => {
             const receivedMsg = msgData.messages[0];
             if (!receivedMsg?.message) return;
