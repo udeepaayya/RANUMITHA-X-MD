@@ -2,7 +2,6 @@ const { cmd } = require("../command");
 const fetch = require("node-fetch");
 const fs = require("fs");
 const path = require("path");
-const ffmpeg = require("fluent-ffmpeg");
 
 cmd({
   pattern: "csong",
@@ -14,94 +13,92 @@ cmd({
   filename: __filename,
 }, async (conn, mek, m, { reply, q }) => {
   try {
-
-    // Format check
+    // Format validation
     if (!q || !q.includes("/")) {
-      return reply("⚠️ Use: .csong <song>/<channel jid>\n\nExample:\n.csong Shape of You/1203xxxxxx@newsletter");
+      return reply(
+        "⚠️ Use format:\n.csong <song name>/<channel JID>\n\nExample:\n.csong Shape of You/1203xxxxxxx@newsletter"
+      );
     }
 
     const [songName, channelJid] = q.split("/").map(x => x.trim());
 
+    // Channel JID validation
     if (!channelJid.endsWith("@newsletter")) {
-      return reply("❌ Invalid Channel JID! Must end with @newsletter");
+      return reply("❌ Invalid channel JID! It must end with @newsletter");
     }
 
-    // API fetch
+    if (!songName) {
+      return reply("⚠️ Please provide a valid song name.");
+    }
+
+    // Fetch song details
     const apiUrl = `https://api.nekolabs.my.id/downloader/youtube/play/v1?q=${encodeURIComponent(songName)}`;
     const res = await fetch(apiUrl);
     const data = await res.json();
 
     if (!data?.success) {
-      return reply("❌ Song not found or API error!");
+      return reply("❌ Song not found or API error.");
     }
 
     const meta = data.result.metadata;
 
-    // Download URL fallback
+    // Fallback for audio URL
     const dlUrl =
       data?.result?.downloadUrl ||
       data?.result?.audio?.[0]?.url;
 
-    if (!dlUrl) return reply("❌ Audio URL missing!");
+    if (!dlUrl) {
+      return reply("❌ Audio URL missing!");
+    }
 
-    // Thumbnail
+    // Thumbnail fetch attempt
     let thumb = null;
     try {
-      let imgRes = await fetch(meta.cover);
-      thumb = Buffer.from(await imgRes.arrayBuffer());
-    } catch { }
+      const tRes = await fetch(meta.cover);
+      thumb = Buffer.from(await tRes.arrayBuffer());
+    } catch {
+      thumb = null;
+    }
 
-    // Caption
-    const caption = `🎶 *RANUMITHA-X-MD SONG SENDER*
+    const caption = `🎶 *RANUMITHA-X-MD SONG SENDER* 🎶
 
 🎧 *Title:* ${meta.title}
 📀 *Channel:* ${meta.channel}
-⏱ Duration: ${meta.duration}
+⏱ Duration:* ${meta.duration}
+🔗 *URL:* ${meta.url}
 
-> © Powered by RANUMITHA-X-MD 🌛`;
+> © Powered by 𝗥𝗔𝗡𝗨𝗠ි𝗧𝗛𝗔-𝗫-𝗠𝗗 🌛`;
 
-    // Send song details (no quoted)
+    // Channel sends
+    if (thumb) {
+      await conn.sendMessage(channelJid, {
+        image: thumb,
+        caption: caption
+      });
+    } else {
+      await conn.sendMessage(channelJid, {
+        text: caption
+      });
+    }
+
+    // Download mp3
+    const mp3Path = path.join(__dirname, `../temp/${Date.now()}.mp3`);
+    const audioRes = await fetch(dlUrl);
+    const audioBuffer = Buffer.from(await audioRes.arrayBuffer());
+    fs.writeFileSync(mp3Path, audioBuffer);
+
+    const audioFile = fs.readFileSync(mp3Path);
+
+    // Send MP3 audio (not voice note)
     await conn.sendMessage(channelJid, {
-      image: thumb,
-      caption
+      audio: audioFile,
+      mimetype: "audio/mpeg",
+      ptt: false
     });
 
-    // Temp path
-    const mp3 = path.join(__dirname, `../temp/${Date.now()}.mp3`);
-    const opus = path.join(__dirname, `../temp/${Date.now()}.opus`);
+    // Delete temp file
+    fs.unlinkSync(mp3Path);
 
-    // Download audio
-    const aRes = await fetch(dlUrl);
-    const aBuf = Buffer.from(await aRes.arrayBuffer());
-    fs.writeFileSync(mp3, aBuf);
+    reply(`✅ *Song sent successfully!*\n\n🎵 *${meta.title}*\n📨 *Channel:* ${channelJid}`);
 
-    // Convert to opus
-    await new Promise((resolve, reject) => {
-      ffmpeg(mp3)
-        .audioCodec("libopus")
-        .format("opus")
-        .save(opus)
-        .on("end", resolve)
-        .on("error", reject);
-    });
-
-    const vBuf = fs.readFileSync(opus);
-
-    // Send to channel (no quoted)
-    await conn.sendMessage(channelJid, {
-      audio: vBuf,
-      mimetype: "audio/ogg; codecs=opus",
-      ptt: true
-    });
-
-    // Cleanup
-    fs.unlinkSync(mp3);
-    fs.unlinkSync(opus);
-
-    reply(`✅ *Song sent successfully!*\n\n📌 *${meta.title}*\n📨 *Channel:* ${channelJid}`);
-
-  } catch (err) {
-    console.error(err);
-    reply("⚠️ Error while sending song!");
-  }
-});
+  } catch (err
