@@ -45,8 +45,12 @@ try{
     //  SEARCH QUERY HANDLING
     // ----------------------------
     let query = q; // normal input
-    if (!query && quoted && quoted.text) {
-        query = quoted.text; // reply text fallback
+
+    // reply message check
+    if (!query && quoted) {
+        if (quoted.message && quoted.message.conversation) {
+            query = quoted.message.conversation;
+        }
     }
 
     if (!query) return reply("⚠️ Please provide a song name (or reply to a message).");
