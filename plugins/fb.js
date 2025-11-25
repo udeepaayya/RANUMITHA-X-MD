@@ -21,7 +21,6 @@ END:VCARD`
     }
 };
 
-
 cmd({
   pattern: "fb",
   alias: ["facebook", "fbvideo", "facebookvideo"], 
@@ -30,14 +29,24 @@ cmd({
   filename: __filename
 }, async (conn, m, store, { from, quoted, q, reply }) => {
   try {
-    if (!q || !q.startsWith("https://")) {
-      return conn.sendMessage(from, { text: "🚩 Please give a valid Facebook URL 🐼" }, { quoted: m });
+    // ✅ Determine FB URL from command or replied message
+    let fbUrl = q?.trim();
+
+    if (!fbUrl && m?.quoted) {
+        fbUrl = 
+            m.quoted.message?.conversation ||
+            m.quoted.message?.extendedTextMessage?.text ||
+            m.quoted.text;
+    }
+
+    if (!fbUrl || !fbUrl.startsWith("https://")) {
+      return conn.sendMessage(from, { text: "🚩 Please provide a valid Facebook URL 🐼 (text or reply)" }, { quoted: m });
     }
 
     await conn.sendMessage(from, { react: { text: '🎥', key: m.key } });
 
     // ✅ Fetch data from API
-    const apiUrl = `https://api-aswin-sparky.koyeb.app/api/downloader/fbdl?url=${encodeURIComponent(q)}`;
+    const apiUrl = `https://api-aswin-sparky.koyeb.app/api/downloader/fbdl?url=${encodeURIComponent(fbUrl)}`;
     const response = await axios.get(apiUrl);
     const data = response.data;
 
@@ -47,15 +56,13 @@ cmd({
 
     const { title, low, high } = data.data;
 
-    // 🎨 Fixed custom thumbnail
     const fixedThumbnail = "https://raw.githubusercontent.com/Ranumithaofc/RANU-FILE-S-/refs/heads/main/images/RANUMITHA-X-MD_FB.jpg";
 
-    // 🖼️ Caption content
     const caption = `
 🎥 *RANUMITHA-X-MD FACEBOOK DOWNLOADER* 🎥
 
 📑 *Title:* ${title || "No title"}
-🔗 *Link:* ${q}
+🔗 *Link:* ${fbUrl}
 
 💬 *Reply with your choice:*
 
@@ -65,7 +72,6 @@ cmd({
 
 > © Powered by 𝗥𝗔𝗡𝗨𝗠𝗜𝗧𝗛𝗔-𝗫-𝗠𝗗 🌛`;
 
-    // 🧩 Send custom thumbnail image with caption
     const sentMsg = await conn.sendMessage(from, {
       image: { url: fixedThumbnail },
       caption: caption
@@ -83,53 +89,41 @@ cmd({
       const isReplyToBot = receivedMsg.message.extendedTextMessage?.contextInfo?.stanzaId === messageID;
 
       if (isReplyToBot) {
-        // ⬇️ React when download begins
         await conn.sendMessage(senderID, { react: { text: '⬇️', key: receivedMsg.key } });
 
-        // 🧩 Download the custom thumbnail as buffer
         const thumbBuffer = await (await axios.get(fixedThumbnail, { responseType: 'arraybuffer' })).data;
-
         let mediaMsg;
 
         switch (receivedText.trim()) {
-         
-                    case "1":
+          case "1":
             await conn.sendMessage(senderID, { react: { text: '⬆️', key: receivedMsg.key } });
-
             mediaMsg = await conn.sendMessage(senderID, {
               video: { url: high },
               mimetype: "video/mp4",
               caption: "*HD Quality Video* 🔋",
               thumbnail: thumbBuffer
             }, { quoted: receivedMsg });
-
             await conn.sendMessage(senderID, { react: { text: '✔️', key: receivedMsg.key } });
             break;
             
-            case "2":
-            // ⬆️ React for upload
+          case "2":
             await conn.sendMessage(senderID, { react: { text: '⬆️', key: receivedMsg.key } });
-
             mediaMsg = await conn.sendMessage(senderID, {
               video: { url: low },
               mimetype: "video/mp4",
               caption: "*SD Quality Video* 🪫",
               thumbnail: thumbBuffer
             }, { quoted: receivedMsg });
-
-            // ✅ React after sent
             await conn.sendMessage(senderID, { react: { text: '✔️', key: receivedMsg.key } });
             break;
 
           case "3":
             await conn.sendMessage(senderID, { react: { text: '⬆️', key: receivedMsg.key } });
-
             mediaMsg = await conn.sendMessage(senderID, { 
               audio: { url: low || high }, 
               mimetype: "audio/mp4", 
               ptt: false 
             }, { quoted: receivedMsg });
-
             await conn.sendMessage(senderID, { react: { text: '✔️', key: receivedMsg.key } });
             break;
 
