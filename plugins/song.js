@@ -9,7 +9,7 @@ const fakevCard = {
   key: {
     fromMe: false,
     participant: "0@s.whatsapp.net",
-    remoteJid: "status@broadcast"
+    remoteJid: "status@broadcast",
   },
   message: {
     contactMessage: {
@@ -19,12 +19,12 @@ VERSION:3.0
 FN:Meta
 ORG:META AI;
 TEL;type=CELL;type=VOICE;waid=94762095304:+94762095304
-END:VCARD`
-    }
-  }
+END:VCARD`,
+    },
+  },
 };
 
-// Command
+// ==================== MAIN COMMAND ======================
 cmd(
   {
     pattern: "song",
@@ -38,7 +38,7 @@ cmd(
 
   async (conn, mek, m, { from, reply, q }) => {
     try {
-      // 🟣 Get query (typed + replied message)
+      // 🟣 Get query
       let query = q?.trim();
 
       if (!query && m?.quoted) {
@@ -48,17 +48,15 @@ cmd(
           m.quoted.text;
       }
 
-      if (!query) {
-        return reply("⚠️ Please provide a song name or YouTube link (or reply to a message).");
-      }
+      if (!query) return reply("⚠️ Please provide a song name or YouTube link.");
 
-      // Shorts → Normal link
+      // Shorts Fix
       if (query.includes("youtube.com/shorts/")) {
         const videoId = query.split("/shorts/")[1].split(/[?&]/)[0];
         query = `https://www.youtube.com/watch?v=${videoId}`;
       }
 
-      // API
+      // API Fetch
       const apiUrl = `https://api.nekolabs.my.id/downloader/youtube/play/v1?q=${encodeURIComponent(query)}`;
       const res = await fetch(apiUrl);
       const data = await res.json();
@@ -79,7 +77,7 @@ cmd(
         buffer = null;
       }
 
-      // Song details message
+      // Caption
       const caption = `
 🎶 *RANUMITHA-X-MD SONG DOWNLOADER* 🎶
 
@@ -102,102 +100,117 @@ cmd(
         { quoted: fakevCard }
       );
 
-      const messageID = sentMsg.key.id;
+      const expectedReplyID = sentMsg.key.id;
 
-      // Reply listener
-      conn.ev.on("messages.upsert", async (msgUpdate) => {
+      // ===================== REPLY LISTENER ======================
+      const listener = async (msgUpdate) => {
         try {
-          const mekInfo = msgUpdate.messages[0];
-          if (!mekInfo?.message) return;
+          const info = msgUpdate.messages[0];
+          if (!info?.message) return;
 
           const userText =
-            mekInfo.message.conversation ||
-            mekInfo.message.extendedTextMessage?.text;
+            info.message.conversation ||
+            info.message.extendedTextMessage?.text;
 
+          // Check reply target
           const isReply =
-            mekInfo?.message?.extendedTextMessage?.contextInfo?.stanzaId ===
-            messageID;
+            info?.message?.extendedTextMessage?.contextInfo?.stanzaId ===
+            expectedReplyID;
 
           if (!isReply) return;
 
           const choice = userText.trim();
 
+          // ⬇️ Download React
           await conn.sendMessage(from, {
-            react: { text: "⬇️", key: mekInfo.key },
+            react: { text: "⬇️", key: info.key },
           });
 
-          const safeTitle = meta.title.replace(/[\\/:*?"<>|]/g, "").slice(0, 80);
-          const audioFileName = `${safeTitle}.mp3`;
-          const tempPath = path.join(__dirname, `../temp/${Date.now()}.mp3`);
-          const voicePath = path.join(__dirname, `../temp/${Date.now()}.opus`);
+          // File Prep
+          const cleanTitle = meta.title.replace(/[\\/:*?"<>|]/g, "").slice(0, 60);
+          const mp3Path = path.join(__dirname, `../temp/${Date.now()}.mp3`);
+          const opusPath = path.join(__dirname, `../temp/${Date.now()}.opus`);
 
-          let type;
-
-          // 1 = Audio
+          // ===================== USER OPTIONS ======================
           if (choice === "1") {
-            type = {
-              audio: { url: dlUrl },
-              mimetype: "audio/mpeg",
-              fileName: audioFileName,
-            };
-
-          // 2 = Document
+            // AUDIO TYPE
+            await conn.sendMessage(
+              from,
+              {
+                audio: { url: dlUrl },
+                mimetype: "audio/mpeg",
+                fileName: cleanTitle + ".mp3",
+              },
+              { quoted: mek }
+            );
           } else if (choice === "2") {
-            type = {
-              document: { url: dlUrl },
-              mimetype: "audio/mpeg",
-              fileName: audioFileName,
-              caption: meta.title,
-            };
-
-          // 3 = Voice Note
+            // DOCUMENT TYPE
+            await conn.sendMessage(
+              from,
+              {
+                document: { url: dlUrl },
+                mimetype: "audio/mpeg",
+                fileName: cleanTitle + ".mp3",
+                caption: meta.title,
+              },
+              { quoted: mek }
+            );
           } else if (choice === "3") {
+            // VOICE NOTE TYPE
             const audioRes = await fetch(dlUrl);
-            const audioBuffer = Buffer.from(await audioRes.arrayBuffer());
-            fs.writeFileSync(tempPath, audioBuffer);
+            fs.writeFileSync(mp3Path, Buffer.from(await audioRes.arrayBuffer()));
 
             await new Promise((resolve, reject) => {
-              ffmpeg(tempPath)
+              ffmpeg(mp3Path)
                 .audioCodec("libopus")
                 .format("opus")
                 .audioBitrate("64k")
-                .save(voicePath)
+                .save(opusPath)
                 .on("end", resolve)
-                .on("error",reject);
+                .on("error", reject);
             });
 
-            const voiceBuffer = fs.readFileSync(voicePath);
+            const voiceBuffer = fs.readFileSync(opusPath);
 
-            type = {
-              audio: voiceBuffer,
-              mimetype: "audio/ogg; codecs=opus",
-              ptt: true,
-            };
+            await conn.sendMessage(
+              from,
+              {
+                audio: voiceBuffer,
+                mimetype: "audio/ogg; codecs=opus",
+                ptt: true,
+              },
+              { quoted: mek }
+            );
 
-            fs.unlinkSync(tempPath);
-            fs.unlinkSync(voicePath);
-
+            fs.unlinkSync(mp3Path);
+            fs.unlinkSync(opusPath);
           } else {
             return reply("*❌ Invalid choice!*");
           }
 
+          // ⬆️ Upload react
           await conn.sendMessage(from, {
-            react: { text: "⬆️", key: mekInfo.key },
+            react: { text: "⬆️", key: info.key },
           });
 
-          await conn.sendMessage(from, type, { quoted: mek });
+          // ✔️ Success react
           await conn.sendMessage(from, {
-            react: { text: "✔️", key: mekInfo.key },
+            react: { text: "✔️", key: info.key },
           });
+
+          // Remove listener after success
+          conn.ev.off("messages.upsert", listener);
 
         } catch (err) {
           console.error("reply handler error:", err);
         }
-      });
+      };
+
+      conn.ev.on("messages.upsert", listener);
 
     } catch (err) {
       console.error("song cmd error:", err);
-      reply("⚠️ An error occurred while processing your request.");
+      reply("⚠️ Error occurred while processing your request.");
     }
   }
 );
