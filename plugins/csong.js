@@ -101,4 +101,8 @@ cmd({
 
     reply(`✅ *Song sent successfully!*\n\n🎵 *${meta.title}*\n📨 *Channel:* ${channelJid}`);
 
-  } catch (err
+  } catch (err) {
+    console.error("csong error:", err);
+    reply("⚠️ Error while sending song to channel.");
+  }
+});
