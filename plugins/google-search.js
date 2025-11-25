@@ -1,26 +1,6 @@
 const { cmd } = require('../command');
 const axios = require('axios');
 
-// Fake ChatGPT vCard
-const fakevCard = {
-    key: {
-        fromMe: false,
-        participant: "0@s.whatsapp.net",
-        remoteJid: "status@broadcast"
-    },
-    message: {
-        contactMessage: {
-            displayName: "© Mr Hiruka",
-            vcard: `BEGIN:VCARD
-VERSION:3.0
-FN:Meta
-ORG:META AI;
-TEL;type=CELL;type=VOICE;waid=94762095304:+94762095304
-END:VCARD`
-        }
-    }
-};
-
 
 cmd({
   pattern: "google",
@@ -43,7 +23,7 @@ async (conn, mek, m, { text }) => {
       res.data.data.slice(0, 5).forEach((item, i) => {
         msg += `*${i+1}.* ${item.title}\n${item.link}\n_${item.snippet}_\n\n> © Powerd by 𝗥𝗔𝗡𝗨𝗠𝗜𝗧𝗛𝗔-𝗫-𝗠𝗗 🌛`;
       });
-      m.reply(fakevCard);
+      m.reply(msg);
     } else {
       m.reply("No results found 😔");
     }
