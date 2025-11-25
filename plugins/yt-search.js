@@ -2,9 +2,12 @@ const config = require('../config')
 const l = console.log
 const { cmd, commands } = require('../command')
 const dl = require('@bochilteam/scraper')  
-const ytdl = require('yt-search')
+const ytdl = require('yt-search');
 const fs = require('fs-extra')
+var videotime = 60000 
+const { getBuffer, getGroupAdmins, getRandom, h2k, isUrl, Json, runtime, sleep, fetchJson} = require('../lib/functions')
 
+// Fake vCard
 const fakevCard = {
     key: {
         fromMe: false,
@@ -27,61 +30,49 @@ END:VCARD`
 cmd({
     pattern: "yts",
     alias: ["ytsearch"],
-    use: '.yts song name',
+    use: '.yts ranumitha',
     react: "🔎",
     desc: "Search and get details from youtube.",
     category: "search",
     filename: __filename
 },
 
-async (conn, mek, m, { from, reply, q }) => {
+async (conn, mek, m, { from, quoted, args, q, reply }) => {
     try {
 
-        // -----------------------------
-        // 📌 AUTO QUERY SYSTEM
-        // -----------------------------
-        let query = q?.trim();
+        // ----------------------------
+        // GET SEARCH QUERY
+        // ----------------------------
+        let text = q;
 
-        // If no query & user replied to something → use that text
-        if (!query && m?.quoted) {
-            query =
-                m.quoted.message?.conversation ||
-                m.quoted.message?.extendedTextMessage?.text ||
-                m.quoted.text;
+        // If user replied to a message, use the replied text
+        if (!text && m.quoted) {
+            text = m.quoted.text;
         }
 
-        if (!query) {
-            return reply("⚠️ Please provide a search term (or reply to a message).");
+        // If no text at all -> error
+        if (!text) return reply('*Please give me search words or reply to message*');
+
+        // ----------------------------
+        // YT SEARCH
+        // ----------------------------
+        let yts = require("yt-search");
+        let arama = await yts(text);
+
+        if (!arama || !arama.all) {
+            return reply('*No results found!*');
         }
 
-        // -----------------------------
-        // 🔍 SEARCH SECTION
-        // -----------------------------
-        let search;
-        try {
-            search = await ytdl(query);
-        } catch (err) {
-            l(err);
-            return await conn.sendMessage(
-                from,
-                { text: "*❌ Error searching YouTube!*" },
-                { quoted: fakevCard }
-            );
-        }
-
-        let msg = '';
-        search.all.map(video => {
-            msg += `> *🔥 ${video.title}*\n🔗 ${video.url}\n\n`;
+        let mesaj = '';
+        arama.all.map((video) => {
+            mesaj += '> *🔥 ' + video.title + '*\n🔗 ' + video.url + '\n\n';
         });
 
-        await conn.sendMessage(
-            from,
-            { text: msg || "❌ No results found!" },
-            { quoted: fakevCard }
-        );
+        // Send result
+        await conn.sendMessage(from, { text: mesaj }, { quoted: fakevCard });
 
     } catch (e) {
         l(e);
-        reply("*❌ Error !!*");
+        reply('*Error !!*');
     }
 });
