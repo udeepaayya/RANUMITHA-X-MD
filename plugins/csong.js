@@ -4,119 +4,104 @@ const fs = require("fs");
 const path = require("path");
 const ffmpeg = require("fluent-ffmpeg");
 
-// Fake vCard
-const fakevCard = {
-    key: {
-        fromMe: false,
-        participant: "0@s.whatsapp.net",
-        remoteJid: "status@broadcast"
-    },
-    message: {
-        contactMessage: {
-            displayName: "© Mr Hiruka",
-            vcard: `BEGIN:VCARD
-VERSION:3.0
-FN:Meta
-ORG:META AI;
-TEL;type=CELL;type=VOICE;waid=94762095304:+94762095304
-END:VCARD`
-        }
-    }
-};
-
 cmd({
   pattern: "csong",
   alias: ["chsong", "channelplay"],
   react: "🍁",
-  desc: "Send a YouTube song to a WhatsApp Channel (voice + details)",
+  desc: "Send a YouTube song to a WhatsApp Channel",
   category: "channel",
-  use: ".csong <song name>/<channel JID>",
+  use: ".csong <song>/<channel jid>",
   filename: __filename,
-}, async (conn, mek, m, { from, reply, q }) => {
+}, async (conn, mek, m, { reply, q }) => {
   try {
+
+    // Format check
     if (!q || !q.includes("/")) {
-      return reply("⚠️ Use format:\n.csong <song name>/<channel JID>\n\nExample:\n.csong Shape of You/1203630xxxxx@newsletter");
+      return reply("⚠️ Use: .csong <song>/<channel jid>\n\nExample:\n.csong Shape of You/1203xxxxxx@newsletter");
     }
 
     const [songName, channelJid] = q.split("/").map(x => x.trim());
 
     if (!channelJid.endsWith("@newsletter")) {
-      return reply("❌ Invalid channel JID! It should end with @newsletter");
+      return reply("❌ Invalid Channel JID! Must end with @newsletter");
     }
 
-    if (!songName) return reply("⚠️ Please provide a song name.");
-
-    // Fetch song details
+    // API fetch
     const apiUrl = `https://api.nekolabs.my.id/downloader/youtube/play/v1?q=${encodeURIComponent(songName)}`;
     const res = await fetch(apiUrl);
     const data = await res.json();
 
-    if (!data?.success || !data?.result?.downloadUrl) {
-      return reply("❌ Song not found or API error.");
+    if (!data?.success) {
+      return reply("❌ Song not found or API error!");
     }
 
     const meta = data.result.metadata;
-    const dlUrl = data.result.downloadUrl;
 
-    // Try fetching thumbnail
-    let buffer;
+    // Download URL fallback
+    const dlUrl =
+      data?.result?.downloadUrl ||
+      data?.result?.audio?.[0]?.url;
+
+    if (!dlUrl) return reply("❌ Audio URL missing!");
+
+    // Thumbnail
+    let thumb = null;
     try {
-      const thumbRes = await fetch(meta.cover);
-      buffer = Buffer.from(await thumbRes.arrayBuffer());
-    } catch {
-      buffer = null;
-    }
+      let imgRes = await fetch(meta.cover);
+      thumb = Buffer.from(await imgRes.arrayBuffer());
+    } catch { }
 
-    const caption = `🎶 *RANUMITHA-X-MD SONG SENDER* 🎶
+    // Caption
+    const caption = `🎶 *RANUMITHA-X-MD SONG SENDER*
 
 🎧 *Title:* ${meta.title}
 📀 *Channel:* ${meta.channel}
-⏱ *Duration:* ${meta.duration}
-🔗 *URL:* ${meta.url}
+⏱ Duration: ${meta.duration}
 
-> © Powered by 𝗥𝗔𝗡𝗨𝗠𝗜𝗧𝗛𝗔-𝗫-𝗠𝗗 🌛`;
+> © Powered by RANUMITHA-X-MD 🌛`;
 
-    // Send details + image to channel
+    // Send song details (no quoted)
     await conn.sendMessage(channelJid, {
-      image: buffer,
-      caption: caption
-    }, { quoted: fakevCard });
+      image: thumb,
+      caption
+    });
 
-    // Convert to voice (.opus)
-    const tempPath = path.join(__dirname, `../temp/${Date.now()}.mp3`);
-    const voicePath = path.join(__dirname, `../temp/${Date.now()}.opus`);
+    // Temp path
+    const mp3 = path.join(__dirname, `../temp/${Date.now()}.mp3`);
+    const opus = path.join(__dirname, `../temp/${Date.now()}.opus`);
 
-    const audioRes = await fetch(dlUrl);
-    const audioBuffer = Buffer.from(await audioRes.arrayBuffer());
-    fs.writeFileSync(tempPath, audioBuffer);
+    // Download audio
+    const aRes = await fetch(dlUrl);
+    const aBuf = Buffer.from(await aRes.arrayBuffer());
+    fs.writeFileSync(mp3, aBuf);
 
+    // Convert to opus
     await new Promise((resolve, reject) => {
-      ffmpeg(tempPath)
+      ffmpeg(mp3)
         .audioCodec("libopus")
         .format("opus")
-        .audioBitrate("64k")
-        .save(voicePath)
+        .save(opus)
         .on("end", resolve)
         .on("error", reject);
     });
 
-    const voiceBuffer = fs.readFileSync(voicePath);
+    const vBuf = fs.readFileSync(opus);
 
-    // Send as voice note to the channel
+    // Send to channel (no quoted)
     await conn.sendMessage(channelJid, {
-      audio: voiceBuffer,
+      audio: vBuf,
       mimetype: "audio/ogg; codecs=opus",
       ptt: true
-    }, { quoted: fakevCard });
+    });
 
-    // Clean temp
-    fs.unlinkSync(tempPath);
-    fs.unlinkSync(voicePath);
+    // Cleanup
+    fs.unlinkSync(mp3);
+    fs.unlinkSync(opus);
 
-    reply(`*✅ Song sent successfully*\n\n*🎧 Song Title* :- ${meta.title}\n*🔖 Channel jid* :- ${channelJid}`);
+    reply(`✅ *Song sent successfully!*\n\n📌 *${meta.title}*\n📨 *Channel:* ${channelJid}`);
 
   } catch (err) {
-    console.error("csong error:", err);
-    reply("⚠️ Error while sending song to channel.");
+    console.error(err);
+    reply("⚠️ Error while sending song!");
   }
 });
