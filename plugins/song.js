@@ -35,7 +35,7 @@ cmd({
   filename: __filename,
 }, async (conn, mek, m, { from, reply, q }) => {
   try {
-    // 🟢 Get query from reply or argument
+    // 🟢 Get query from argument or replied message
     let query = q?.trim();
     if (!query && m.quoted) {
       query = m.quoted?.message?.conversation ||
@@ -43,10 +43,15 @@ cmd({
     }
     if (!query) return reply("⚠️ Please provide a song name or YouTube link (or reply to a message).");
 
-    // 🟢 Normalize YouTube Shorts URL
-    if (query.includes("youtube.com/shorts/")) {
-      const videoId = query.split("/shorts/")[1].split(/[?&]/)[0];
-      query = `https://www.youtube.com/watch?v=${videoId}`;
+    // 🟢 Detect if query is a YouTube/Shorts link
+    let isYouTubeLink = false;
+    if (query.match(/(youtube\.com|youtu\.be)/i)) {
+      isYouTubeLink = true;
+      // normalize shorts link
+      if (query.includes("youtube.com/shorts/")) {
+        const videoId = query.split("/shorts/")[1].split(/[?&]/)[0];
+        query = `https://www.youtube.com/watch?v=${videoId}`;
+      }
     }
 
     // 🟢 Fetch song metadata from Nekolabs API
