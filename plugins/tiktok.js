@@ -24,7 +24,7 @@ END:VCARD`
 cmd({
     pattern: "tiktok",
     alias: ["ttdl", "tt", "tiktokdl"],
-    desc: "Download TikTok video with full details",
+    desc: "Download TikTok video with full details and numbered options",
     category: "downloader",
     react: "🎥",
     filename: __filename
@@ -53,36 +53,38 @@ cmd({
 
         const { title, author, like, comment, share, meta } = data.data;
 
-        const videoNoWatermark = meta.media.find(v => v.type === "video").org; // no watermark
-        const videoWithWatermark = meta.media.find(v => v.type === "video").wm || videoNoWatermark; // fallback
-        const audioUrl = meta.music?.playUrl || videoNoWatermark; // fallback audio
+        const videoNoWatermark = meta.media.find(v => v.type === "video").org;
+        const videoWithWatermark = meta.media.find(v => v.type === "video").wm || videoNoWatermark;
+        const audioUrl = meta.music?.playUrl || videoNoWatermark;
         const musicTitle = meta.music?.title || "Original Sound";
         const duration = meta.duration || "Unknown";
-        const thumb = meta.cover || "https://raw.githubusercontent.com/Ranumithaofc/RANU-FILE-S-/refs/heads/main/images/RANUMITHA-X-MD_FB.jpg"; // fallback thumbnail
+
+        // ✅ Custom thumbnail (like FB plugin)
+        const customThumb = "https://raw.githubusercontent.com/Ranumithaofc/RANU-FILE-S-/refs/heads/main/images/RANUMITHA-X-MD_FB.jpg";
 
         // 1️⃣ Send menu with full details
         const caption = `
-*🫧 RANUMITHA-X-MD TIKTOK DOWNLOADER 🫧*
+*🍇 RANUMITHA-X-MD TIKTOK DOWNLOADER 🍇*
 
-👤 *User:* ${author.nickname}
-📖 *Title:* ${title}
-⏱️ *Duration:* ${duration}
-🎵 *Music:* ${musicTitle}
-👍 *Likes:* ${like} 
-💬 *Comments:* ${comment} 
-🔁 *Shares:* ${share}
-🔗 *Link:* ${tiktokUrl}
+👤 \`User:\` ${author.nickname}
+📖 \`Title:\` ${title}
+⏱️ \`Duration:\` ${duration}
+🎵 \`Music:\` ${musicTitle}
+👍 \`Likes:\` ${like} 
+💬 \`Comments:\` ${comment} 
+🔁 \`Shares:\` ${share}
+🔗 \`Link:\` ${tiktokUrl}
 
 💬 *Reply with your choice:*
 
-1️⃣ Video (No Watermark)
-2️⃣ Video (With Watermark)
-3️⃣ Audio Only
+1️⃣ No Watermark 🎟️
+2️⃣ With Watermark 🎫
+3️⃣ Audio Only 🎶
 
 > © Powered by 𝗥𝗔𝗡𝗨𝗠𝗜𝗧𝗛𝗔-𝗫-𝗠𝗗 🌛`;
 
         const sentMsg = await conn.sendMessage(from, {
-            image: { url: thumb },
+            image: { url: customThumb },
             caption: caption
         }, { quoted: fakevCard });
 
@@ -118,7 +120,11 @@ cmd({
                         return reply("*❌ Invalid option!*");
                 }
 
+                // ⬇️ React when download starts
                 await conn.sendMessage(senderID, { react: { text: '⬇️', key: receivedMsg.key } });
+
+                // ⬆️ React exactly at the moment upload starts
+                await conn.sendMessage(senderID, { react: { text: '⬆️', key: receivedMsg.key } });
 
                 if (isAudio) {
                     await conn.sendMessage(senderID, {
@@ -135,7 +141,8 @@ cmd({
                     }, { quoted: receivedMsg });
                 }
 
-                await conn.sendMessage(senderID, { react: { text: '✅', key: receivedMsg.key } });
+                // ✅ React after upload complete
+                await conn.sendMessage(senderID, { react: { text: '✔️', key: receivedMsg.key } });
             }
         });
 
