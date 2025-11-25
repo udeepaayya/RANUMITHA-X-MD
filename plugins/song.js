@@ -38,45 +38,36 @@ cmd({
 
 },
 
-async(conn, mek, m,{from, l, quoted, body, isCmd, umarmd, args, q, isGroup, sender, senderNumber, botNumber2, botNumber, pushname, isMe, isOwner, groupMetadata, groupName, participants, groupAdmins, isBotAdmins, isAdmins, reply}) => {
+async(conn, mek, m,{from, l, quoted, body, isCmd, args, q, reply}) => {
 try{
 
-// ----------------------------
-//  REPLY MESSAGE HANDLING
-// ----------------------------
-let query;
+    // ----------------------------
+    //  SEARCH QUERY HANDLING
+    // ----------------------------
+    let query = q; // normal input
+    if (!query && quoted && quoted.text) {
+        query = quoted.text; // reply text fallback
+    }
 
-if (quoted && quoted.text) {
-    // reply karala dunnoth → reply eke text eka search wenna
-    query = quoted.text;
-} else {
-    // normal search
-    query = q;
-}
+    if (!query) return reply("⚠️ Please provide a song name (or reply to a message).");
 
-if (!query) {
-    return reply("⚠️ Please provide a song name (or reply to a message).");
-}
+    // SEARCH
+    let arama;
+    try {
+        arama = await ytdl(query);
+    } catch(e) {
+        l(e)
+        return await conn.sendMessage(from , { text: '*Error !!*' }, { quoted: fakevCard } )
+    }
 
-// SEARCH
-let arama;
-try {
-    let yts = require("yt-search")
-    arama = await yts(query);
-} catch(e) {
-    l(e)
-    return await conn.sendMessage(from , { text: '*Error !!*' }, { quoted: fakevCard } )
-}
+    // BUILD MESSAGE
+    let mesaj = '';
+    arama.all.map(video => {
+        mesaj += `> *🔥 ${video.title}*\n🔗 ${video.url}\n\n`;
+    });
 
-// MESSAGE BUILD
-let mesaj = '';
-arama.all.map((video) => {
-mesaj += '> *🔥 ' + video.title + '*\n'
-mesaj += '🔗 ' + video.url + '\n\n'
-});
-
-// SEND RESULT
-await conn.sendMessage(from , { text:  mesaj }, { quoted: fakevCard } )
+    // SEND RESULT
+    await conn.sendMessage(from , { text: mesaj }, { quoted: fakevCard });
 
 } catch (e) {
     l(e)
