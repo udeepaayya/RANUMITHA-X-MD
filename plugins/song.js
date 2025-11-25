@@ -24,7 +24,7 @@ END:VCARD`
   }
 };
 
-// 🟣 Command definition
+// Command
 cmd(
   {
     pattern: "song",
@@ -38,8 +38,19 @@ cmd(
 
   async (conn, mek, m, { from, reply, q }) => {
     try {
+      // 🟣 Get query (typed + replied message)
       let query = q?.trim();
-      if (!query) return reply("⚠️ Please provide a song name or YouTube link.");
+
+      if (!query && m?.quoted) {
+        query =
+          m.quoted.message?.conversation ||
+          m.quoted.message?.extendedTextMessage?.text ||
+          m.quoted.text;
+      }
+
+      if (!query) {
+        return reply("⚠️ Please provide a song name or YouTube link (or reply to a message).");
+      }
 
       // Shorts → Normal link
       if (query.includes("youtube.com/shorts/")) {
@@ -47,7 +58,7 @@ cmd(
         query = `https://www.youtube.com/watch?v=${videoId}`;
       }
 
-      // API call
+      // API
       const apiUrl = `https://api.nekolabs.my.id/downloader/youtube/play/v1?q=${encodeURIComponent(query)}`;
       const res = await fetch(apiUrl);
       const data = await res.json();
@@ -68,7 +79,7 @@ cmd(
         buffer = null;
       }
 
-      // 🎶 DETAILS MESSAGE (Your exact style)
+      // Song details message
       const caption = `
 🎶 *RANUMITHA-X-MD SONG DOWNLOADER* 🎶
 
@@ -85,19 +96,15 @@ cmd(
 
 © Powered by 𝗥𝗔𝗡𝗨𝗠𝗜𝗧𝗛𝗔-𝗫-𝗠𝗗 🌛`;
 
-      // Send details
       const sentMsg = await conn.sendMessage(
         from,
-        {
-          image: buffer,
-          caption: caption,
-        },
+        { image: buffer, caption: caption },
         { quoted: fakevCard }
       );
 
       const messageID = sentMsg.key.id;
 
-      // 🟢 Listen for user reply
+      // Reply listener
       conn.ev.on("messages.upsert", async (msgUpdate) => {
         try {
           const mekInfo = msgUpdate.messages[0];
@@ -108,7 +115,8 @@ cmd(
             mekInfo.message.extendedTextMessage?.text;
 
           const isReply =
-            mekInfo?.message?.extendedTextMessage?.contextInfo?.stanzaId === messageID;
+            mekInfo?.message?.extendedTextMessage?.contextInfo?.stanzaId ===
+            messageID;
 
           if (!isReply) return;
 
@@ -155,7 +163,7 @@ cmd(
                 .audioBitrate("64k")
                 .save(voicePath)
                 .on("end", resolve)
-                .on("error", reject);
+                .on("error",reject);
             });
 
             const voiceBuffer = fs.readFileSync(voicePath);
@@ -168,6 +176,7 @@ cmd(
 
             fs.unlinkSync(tempPath);
             fs.unlinkSync(voicePath);
+
           } else {
             return reply("*❌ Invalid choice!*");
           }
@@ -180,10 +189,12 @@ cmd(
           await conn.sendMessage(from, {
             react: { text: "✔️", key: mekInfo.key },
           });
+
         } catch (err) {
           console.error("reply handler error:", err);
         }
       });
+
     } catch (err) {
       console.error("song cmd error:", err);
       reply("⚠️ An error occurred while processing your request.");
