@@ -46,10 +46,14 @@ try{
     // ----------------------------
     let query = q; // normal input
 
-    // reply message check
     if (!query && quoted) {
-        if (quoted.message && quoted.message.conversation) {
+        // Simple text message
+        if (quoted.message.conversation) {
             query = quoted.message.conversation;
+        }
+        // Extended text message (caption / extended)
+        else if (quoted.message.extendedTextMessage && quoted.message.extendedTextMessage.text) {
+            query = quoted.message.extendedTextMessage.text;
         }
     }
 
