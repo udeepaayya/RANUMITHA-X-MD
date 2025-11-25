@@ -2,6 +2,8 @@ const config = require('../config')
 const l = console.log
 const { cmd } = require('../command')
 const yts = require('yt-search')
+const axios = require("axios")
+const fs = require("fs-extra")
 
 // Fake vCard
 const fakevCard = {
@@ -23,88 +25,98 @@ END:VCARD`
     }
 };
 
+// Temporary store
+let YTS_RESULTS = {} 
+
 cmd({
     pattern: "yts",
     alias: ["ytsearch"],
-    use: '.yts song name',
+    use: ".yts query or reply text",
     react: "🔎",
-    desc: "Search YouTube videos with thumbnail and reply menu",
+    desc: "YouTube search with thumbnail + reply system",
     category: "search",
     filename: __filename
-}, async (conn, mek, m, { from, q, reply }) => {
+},
+
+async (conn, mek, m, { from, reply, q, quoted }) => {
     try {
 
-        if (!q) return reply('*Please enter a search query!*');
+        // If user replied to a message
+        let searchText = q ? q : quoted?.msg?.conversation
 
-        await conn.sendMessage(from, { react: { text: '🔎', key: m.key } });
+        if (!searchText)
+            return reply("*Please type a name or reply to text!*")
 
         // Search YouTube
-        const search = await yts(q);
-        const videos = search.videos.slice(0, 8);
+        let res = await yts(searchText);
+        if (!res || !res.all.length)
+            return reply("*No results found!*")
 
-        if (!videos || videos.length === 0)
-            return reply("❌ No results found!");
+        let videos = res.all.slice(0, 8) // only first 8 results
+        YTS_RESULTS[from] = videos
 
-        // Thumbnail image (custom like FB plugin)
-        const thumb = "https://raw.githubusercontent.com/Ranumithaofc/RANU-FILE-S-/refs/heads/main/images/RANUMITHA-X-MD_FB.jpg";
+        // Send thumbnail + list
+        let thumb = await axios.get(videos[0].thumbnail, { responseType: "arraybuffer" })
 
-        // Build caption list with numbers
-        let msg = `*🔎 YOUTUBE SEARCH RESULTS*\n\n`;
-        videos.forEach((v, i) => {
-            msg += `*${i + 1}️⃣ ${v.title}*\n`;
-            msg += `⏱️ Duration: ${v.timestamp}\n`;
-            msg += `👤 Channel: ${v.author.name}\n`;
-            msg += `🔗 ${v.url}\n\n`;
-        });
+        let caption = `*🔍 YouTube Search Results*\n\n*Query:* ${searchText}\n\n`
 
-        msg += `Reply with the *number* to get the video/audio.\n\n> © RANUMITHA-X-MD`;
+        videos.map((v, i) => {
+            caption += `*${i + 1}. ${v.title}*\n🔗 ${v.url}\n\n`
+        })
 
-        // Send thumbnail + caption
-        const sentMsg = await conn.sendMessage(from, {
-            image: { url: thumb },
-            caption: msg
-        }, { quoted: fakevCard });
+        await conn.sendMessage(from, {
+            image: Buffer.from(thumb.data),
+            caption
+        }, { quoted: fakevCard })
 
-        const messageID = sentMsg.key.id;
-
-        // 🔥 Reply listener
-        conn.ev.on("messages.upsert", async (msgData) => {
-            const receivedMsg = msgData.messages[0];
-            if (!receivedMsg?.message) return;
-
-            const text = receivedMsg.message.conversation
-                || receivedMsg.message.extendedTextMessage?.text;
-
-            const senderID = receivedMsg.key.remoteJid;
-            const replyID = receivedMsg.message.extendedTextMessage?.contextInfo?.stanzaId;
-
-            if (replyID === messageID) {
-
-                const num = parseInt(text.trim());
-                if (isNaN(num) || num < 1 || num > videos.length)
-                    return reply("*❌ Invalid number!*");
-
-                const vid = videos[num - 1];
-
-                // ⬇️ React for download
-                await conn.sendMessage(senderID, { react: { text: '⬇️', key: receivedMsg.key } });
-
-                // ⬆️ React for upload start
-                await conn.sendMessage(senderID, { react: { text: '⬆️', key: receivedMsg.key } });
-
-                // Send chosen video
-                await conn.sendMessage(senderID, {
-                    video: { url: vid.url },
-                    caption: `🎬 *${vid.title}*\n\nDownloaded by *RANUMITHA-X-MD*`
-                }, { quoted: receivedMsg });
-
-                // Complete reaction
-                await conn.sendMessage(senderID, { react: { text: '✅', key: receivedMsg.key } });
-            }
-        });
+        reply("*Reply a number to download (1-8)*")
 
     } catch (e) {
-        l(e);
-        reply('*Error while searching YouTube!*');
+        l(e)
+        reply("*Error occurred!*")
+    }
+});
+
+
+// Listener for reply-number → download
+cmd({
+    on: "text"
+}, async (conn, mek, m, { from, body, quoted }) => {
+    try {
+        if (!YTS_RESULTS[from]) return;
+
+        if (!quoted) return; // must reply
+        if (!quoted.key || !quoted.message?.imageMessage) return;
+
+        let n = Number(body.trim())
+        if (isNaN(n) || n < 1 || n > YTS_RESULTS[from].length)
+            return;
+
+        let video = YTS_RESULTS[from][n - 1]
+
+        await conn.sendMessage(from, { react: { text: "⬆️", key: mek.key } })
+
+        // Download via API (bochilteam)
+        let api = `https://api.damercatu.com/ytdl?url=${encodeURIComponent(video.url)}`
+        let d = await axios.get(api).catch(() => null)
+
+        if (!d || !d.data || !d.data.video)
+            return reply("*Download failed!*")
+
+        let fileUrl = d.data.video
+
+        let buffer = await axios.get(fileUrl, { responseType: "arraybuffer" })
+
+        await conn.sendMessage(from, {
+            video: Buffer.from(buffer.data),
+            caption: `*🎬 ${video.title}*\nDownloaded Successfully!`
+        }, { quoted: fakevCard })
+
+        await conn.sendMessage(from, { react: { text: "⬇️", key: mek.key } })
+
+        delete YTS_RESULTS[from]
+
+    } catch (e) {
+        l(e)
     }
 });
