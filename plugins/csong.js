@@ -2,107 +2,93 @@ const { cmd } = require("../command");
 const fetch = require("node-fetch");
 const fs = require("fs");
 const path = require("path");
+const ffmpeg = require("fluent-ffmpeg");
 
 cmd({
   pattern: "csong",
   alias: ["chsong", "channelplay"],
-  react: "🍁",
-  desc: "Send a YouTube song to a WhatsApp Channel",
+  react: "🎤",
+  desc: "Send song as voice-like audio to channel",
   category: "channel",
-  use: ".csong <song>/<channel jid>",
-  filename: __filename,
-}, async (conn, mek, m, { reply, q }) => {
+  filename: __filename
+},
+async (client, message, match, { reply }) => {
   try {
-    // Format validation
-    if (!q || !q.includes("/")) {
-      return reply(
-        "⚠️ Use format:\n.csong <song name>/<channel JID>\n\nExample:\n.csong Shape of You/1203xxxxxxx@newsletter"
-      );
-    }
 
-    const [songName, channelJid] = q.split("/").map(x => x.trim());
+    if (!match || !match.includes("/"))
+      return reply("⚠️ Format:\n.csong <song>/<channel JID>");
 
-    // Channel JID validation
-    if (!channelJid.endsWith("@newsletter")) {
-      return reply("❌ Invalid channel JID! It must end with @newsletter");
-    }
+    const [songName, channelJid] = match.split("/").map(x => x.trim());
 
-    if (!songName) {
-      return reply("⚠️ Please provide a valid song name.");
-    }
+    if (!channelJid.endsWith("@newsletter"))
+      return reply("❌ Invalid Channel JID");
 
-    // Fetch song details
-    const apiUrl = `https://api.nekolabs.my.id/downloader/youtube/play/v1?q=${encodeURIComponent(songName)}`;
-    const res = await fetch(apiUrl);
+    // API FETCH
+    const api = `https://api.nekolabs.my.id/downloader/youtube/play/v1?q=${encodeURIComponent(songName)}`;
+    const res = await fetch(api);
     const data = await res.json();
 
-    if (!data?.success) {
-      return reply("❌ Song not found or API error.");
-    }
+    if (!data?.success) return reply("❌ Song not found");
 
     const meta = data.result.metadata;
+    const url = data.result.downloadUrl;
 
-    // Fallback for audio URL
-    const dlUrl =
-      data?.result?.downloadUrl ||
-      data?.result?.audio?.[0]?.url;
-
-    if (!dlUrl) {
-      return reply("❌ Audio URL missing!");
-    }
-
-    // Thumbnail fetch attempt
+    // THUMBNAIL
     let thumb = null;
     try {
-      const tRes = await fetch(meta.cover);
-      thumb = Buffer.from(await tRes.arrayBuffer());
-    } catch {
-      thumb = null;
-    }
+      const r = await fetch(meta.cover);
+      thumb = Buffer.from(await r.arrayBuffer());
+    } catch { thumb = null; }
 
     const caption = `🎶 *RANUMITHA-X-MD SONG SENDER* 🎶
 
 🎧 *Title:* ${meta.title}
 📀 *Channel:* ${meta.channel}
-⏱ Duration:* ${meta.duration}
+⏱ *Duration:* ${meta.duration}
 🔗 *URL:* ${meta.url}
 
-> © Powered by 𝗥𝗔𝗡𝗨𝗠ි𝗧𝗛𝗔-𝗫-𝗠𝗗 🌛`;
+> © RANUMITHA-X-MD`;
 
-    // Channel sends
-    if (thumb) {
-      await conn.sendMessage(channelJid, {
-        image: thumb,
-        caption: caption
-      });
-    } else {
-      await conn.sendMessage(channelJid, {
-        text: caption
-      });
-    }
+    // Send Caption/Thumbnail
+    await client.sendMessage(
+      channelJid,
+      thumb ? { image: thumb, caption } : { text: caption }
+    );
 
-    // Download mp3
-    const mp3Path = path.join(__dirname, `../temp/${Date.now()}.mp3`);
-    const audioRes = await fetch(dlUrl);
-    const audioBuffer = Buffer.from(await audioRes.arrayBuffer());
-    fs.writeFileSync(mp3Path, audioBuffer);
+    // ===== DOWNLOAD Source MP3 =====
+    const mp3 = path.join(__dirname, `../temp/${Date.now()}.mp3`);
+    const voice = path.join(__dirname, `../temp/${Date.now()}.opus`);
 
-    const audioFile = fs.readFileSync(mp3Path);
+    const audioRes = await fetch(url);
+    fs.writeFileSync(mp3, Buffer.from(await audioRes.arrayBuffer()));
 
-    // Send MP3 audio (not voice note)
-    await conn.sendMessage(channelJid, {
-      audio: audioFile,
-      mimetype: "audio/mpeg",
-      ptt: false
+    // ===== CONVERT to OPUS (VOICE MODE) =====
+    await new Promise((resolve, reject) => {
+      ffmpeg(mp3)
+        .audioCodec("libopus")
+        .audioBitrate("64k")
+        .format("opus")   // voice-like
+        .save(voice)
+        .on("end", resolve)
+        .on("error", reject);
     });
 
-    // Delete temp file
-    fs.unlinkSync(mp3Path);
+    const voiceData = fs.readFileSync(voice);
 
-    reply(`✅ *Song sent successfully!*\n\n🎵 *${meta.title}*\n📨 *Channel:* ${channelJid}`);
+    // ===== SEND TO CHANNEL (VOICE STYLE AUDIO) =====
+    await client.sendMessage(channelJid, {
+      audio: voiceData,
+      mimetype: "audio/ogg; codecs=opus",
+      ptt: false     // IMPORTANT: Channel accepts only if ptt=false
+    });
 
-  } catch (err) {
-    console.error("csong error:", err);
-    reply("⚠️ Error while sending song to channel.");
+    fs.unlinkSync(mp3);
+    fs.unlinkSync(voice);
+
+    reply(`✅ Voice-style song sent!\n🎧 ${meta.title}`);
+
+  } catch (e) {
+    console.log(e);
+    reply("💢 Error: " + e.message);
   }
 });
