@@ -24,13 +24,13 @@ END:VCARD`,
   },
 };
 
-// ==================== MAIN COMMAND ======================
+// =================== MAIN COMMAND ===================
 cmd(
   {
     pattern: "song",
     alias: ["play", "song1", "play1"],
     react: "🎵",
-    desc: "Download YouTube song (Audio) via Nekolabs API",
+    desc: "Download YouTube song (Audio)",
     category: "download",
     use: ".song <query>",
     filename: __filename,
@@ -38,7 +38,7 @@ cmd(
 
   async (conn, mek, m, { from, reply, q }) => {
     try {
-      // 🟣 Get query
+      // Get query
       let query = q?.trim();
 
       if (!query && m?.quoted) {
@@ -48,36 +48,39 @@ cmd(
           m.quoted.text;
       }
 
-      if (!query) return reply("⚠️ Please provide a song name or YouTube link.");
+      if (!query) {
+        return reply("⚠️ Please provide a song name or YouTube link.");
+      }
 
-      // Shorts Fix
+      // Shorts → Main link
       if (query.includes("youtube.com/shorts/")) {
         const videoId = query.split("/shorts/")[1].split(/[?&]/)[0];
         query = `https://www.youtube.com/watch?v=${videoId}`;
       }
 
-      // API Fetch
-      const apiUrl = `https://api.nekolabs.my.id/downloader/youtube/play/v1?q=${encodeURIComponent(query)}`;
+      // API request
+      const apiUrl = `https://api.nekolabs.my.id/downloader/youtube/play/v1?q=${encodeURIComponent(
+        query
+      )}`;
+
       const res = await fetch(apiUrl);
       const data = await res.json();
 
       if (!data?.success || !data?.result?.downloadUrl) {
-        return reply("❌ Song not found or API error.");
+        return reply("❌ Song not found!");
       }
 
       const meta = data.result.metadata;
       const dlUrl = data.result.downloadUrl;
 
       // Thumbnail
-      let buffer;
+      let thumbBuffer = null;
       try {
-        const thumbRes = await fetch(meta.cover);
-        buffer = Buffer.from(await thumbRes.arrayBuffer());
-      } catch {
-        buffer = null;
-      }
+        const t = await fetch(meta.cover);
+        thumbBuffer = Buffer.from(await t.arrayBuffer());
+      } catch {}
 
-      // Caption
+      // Song Info Message
       const caption = `
 🎶 *RANUMITHA-X-MD SONG DOWNLOADER* 🎶
 
@@ -88,15 +91,18 @@ cmd(
 
 🔽 *Reply with your choice:*
 
-1. *Audio Type* 🎵
-2. *Document Type* 📁
-3. *Voice Note Type* 🎤
+1. *Audio File* 🎵  
+2. *Document File* 📁  
+3. *Voice Note* 🎤  
 
 © Powered by 𝗥𝗔𝗡𝗨𝗠𝗜𝗧𝗛𝗔-𝗫-𝗠𝗗 🌛`;
 
       const sentMsg = await conn.sendMessage(
         from,
-        { image: buffer, caption: caption },
+        {
+          image: thumbBuffer,
+          caption: caption,
+        },
         { quoted: fakevCard }
       );
 
@@ -108,11 +114,11 @@ cmd(
           const info = msgUpdate.messages[0];
           if (!info?.message) return;
 
+          // Check reply
           const userText =
             info.message.conversation ||
             info.message.extendedTextMessage?.text;
 
-          // Check reply target
           const isReply =
             info?.message?.extendedTextMessage?.contextInfo?.stanzaId ===
             expectedReplyID;
@@ -121,19 +127,19 @@ cmd(
 
           const choice = userText.trim();
 
-          // ⬇️ Download React
+          // React: Download
           await conn.sendMessage(from, {
             react: { text: "⬇️", key: info.key },
           });
 
-          // File Prep
-          const cleanTitle = meta.title.replace(/[\\/:*?"<>|]/g, "").slice(0, 60);
+          const cleanTitle = meta.title
+            .replace(/[\\/:*?"<>|]/g, "")
+            .slice(0, 60);
           const mp3Path = path.join(__dirname, `../temp/${Date.now()}.mp3`);
           const opusPath = path.join(__dirname, `../temp/${Date.now()}.opus`);
 
-          // ===================== USER OPTIONS ======================
+          // ================== OPTION 1: AUDIO ==================
           if (choice === "1") {
-            // AUDIO TYPE
             await conn.sendMessage(
               from,
               {
@@ -143,8 +149,9 @@ cmd(
               },
               { quoted: mek }
             );
-          } else if (choice === "2") {
-            // DOCUMENT TYPE
+          }
+          // ================== OPTION 2: DOCUMENT ==================
+          else if (choice === "2") {
             await conn.sendMessage(
               from,
               {
@@ -155,10 +162,14 @@ cmd(
               },
               { quoted: mek }
             );
-          } else if (choice === "3") {
-            // VOICE NOTE TYPE
+          }
+          // ================== OPTION 3: VOICE NOTE ==================
+          else if (choice === "3") {
             const audioRes = await fetch(dlUrl);
-            fs.writeFileSync(mp3Path, Buffer.from(await audioRes.arrayBuffer()));
+            fs.writeFileSync(
+              mp3Path,
+              Buffer.from(await audioRes.arrayBuffer())
+            );
 
             await new Promise((resolve, reject) => {
               ffmpeg(mp3Path)
@@ -176,41 +187,41 @@ cmd(
               from,
               {
                 audio: voiceBuffer,
-                mimetype: "audio/ogg; codecs=opus",
                 ptt: true,
+                mimetype: "audio/ogg; codecs=opus",
               },
               { quoted: mek }
             );
 
             fs.unlinkSync(mp3Path);
             fs.unlinkSync(opusPath);
-          } else {
-            return reply("*❌ Invalid choice!*");
+          }
+          // ================== INVALID OPTION ==================
+          else {
+            return reply("❌ Invalid option! Reply with 1 / 2 / 3.");
           }
 
-          // ⬆️ Upload react
+          // React: Upload
           await conn.sendMessage(from, {
             react: { text: "⬆️", key: info.key },
           });
 
-          // ✔️ Success react
+          // React: Done
           await conn.sendMessage(from, {
             react: { text: "✔️", key: info.key },
           });
 
-          // Remove listener after success
+          // Remove listener after this user reply
           conn.ev.off("messages.upsert", listener);
-
         } catch (err) {
-          console.error("reply handler error:", err);
+          console.error("Reply Handler Error:", err);
         }
       };
 
       conn.ev.on("messages.upsert", listener);
-
     } catch (err) {
-      console.error("song cmd error:", err);
-      reply("⚠️ Error occurred while processing your request.");
+      console.error("Song Command Error:", err);
+      reply("⚠️ Error while processing your request.");
     }
   }
 );
