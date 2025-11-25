@@ -41,28 +41,41 @@ cmd({
 async(conn, mek, m,{from, l, quoted, body, isCmd, umarmd, args, q, isGroup, sender, senderNumber, botNumber2, botNumber, pushname, isMe, isOwner, groupMetadata, groupName, participants, groupAdmins, isBotAdmins, isAdmins, reply}) => {
 try{
 
-// NEW LINE (no other changes)
-const query = q || body || "";
+// ----------------------------
+//  REPLY MESSAGE HANDLING
+// ----------------------------
+let query;
 
-// Your requested check
+if (quoted && quoted.text) {
+    // reply karala dunnoth → reply eke text eka search wenna
+    query = quoted.text;
+} else {
+    // normal search
+    query = q;
+}
+
 if (!query) {
     return reply("⚠️ Please provide a song name (or reply to a message).");
 }
 
+// SEARCH
+let arama;
 try {
     let yts = require("yt-search")
-    var arama = await yts(query);
+    arama = await yts(query);
 } catch(e) {
     l(e)
     return await conn.sendMessage(from , { text: '*Error !!*' }, { quoted: fakevCard } )
 }
 
-var mesaj = '';
+// MESSAGE BUILD
+let mesaj = '';
 arama.all.map((video) => {
-    mesaj += '> *🔥 ' + video.title + '*\n'
-    mesaj += '🔗 ' + video.url + '\n\n'
+mesaj += '> *🔥 ' + video.title + '*\n'
+mesaj += '🔗 ' + video.url + '\n\n'
 });
 
+// SEND RESULT
 await conn.sendMessage(from , { text:  mesaj }, { quoted: fakevCard } )
 
 } catch (e) {
