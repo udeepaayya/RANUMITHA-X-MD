@@ -60,7 +60,7 @@ cmd({
         const duration = meta.duration || "Unknown";
 
         // ✅ Custom thumbnail (like FB plugin)
-        const customThumb = "https://raw.githubusercontent.com/Ranumithaofc/RANU-FILE-S-/refs/heads/main/images/RANUMITHA-X-MD_FB.jpg";
+        const customThumb = "https://raw.githubusercontent.com/Ranumithaofc/RANU-FILE-S-/refs/heads/main/images/tiktok%20logo.jpg";
 
         // 1️⃣ Send menu with full details
         const caption = `
