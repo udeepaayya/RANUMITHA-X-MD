@@ -28,110 +28,113 @@ cmd({
   pattern: "csong",
   alias: ["chsong", "channelplay"],
   react: "🍁",
-  desc: "Send a YouTube song to a WhatsApp Channel (voice + details)",
+  desc: "Send a YouTube song to a WhatsApp Channel",
   category: "channel",
-  use: ".csong <song name or youtube link>/<channel JID>",
+  use: ".csong <song name or url>/<channel jid>",
   filename: __filename,
-}, async (conn, mek, m, { from, reply, q }) => {
+}, async (conn, mek, m, { reply, q }) => {
   try {
-    if (!q || !q.includes("/")) {
-      return reply("⚠️ Use format:\n.csong <song name or youtube url>/<channel JID>\n\nExample:\n.csong https://youtu.be/xxxxx /1203630xxxxx@newsletter");
-    }
+    if (!q || !q.includes("/"))
+      return reply("❗ Use: `.csong <song name or youtube url>/<channel@newsletter>`");
 
-    // ============================
-    // FIXED: Split ONLY at last "/"
-    // ============================
+    // Split at last slash (fix)
     const lastSlash = q.lastIndexOf("/");
     const songInput = q.substring(0, lastSlash).trim();
     const channelJid = q.substring(lastSlash + 1).trim();
 
-    if (!channelJid.endsWith("@newsletter")) {
-      return reply("❌ Invalid channel JID! It should end with @newsletter");
-    }
+    if (!channelJid.endsWith("@newsletter"))
+        return reply("❌ Invalid channel JID. Must end with @newsletter");
 
-    if (!songInput) return reply("⚠️ Please provide a valid song name or link.");
+    let apiUrl;
+    let meta = {};
+    let downloadUrl = "";
 
-    // Detect input type
+    // ===============  CHECK IF INPUT IS URL  =================
     const isUrl = songInput.startsWith("http://") || songInput.startsWith("https://");
 
-    // API Request
-    const apiUrl = isUrl
-      ? `https://api.nekolabs.my.id/downloader/youtube/play/v1?url=${encodeURIComponent(songInput)}`
-      : `https://api.nekolabs.my.id/downloader/youtube/play/v1?q=${encodeURIComponent(songInput)}`;
+    if (isUrl) {
+        // ---- Download from YouTube link ----
+        apiUrl = `https://yt-api.eu.org/api/ytmp3?url=${encodeURIComponent(songInput)}`;
+        const res = await fetch(apiUrl);
+        const json = await res.json();
 
-    const res = await fetch(apiUrl);
-    const data = await res.json();
+        if (!json.status) return reply("❌ Invalid YouTube link!");
 
-    if (!data?.success || !data?.result?.downloadUrl) {
-      return reply("❌ Song not found or API returned an error.");
+        meta.title = json.title;
+        meta.channel = json.channel;
+        meta.duration = json.duration;
+        meta.cover = json.thumbnail;
+        meta.url = songInput;
+        downloadUrl = json.url;
+
+    } else {
+        // ---- Search by name ----
+        apiUrl = `https://yt-api.eu.org/api/play?query=${encodeURIComponent(songInput)}`;
+        const res = await fetch(apiUrl);
+        const json = await res.json();
+
+        if (!json.status) return reply("❌ No results found!");
+
+        meta.title = json.title;
+        meta.channel = json.channel;
+        meta.duration = json.duration;
+        meta.cover = json.thumbnail;
+        meta.url = json.url;
+        downloadUrl = json.downloadUrl;
     }
-
-    const meta = data.result.metadata;
-    const dlUrl = data.result.downloadUrl;
 
     // Download thumbnail
-    let buffer = null;
+    let thumb = null;
     try {
-      const thumbRes = await fetch(meta.cover);
-      buffer = Buffer.from(await thumbRes.arrayBuffer());
-    } catch (e) {
-      buffer = null;
-    }
+        const img = await fetch(meta.cover);
+        thumb = Buffer.from(await img.arrayBuffer());
+    } catch {}
 
     // Caption
-    const caption = `🎶 *RANUMITHA-X-MD SONG SENDER* 🎶
+    const caption = `🎶 *RANUMITHA-X-MD* 🎶
 
 🎧 *Title:* ${meta.title}
-📀 *Channel:* ${meta.channel}
+📺 *Channel:* ${meta.channel}
 ⏱ *Duration:* ${meta.duration}
 🔗 *URL:* ${meta.url}
 
-> © Powered by 𝗥𝗔𝗡𝗨𝗠𝗜𝗧𝗛𝗔-𝗫-𝗠𝗗 🌛`;
+> © Powered by RANUMITHA-X-MD`;
 
-    // Send thumbnail + caption
-    await conn.sendMessage(
-      channelJid,
-      { image: buffer, caption },
-      { quoted: fakevCard }
-    );
+    // Send details + thumbnail
+    await conn.sendMessage(channelJid, { image: thumb, caption }, { quoted: fakevCard });
 
-    // ============================
-    // Convert MP3 → OPUS (voice note)
-    // ============================
-    const tempPath = path.join(__dirname, `../temp/${Date.now()}.mp3`);
-    const voicePath = path.join(__dirname, `../temp/${Date.now()}.opus`);
+    // MP3 → OPUS convert
+    const mp3Path = path.join(__dirname, `../temp/${Date.now()}.mp3`);
+    const opusPath = path.join(__dirname, `../temp/${Date.now()}.opus`);
 
-    const audioRes = await fetch(dlUrl);
-    fs.writeFileSync(tempPath, Buffer.from(await audioRes.arrayBuffer()));
+    const audioRes = await fetch(downloadUrl);
+    fs.writeFileSync(mp3Path, Buffer.from(await audioRes.arrayBuffer()));
 
-    // FFMPEG convert
     await new Promise((resolve, reject) => {
-      ffmpeg(tempPath)
+      ffmpeg(mp3Path)
         .audioCodec("libopus")
         .format("opus")
         .audioBitrate("64k")
-        .save(voicePath)
+        .save(opusPath)
         .on("end", resolve)
         .on("error", reject);
     });
 
-    const voiceBuffer = fs.readFileSync(voicePath);
+    const voice = fs.readFileSync(opusPath);
 
-    // Send voice
-    await conn.sendMessage(
-      channelJid,
-      { audio: voiceBuffer, mimetype: "audio/ogg; codecs=opus", ptt: true },
-      { quoted: fakevCard }
-    );
+    await conn.sendMessage(channelJid, {
+      audio: voice,
+      ptt: true,
+      mimetype: "audio/ogg; codecs=opus",
+    }, { quoted: fakevCard });
 
-    // Delete temp files
-    fs.unlinkSync(tempPath);
-    fs.unlinkSync(voicePath);
+    fs.unlinkSync(mp3Path);
+    fs.unlinkSync(opusPath);
 
-    reply(`*✅ Song sent successfully!*\n\n🎧 *${meta.title}*\n📩 *Channel:* ${channelJid}`);
+    reply(`✅ Sent: *${meta.title}*`);
 
-  } catch (err) {
-    console.error("csong error:", err);
-    reply("⚠️ Error while sending song to channel.");
+  } catch (e) {
+    console.log("csong error:", e);
+    reply("⚠️ Unexpected error occurred.");
   }
 });
