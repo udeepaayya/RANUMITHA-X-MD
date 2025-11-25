@@ -40,7 +40,7 @@ cmd({
     }
 
     if (!fbUrl || !fbUrl.startsWith("https://")) {
-      return conn.sendMessage(from, { text: "🚩 Please provide a valid Facebook URL 🐼 (text or reply)" }, { quoted: m });
+      return conn.sendMessage(from, { text: "*🚩 Please provide a valid Facebook URL 🐼 or reply to the URL.*" }, { quoted: m });
     }
 
     await conn.sendMessage(from, { react: { text: '🎥', key: m.key } });
