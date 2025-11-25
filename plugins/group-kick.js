@@ -3,16 +3,21 @@ const { cmd } = require('../command');
 cmd({
     pattern: "kick",
     alias: ["remove", "k"],
-    desc: "Removes a user from the group by reply or mention",
+    desc: "Removes a user from the group by reply or mention (Owner only)",
     category: "admin",
     react: "❌",
     filename: __filename
 },
-async (conn, mek, m, { from, isGroup, isBotAdmins, isAdmins, reply }) => {
+async (conn, mek, m, { from, isGroup, isBotAdmins, isOwner, reply }) => {
     try {
+        // Only work in groups
         if (!isGroup) return reply("📛 *Group command only!*");
-        if (!isAdmins) return reply("📛 *Only admins can use this command!*");
-        if (!isBotAdmins) return reply("📛 *Bot must be admin!*");
+
+        // Owner check
+        if (!isOwner) return reply("📛 *Only the bot owner can use this command!*");
+
+        // Bot must be admin
+        if (!isBotAdmins) return reply("📛 *Bot must be admin to remove participants!*");
 
         let mentionedJid;
 
@@ -27,12 +32,13 @@ async (conn, mek, m, { from, isGroup, isBotAdmins, isAdmins, reply }) => {
             return reply("⚠️ *Reply to a user's message or mention them to kick!*"); 
         }
 
-        // Bot detect
+        // Prevent kicking bot itself
         const botJid = conn.user.id?.split(":")[0] + "@s.whatsapp.net";
         if (mentionedJid === botJid) {
-            return reply("😒 *It's me!*");
+            return reply("😒 *Cannot remove the bot itself!*");
         }
 
+        // Remove user
         await conn.groupParticipantsUpdate(from, [mentionedJid], "remove");
 
         await conn.sendMessage(from, { 
