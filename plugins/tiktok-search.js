@@ -23,7 +23,7 @@ END:VCARD`
 
 cmd({
   pattern: "tiktoksearch",
-  alias: ["tiktoks", "tiks", "toks","ttsh","ttsearch","ts"],
+  alias: ["tiktoks", "tiks", "toks","ttsh","ttsearch","ts","ttts"],
   desc: "Search for TikTok videos using a query.",
   react: '⏳',
   category: 'tools',
