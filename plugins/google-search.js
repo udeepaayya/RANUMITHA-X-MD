@@ -4,7 +4,7 @@ const axios = require('axios');
 
 cmd({
   pattern: "google",
-  alias: ["gsearch"],
+  alias: ["gsearch","gsh"],
   desc: "Search Google via Chamod API",
   category: "search",
   react: "🔎",
