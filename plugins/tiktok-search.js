@@ -25,7 +25,7 @@ cmd({
   pattern: "tiktoksearch",
   alias: ["tiktoks", "tiks", "toks","ttsh","ttsearch","ts"],
   desc: "Search for TikTok videos using a query.",
-  react: '✅',
+  react: '⏳',
   category: 'tools',
   filename: __filename
 }, async (conn, m, store, {
@@ -73,7 +73,7 @@ cmd({
       }
     }
 
-    await store.react('✅');
+    await store.react('✔️');
   } catch (error) {
     console.error("Error in TikTokSearch command:", error);
     await store.react('❌');
