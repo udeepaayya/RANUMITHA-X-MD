@@ -54,7 +54,7 @@ cmd({
         if (!isDirectVideo(url)) {
             return reply(
                 "❗ *This is NOT a direct video URL!*\n\n" +
-                "👉 Please give me a **direct video link** ending with:\n" +
+                "👉 Please give me a *direct video link* ending with:\n" +
                 "`.mp4`, `.mkv`, `.webm`, `.mov`, `.avi`, `.ts` ..."
             );
         }
