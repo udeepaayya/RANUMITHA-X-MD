@@ -265,7 +265,7 @@ conn.ev.on('messages.upsert', async (msgUpdate) => {
 ┃★│ • emojimix 😎+😂
 ┃★│ • take [name,text]
 ┃★│ • tourl [url]
-┃★│ • gv [voice url]
+┃★│ • gv [url]
 ┃★│ • gvideo [url]
 ┃★│ • tomp3 [video]
 ┃★╰──────────────
