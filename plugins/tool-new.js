@@ -262,6 +262,7 @@ async (conn, mek, m, { args, reply }) => {
 
 cmd({
     pattern: "timenow",
+    alias: "time",
     desc: "Check the current local time.",
     category: "utility",
     filename: __filename,
@@ -271,17 +272,17 @@ async (conn, mek, m, { reply }) => {
         // Get current date and time
         const now = new Date();
         
-        // Get local time in Pakistan timezone (Asia/Karachi)
+        // Get local time in Sri Lanka timezone (Asia/Colombo)
         const localTime = now.toLocaleTimeString("en-US", { 
             hour: "2-digit", 
             minute: "2-digit", 
             second: "2-digit", 
             hour12: true,
-            timeZone: "Asia/Karachi" // Setting Pakistan's time zone explicitly
+            timeZone: "Asia/Colombo" // Setting Sri Lanka's time zone
         });
         
         // Send the local time as reply
-        reply(`🕒 Current Local Time in Pakistan: ${localTime}`);
+        reply(`🕒 Current Local Time in Sri Lanka: ${localTime}`);
     } catch (e) {
         console.error("Error in .timenow command:", e);
         reply("❌ An error occurred. Please try again later.");
