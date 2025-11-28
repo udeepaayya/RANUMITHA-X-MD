@@ -5,7 +5,7 @@ const path = require("path");
 
 cmd({
   pattern: "getvideo",
-  alias: ["gvideo", "video"],
+  alias: ["gvideo"],
   desc: "Download video from any direct link (Original quality)",
   category: "download",
   react: "🎥",
