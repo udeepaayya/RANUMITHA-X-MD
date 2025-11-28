@@ -262,7 +262,7 @@ async (conn, mek, m, { args, reply }) => {
 
 cmd({
     pattern: "timenow",
-    alias: "time",
+    alias: "time","velava","velavakeyd","welava",
     desc: "Check the current local time.",
     category: "utility",
     filename: __filename,
@@ -291,6 +291,7 @@ async (conn, mek, m, { reply }) => {
 
 cmd({
     pattern: "date",
+    alias: "2day","today","davasa","adadavasa","adha",
     desc: "Check the current date.",
     category: "utility",
     filename: __filename,
@@ -300,16 +301,17 @@ async (conn, mek, m, { reply }) => {
         // Get current date
         const now = new Date();
         
-        // Get the formatted date (e.g., "Monday, January 15, 2025")
+        // Get the formatted date in Sri Lanka timezone
         const currentDate = now.toLocaleDateString("en-US", {
             weekday: "long",
             year: "numeric",
             month: "long",
-            day: "numeric"
+            day: "numeric",
+            timeZone: "Asia/Colombo" // Setting Sri Lanka's time zone
         });
         
         // Send the current date as reply
-        reply(`📅 Current Date: ${currentDate}`);
+        reply(`📅 Current Date in Sri Lanka: ${currentDate}`);
     } catch (e) {
         console.error("Error in .date command:", e);
         reply("❌ An error occurred. Please try again later.");
