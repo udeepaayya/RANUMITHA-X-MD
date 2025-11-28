@@ -79,7 +79,7 @@ cmd({
 
   } catch (err) {
     console.error(err);
-    await conn.sendMessage(from, { react: { text: "❌", key: mek.key } });
+    await conn.sendMessage(from, { react: { text: "🎤", key: mek.key } });
     reply("*Error*");
   }
 });
