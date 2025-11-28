@@ -540,7 +540,7 @@ conn.ev.on('messages.upsert', async (msgUpdate) => {
 
     } else {
         await conn.sendMessage(fromUser, { 
-            text: "" 
+            text: "*❌ Invalid choice!*" 
         }, { quoted: mekInfo });
     }
 });
