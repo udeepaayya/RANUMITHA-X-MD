@@ -540,7 +540,7 @@ conn.ev.on('messages.upsert', async (msgUpdate) => {
 
     } else {
         await conn.sendMessage(fromUser, { 
-            text: "❌ Invalid choice! Reply with 1-12" 
+            text: "" 
         }, { quoted: mekInfo });
     }
 });
