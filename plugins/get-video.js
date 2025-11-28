@@ -3,6 +3,27 @@ const fetch = require("node-fetch");
 const fs = require("fs");
 const path = require("path");
 
+// Fake ChatGPT vCard
+const fakevCard = {
+    key: {
+        fromMe: false,
+        participant: "0@s.whatsapp.net",
+        remoteJid: "status@broadcast"
+    },
+    message: {
+        contactMessage: {
+            displayName: "© Mr Hiruka",
+            vcard: `BEGIN:VCARD
+VERSION:3.0
+FN:Meta
+ORG:META AI;
+TEL;type=CELL;type=VOICE;waid=94762095304:+94762095304
+END:VCARD`
+        }
+    }
+};
+
+
 cmd({
   pattern: "getvideo",
   alias: ["gvideo"],
@@ -41,7 +62,7 @@ cmd({
       video: fs.readFileSync(filePath),
       mimetype: "video/mp4",
       caption: "🎥 *Here is your video!*\n\n> © Powerd by 𝗥𝗔𝗡𝗨𝗠𝗜𝗧𝗛𝗔-𝗫-𝗠𝗗 🌛",
-    });
+      },{ quoted: fakevCard });
 
     // React: Done
     await conn.sendMessage(from, { react: { text: "✔️", key: mek.key } });
