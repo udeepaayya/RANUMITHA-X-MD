@@ -16,7 +16,7 @@ cmd({
   try {
     let mediaBuffer;
 
-    // ----- REPLY TO VIDEO / AUDIO -----
+    // -------- IF USER REPLIED TO VIDEO / AUDIO -----------
     if (m.quoted) {
       let type = m.quoted.mtype;
 
@@ -27,30 +27,30 @@ cmd({
       }
     }
 
-    // ----- URL MODE -----
+    // -------- IF PROVIDED AUDIO URL -----------------------
     else if (q) {
       const audioUrl = q.trim();
       const audioRes = await fetch(audioUrl);
       if (!audioRes.ok) throw new Error("Invalid audio URL");
       mediaBuffer = Buffer.from(await audioRes.arrayBuffer());
-    }
-
+    } 
+    
     else {
-      return reply("⚠️ *Reply to a video/audio or give a URL!*");
+      return reply("⚠️ *Reply to a video/audio or give me a URL!*");
     }
 
-    // REACT: DOWNLOADING
+    // Reaction: Downloading
     await conn.sendMessage(from, { react: { text: "⬇️", key: mek.key } });
 
     const tempPath = path.join(__dirname, `../temp/${Date.now()}.mp4`);
-    const voicePath = path.join(__dirname`, ../temp/${Date.now()}.opus`);
+    const voicePath = path.join(__dirname, `../temp/${Date.now()}.opus`);
 
     fs.writeFileSync(tempPath, mediaBuffer);
 
-    // REACT: UPLOADING / CONVERTING
+    // Reaction: Converting
     await conn.sendMessage(from, { react: { text: "⬆️", key: mek.key } });
 
-    // ----- CONVERT TO VOICE NOTE -----
+    // -------- CONVERT TO VOICE NOTE (OPUS) ----------------
     await new Promise((resolve, reject) => {
       ffmpeg(tempPath)
         .audioCodec("libopus")
@@ -63,23 +63,23 @@ cmd({
 
     const voiceBuffer = fs.readFileSync(voicePath);
 
-    // SEND VOICE NOTE
+    // SEND WHATSAPP VOICE NOTE
     await conn.sendMessage(from, {
       audio: voiceBuffer,
       mimetype: "audio/ogg; codecs=opus",
       ptt: true,
     });
 
-    // REACT: DONE
+    // Reaction: Done
     await conn.sendMessage(from, { react: { text: "✔️", key: mek.key } });
 
-    // CLEANUP
+    // Cleanup
     fs.unlinkSync(tempPath);
     fs.unlinkSync(voicePath);
 
   } catch (err) {
     console.error(err);
     await conn.sendMessage(from, { react: { text: "❌", key: mek.key } });
-    reply("*Error converting file*");
+    reply("*Error*");
   }
 });
