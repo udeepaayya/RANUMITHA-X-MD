@@ -3,7 +3,7 @@ const fetch = require("node-fetch");
 const fs = require("fs");
 const path = require("path");
 
-// Fake ChatGPT vCard
+// Fake vCard
 const fakevCard = {
     key: {
         fromMe: false,
@@ -15,7 +15,7 @@ const fakevCard = {
             displayName: "© Mr Hiruka",
             vcard: `BEGIN:VCARD
 VERSION:3.0
-FN:Meta
+FN:Meta AI
 ORG:META AI;
 TEL;type=CELL;type=VOICE;waid=94762095304:+94762095304
 END:VCARD`
@@ -23,56 +23,88 @@ END:VCARD`
     }
 };
 
+// Supported global video formats
+const videoExts = [
+    "mp4","mkv","mov","webm","avi","flv","ts","m4v","3gp","mpeg","mpg"
+];
 
 cmd({
-  pattern: "getvideo",
-  alias: ["gvideo"],
-  desc: "Download video from any direct link (Original quality)",
-  category: "download",
-  react: "🎥",
-  use: ".getvideo <video-url>",
-  filename: __filename,
+    pattern: "getvideo",
+    alias: ["gvideo"],
+    desc: "Download ANY direct video link (global support)",
+    category: "download",
+    react: "🎥",
+    use: ".getvideo <video-url>",
+    filename: __filename,
 }, async (conn, mek, m, { from, reply, q }) => {
 
-  try {
-    if (!q) return reply("*🖇️ Please send me a direct video URL!*");
+    try {
+        if (!q) return reply("🖇️ *Give me a valid direct video URL!*");
 
-    const videoUrl = q.trim();
+        let url = q.trim();
 
-    // React: Downloading
-    await conn.sendMessage(from, { react: { text: "⬇️", key: mek.key } });
+        // Fix Google Drive links automatic
+        if (url.includes("drive.google.com")) {
+            const id = url.match(/[-\w]{25,}/)?.[0];
+            if (id) url = `https://drive.google.com/uc?id=${id}&export=download`;
+        }
 
-    // Download video buffer
-    const videoRes = await fetch(videoUrl);
-    if (!videoRes.ok) throw new Error("Invalid video link");
+        await conn.sendMessage(from, { react: { text: "⬇️", key: mek.key } });
 
-    const buffer = Buffer.from(await videoRes.arrayBuffer());
+        // Fetch the file
+        const res = await fetch(url, {
+            redirect: "follow",
+            headers: { "User-Agent": "Mozilla/5.0" }
+        });
 
-    // Save temporary video
-    const fileName = `${Date.now()}.mp4`;
-    const filePath = path.join(__dirname, `../temp/${fileName}`);
+        if (!res.ok) throw new Error("Invalid or blocked video link.");
 
-    fs.writeFileSync(filePath, buffer);
+        const buffer = Buffer.from(await res.arrayBuffer());
 
-    // React: Uploading
-    await conn.sendMessage(from, { react: { text: "⬆️", key: mek.key } });
+        // Detect file name from header (universal support)
+        let ext = ".mp4";
 
-    // Send the video
-    await conn.sendMessage(from, {
-      video: fs.readFileSync(filePath),
-      mimetype: "video/mp4",
-      caption: "🎥 *Here is your video!*\n\n> © Powerd by 𝗥𝗔𝗡𝗨𝗠𝗜𝗧𝗛𝗔-𝗫-𝗠𝗗 🌛",
-      },{ quoted: fakevCard });
+        const type = res.headers.get("content-type");
+        const dispo = res.headers.get("content-disposition");
 
-    // React: Done
-    await conn.sendMessage(from, { react: { text: "✔️", key: mek.key } });
+        // Detect from content-type
+        if (type && type.includes("video/")) {
+            const t = type.split("/")[1].split(";")[0];
+            ext = "." + t;
+        }
 
-    // Clean temp file
-    fs.unlinkSync(filePath);
+        // Detect from content-disposition
+        if (dispo && dispo.includes("filename")) {
+            const match = dispo.match(/filename="?(.+)"?/);
+            if (match) ext = path.extname(match[1]) || ext;
+        }
 
-  } catch (err) {
-    console.error(err);
-    await conn.sendMessage(from, { react: { text: "🎥", key: mek.key } });
-    reply("❗ *Error downloading video.* Make sure URL is direct.");
-  }
+        // Detect from URL
+        const urlExt = path.extname(url.split("?")[0]);
+        if (urlExt.length <= 5 && videoExts.includes(urlExt.replace(".", ""))) {
+            ext = urlExt;
+        }
+
+        const fileName = Date.now() + ext;
+        const filePath = path.join(__dirname, "../temp/" + fileName);
+
+        fs.writeFileSync(filePath, buffer);
+
+        await conn.sendMessage(from, { react: { text: "⬆️", key: mek.key } });
+
+        await conn.sendMessage(from, {
+            video: fs.readFileSync(filePath),
+            mimetype: "video/mp4",
+            caption: "🎥 *Your video is ready!*\n\n> © Powered by 𝗥𝗔𝗡𝗨𝗠𝗜𝗧𝗛𝗔-𝗫-𝗠𝗗 🌛"
+        }, { quoted: fakevCard });
+
+        fs.unlinkSync(filePath);
+
+        await conn.sendMessage(from, { react: { text: "✔️", key: mek.key } });
+
+    } catch (e) {
+        console.log(e);
+        await conn.sendMessage(from, { react: { text: "❌", key: mek.key } });
+        reply("❗ *Download failed.*\nOnly DIRECT video links supported.");
+    }
 });
