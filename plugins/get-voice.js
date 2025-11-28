@@ -7,36 +7,50 @@ const ffmpeg = require("fluent-ffmpeg");
 cmd({
   pattern: "getvoice",
   alias: ["gv"],
-  desc: "Convert any direct audio URL into WhatsApp Voice Note",
+  desc: "Convert replied video/audio or URL to WhatsApp Voice Note",
   category: "owner",
   react: "🎤",
-  use: ".getvoice <audio-url>",
+  use: ".gv <reply/video/audio/url>",
   filename: __filename,
 }, async (conn, mek, m, { from, reply, q }) => {
   try {
-    if (!q) {
-      // ⚠️ If no URL, send message
-      return await reply("*📎 Please give me audio URL!*");
+    let mediaBuffer;
+
+    // ----- REPLY TO VIDEO / AUDIO -----
+    if (m.quoted) {
+      let type = m.quoted.mtype;
+
+      if (type === "videoMessage" || type === "audioMessage") {
+        mediaBuffer = await m.quoted.download();
+      } else {
+        return reply("⚠️ *Please reply to a video or audio!*");
+      }
     }
 
-    const audioUrl = q.trim();
+    // ----- URL MODE -----
+    else if (q) {
+      const audioUrl = q.trim();
+      const audioRes = await fetch(audioUrl);
+      if (!audioRes.ok) throw new Error("Invalid audio URL");
+      mediaBuffer = Buffer.from(await audioRes.arrayBuffer());
+    }
 
-    // ⬇️ React: Downloading
+    else {
+      return reply("⚠️ *Reply to a video/audio or give a URL!*");
+    }
+
+    // REACT: DOWNLOADING
     await conn.sendMessage(from, { react: { text: "⬇️", key: mek.key } });
 
-    const tempPath = path.join(__dirname, `../temp/${Date.now()}.mp3`);
-    const voicePath = path.join(__dirname, `../temp/${Date.now()}.opus`);
+    const tempPath = path.join(__dirname, `../temp/${Date.now()}.mp4`);
+    const voicePath = path.join(__dirname`, ../temp/${Date.now()}.opus`);
 
-    // DOWNLOAD AUDIO
-    const audioRes = await fetch(audioUrl);
-    if (!audioRes.ok) throw new Error("Invalid audio URL");
-    const audioBuffer = Buffer.from(await audioRes.arrayBuffer());
-    fs.writeFileSync(tempPath, audioBuffer);
+    fs.writeFileSync(tempPath, mediaBuffer);
 
-    // ⬆️ React: Converting
+    // REACT: UPLOADING / CONVERTING
     await conn.sendMessage(from, { react: { text: "⬆️", key: mek.key } });
 
-    // CONVERT TO OPUS
+    // ----- CONVERT TO VOICE NOTE -----
     await new Promise((resolve, reject) => {
       ffmpeg(tempPath)
         .audioCodec("libopus")
@@ -56,7 +70,7 @@ cmd({
       ptt: true,
     });
 
-    // ✅ React: Done
+    // REACT: DONE
     await conn.sendMessage(from, { react: { text: "✔️", key: mek.key } });
 
     // CLEANUP
@@ -65,7 +79,7 @@ cmd({
 
   } catch (err) {
     console.error(err);
-    // ❌ React: Error
     await conn.sendMessage(from, { react: { text: "❌", key: mek.key } });
+    reply("*Error converting file*");
   }
 });
