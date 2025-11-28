@@ -262,7 +262,7 @@ async (conn, mek, m, { args, reply }) => {
 
 cmd({
     pattern: "timenow",
-    alias: "time","velava","velavakeyd","welava",
+    alias: ["time","velava","velavakeyd","welava"],
     desc: "Check the current local time.",
     category: "utility",
     filename: __filename,
@@ -291,7 +291,7 @@ async (conn, mek, m, { reply }) => {
 
 cmd({
     pattern: "date",
-    alias: "2day","today","davasa","adadavasa","adha",
+    alias: ["2day","today","davasa","adha"],
     desc: "Check the current date.",
     category: "utility",
     filename: __filename,
