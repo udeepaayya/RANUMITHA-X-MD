@@ -510,3 +510,129 @@ async (conn, mek, m, { args, reply }) => {
         reply("❎ An error occurred while processing your request.");
     }
 });
+
+
+// 3. DATE + TIME COMBINED
+cmd({
+    pattern: "datetime",
+    desc: "Date + Time",
+    category: "utility",
+}, async (conn, mek, m, { reply }) => {
+    try {
+        const now = new Date();
+
+        const date = now.toLocaleDateString("en-US", {
+            weekday: "long",
+            year: "numeric",
+            month: "long",
+            day: "numeric",
+            timeZone: "Asia/Colombo"
+        });
+
+        const time = now.toLocaleTimeString("en-US", {
+            hour: "2-digit",
+            minute: "2-digit",
+            second: "2-digit",
+            hour12: true,
+            timeZone: "Asia/Colombo"
+        });
+
+        reply(`📅 *Date:* ${date}\n🕒 *Time:* ${time}`);
+    } catch {
+        reply("❌ Error");
+    }
+});
+
+
+
+// 5. CURRENT MONTH
+cmd({
+    pattern: "month",
+    desc: "Current month",
+    category: "utility"
+}, async (conn, mek, m, { reply }) => {
+    const now = new Date();
+    const month = now.toLocaleDateString("en-US", { month: "long", timeZone: "Asia/Colombo" });
+    reply(`🗓️ *Current Month:* ${month}`);
+});
+
+// 6. WEEK NUMBER
+cmd({
+    pattern: "weeknumber",
+    desc: "Week of the year",
+    category: "utility"
+}, async (conn, mek, m, { reply }) => {
+    const now = new Date();
+    const onejan = new Date(now.getFullYear(), 0, 1);
+    const week = Math.ceil((((now - onejan) / 86400000) + onejan.getDay() + 1) / 7);
+    reply(`📅 *Week Number:* ${week}`);
+});
+
+// 7. YEAR PROGRESS BAR
+cmd({
+    pattern: "yearprogress",
+    desc: "Shows year progress",
+    category: "utility"
+}, async (conn, mek, m, { reply }) => {
+    const now = new Date();
+    const start = new Date(now.getFullYear(), 0, 1);
+    const end = new Date(now.getFullYear(), 11, 31);
+    const progress = ((now - start) / (end - start)) * 100;
+    const bar = "█".repeat(progress / 10) + "░".repeat(10 - progress / 10);
+
+    reply(`📊 *Year Progress*\n${bar} ${progress.toFixed(1)}%`);
+});
+
+// 8. COUNTDOWN
+cmd({
+    pattern: "countdown",
+    desc: "Days left for a date",
+    category: "utility"
+}, async (conn, mek, m, { reply, args }) => {
+    if (!args[0]) return reply("📌 Use: .countdown 2025-12-25");
+
+    const target = new Date(args[0]);
+    const now = new Date();
+    const diff = Math.ceil((target - now) / (1000 * 60 * 60 * 24));
+
+    reply(`⏳ *Days Left:* ${diff} days`);
+});
+
+// 9. AGE CALCULATOR
+cmd({
+    pattern: "age",
+    desc: "Find age",
+    category: "utility"
+}, async (conn, mek, m, { reply, args }) => {
+    if (!args[0]) return reply("📌 Use: .age 2005-09-12");
+
+    const birth = new Date(args[0]);
+    const now = new Date();
+
+    const years = now.getFullYear() - birth.getFullYear();
+    reply(`🎂 *Age:* ${years} years`);
+});
+
+// 10. TIME IN ANY COUNTRY
+cmd({
+    pattern: "timein",
+    desc: "Time in any country",
+    category: "utility"
+}, async (conn, mek, m, { reply, args }) => {
+    if (!args[0]) return reply("📌 Use: .timein india");
+
+    try {
+        const country = args.join(" ");
+        const time = new Date().toLocaleTimeString("en-US", {
+            hour: "2-digit",
+            minute: "2-digit",
+            second: "2-digit",
+            hour12: true,
+            timeZone: country
+        });
+
+        reply(`🕒 *Time in ${country}:* ${time}`);
+    } catch {
+        reply("❌ Invalid country/timezone");
+    }
+});
