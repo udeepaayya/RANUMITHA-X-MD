@@ -2,7 +2,7 @@ const axios = require('axios');
 const { cmd } = require('../command');
 
 cmd({
-    pattern: "news",
+    pattern: "news2",
     desc: "Get latest Derana news.",
     category: "news",
     react: "📰",
