@@ -2,7 +2,7 @@ const axios = require('axios');
 const { cmd } = require('../command');
 
 cmd({
-    pattern: "news2",
+    pattern: "news",
     desc: "Get latest Derana news.",
     category: "news",
     react: "📰",
@@ -10,41 +10,36 @@ cmd({
 },
 async (conn, mek, m, { from, reply }) => {
     try {
-        // Derana API
         const response = await axios.get("https://derana.vercel.app/api/derana");
-        const articles = response.data;
+        
+        if (!response.data.status) 
+            return reply("⚠️ Could not fetch Derana news.");
 
-        if (!articles || !articles.length)
-            return reply("⚠️ No news found from Derana.");
+        const news = response.data.result;
 
-        // Send latest 5 news articles
-        for (let i = 0; i < Math.min(articles.length, 5); i++) {
-            const article = articles[i];
+        let message = `
+📰 *${news.title}*
 
-            let message = `
-📰 *${article.title}*
+📅 *Date:* ${news.date}
 
-${article.description || "No description available."}
+${news.desc}
 
-🔗 *Link:* ${article.url}
+🔗 *Read More:* ${news.url}
 
 > © Powered by 𝗥𝗔𝗡𝗨𝗠𝗜𝗧𝗛𝗔-𝗫-𝗠𝗗 🌛
-`;
+        `;
 
-            console.log("Image URL:", article.image);
-
-            if (article.image) {
-                await conn.sendMessage(from, {
-                    image: { url: article.image },
-                    caption: message
-                });
-            } else {
-                await conn.sendMessage(from, { text: message });
-            }
+        if (news.image) {
+            await conn.sendMessage(from, { 
+                image: { url: news.image }, 
+                caption: message 
+            });
+        } else {
+            await conn.sendMessage(from, { text: message });
         }
 
-    } catch (e) {
-        console.error("Derana News Error:", e);
-        reply("❌ Could not fetch Derana news. Try again later.");
+    } catch (err) {
+        console.error(err);
+        reply("❌ Error: Cannot fetch Derana news.");
     }
 });
