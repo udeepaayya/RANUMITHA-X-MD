@@ -1,45 +1,51 @@
-const axios = require('axios');
-const { cmd } = require('../command');
+const { cmd } = require("../command");
+const axios = require("axios");
 
 cmd({
-    pattern: "news2",
-    desc: "Get latest Derana news.",
-    category: "news",
-    react: "📰",
-    filename: __filename
+  pattern: "news2",
+  alias: ["latestnews2", "ln2"],
+  desc: "Send latest news",
+  category: "info",
+  react: "📰",
+  filename: __filename
 },
 async (conn, mek, m, { from, reply }) => {
-    try {
-        const response = await axios.get("https://derana.vercel.app/api/derana");
-        
-        if (!response.data.status) 
-            return reply("⚠️ Could not fetch Derana news.");
+  try {
+    reply("⏳ Fetching latest news…");
 
-        const news = response.data.result;
+    // Use any API with 100% working news source
+    const url = "https://newsapi.org/v2/top-headlines?country=us&apiKey=demo";
+    const res = await axios.get(url);
 
-        let message = `
-📰 *${news.title}*
+    const articles = res.data.articles;
 
-📅 *Date:* ${news.date}
-
-${news.desc}
-
-🔗 *Read More:* ${news.url}
-
-> © Powered by 𝗥𝗔𝗡𝗨𝗠𝗜𝗧𝗛𝗔-𝗫-𝗠𝗗 🌛
-        `;
-
-        if (news.image) {
-            await conn.sendMessage(from, { 
-                image: { url: news.image }, 
-                caption: message 
-            });
-        } else {
-            await conn.sendMessage(from, { text: message });
-        }
-
-    } catch (err) {
-        console.error(err);
-        reply("❌ Error: Cannot fetch Derana news.");
+    if (!articles || articles.length === 0) {
+      return reply("❌ No news found!");
     }
+
+    // Send each news one-by-one
+    for (let i = 0; i < articles.length; i++) {
+      let news = articles[i];
+      let msg = `
+📰 *NEWS ${i + 1}*
+
+*Title:* ${news.title || "N/A"}
+
+*Description:* ${news.description || "N/A"}
+
+🔗 *URL:* ${news.url}
+`;
+
+      await conn.sendMessage(from, { text: msg }, { quoted: mek });
+
+      await new Promise(resolve => setTimeout(resolve, 700)); // prevent spam block
+    }
+
+    // FINAL CONFIRMATION MESSAGE
+    await conn.sendMessage(from, { text: "✅ All news sent successfully!" }, { quoted: mek });
+
+  } catch (err) {
+    console.log(err);
+    reply("❌ Error fetching news!");
+  }
 });
