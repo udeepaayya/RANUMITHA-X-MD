@@ -58,4 +58,5 @@ cmd({
   }
 
   m.reply(`🔐 *Generated Password:*\n${pass}`);
+  m.reply(`${pass}`);
 });
