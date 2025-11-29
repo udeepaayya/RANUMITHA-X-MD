@@ -22,33 +22,23 @@ cmd({
 
 
 
+// =============================
+// 9. TRANSLATE (English → Sinhala)
+// =============================
 cmd({
   pattern: "translate2",
-  alias: ["trt2"],
+  alias: "trt2","sinhalen",
   react: "🌐",
-  desc: "Translate text to any language",
-  use: ".translate <language> <text>"
+  desc: "Translate to Sinhala",
+  use: ".translate <text>"
 }, async (conn, mek, m, { text }) => {
-  if (!text) return m.reply("📌 Use: .translate si Hello World");
+  if (!text) return m.reply("Type something!");
 
-  // Split the first word as language code, rest as text
-  let [lang, ...rest] = text.split(" ");
-  let content = rest.join(" ");
+  let url = `https://api.popcat.xyz/translate?to=si&text=${encodeURIComponent(text)}`;
+  let res = await fetch(url);
+  let data = await res.json();
 
-  if (!lang || !content) return m.reply("📌 Format: .translate <language_code> <text>");
-
-  try {
-    let url = `https://api.popcat.xyz/translate?to=${encodeURIComponent(lang)}&text=${encodeURIComponent(content)}`;
-    let res = await fetch(url);
-    let data = await res.json();
-
-    if (data.error) return m.reply("❌ Translation failed");
-
-    m.reply(`🌐 *Translation (${lang}):*\n${data.translated}`);
-  } catch (e) {
-    console.error(e);
-    m.reply("❌ Error translating text");
-  }
+  m.reply(`🌐 *Translation:*\n${data.translated}`);
 });
 
 
