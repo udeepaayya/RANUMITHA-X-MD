@@ -262,6 +262,7 @@ async (conn, mek, m, { args, reply }) => {
 
 cmd({
     pattern: "timenow",
+    alias: ["velava","welava","time"],
     desc: "Check the current local time.",
     category: "utility",
     filename: __filename,
@@ -281,7 +282,7 @@ async (conn, mek, m, { reply }) => {
         });
         
         // Send the local time as reply
-        reply(`🕒 Current Local Time in Sri Lanka: ${localTime}`);
+        reply(`🕒 Current Local Time in Sri Lanka: *${localTime}*`);
     } catch (e) {
         console.error("Error in .timenow command:", e);
         reply("❌ An error occurred. Please try again later.");
@@ -290,6 +291,7 @@ async (conn, mek, m, { reply }) => {
 
 cmd({
     pattern: "date",
+    alias: ["dawasa","ada","adha"],
     desc: "Check the current date.",
     category: "utility",
     filename: __filename,
@@ -306,7 +308,7 @@ async (conn, mek, m, { reply }) => {
             timeZone: "Asia/Colombo" // Sri Lanka time zone
         });
 
-        reply(`📅 Current Date in Sri Lanka: ${currentDate}`);
+        reply(`📅 Current Date in Sri Lanka: *${currentDate}*`);
     } catch (e) {
         console.error("Error in .date command:", e);
         reply("❌ An error occurred. Please try again later.");
