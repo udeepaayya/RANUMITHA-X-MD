@@ -2,7 +2,6 @@ const { cmd } = require("../command");
 const fetch = require("node-fetch");
 
 
-
 // =============================
 // 6. SHORT URL
 // =============================
@@ -27,7 +26,7 @@ cmd({
 // =============================
 cmd({
   pattern: "translate2",
-  alias: "trt2","sinhalen",
+  alias: ["trt2","sinhalen"],
   react: "🌐",
   desc: "Translate to Sinhala",
   use: ".translate <text>"
