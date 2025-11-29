@@ -262,6 +262,7 @@ async (conn, mek, m, { args, reply }) => {
 
 cmd({
     pattern: "timenow",
+    react: "🕒",
     alias: ["velava","welava","time"],
     desc: "Check the current local time.",
     category: "utility",
@@ -291,6 +292,7 @@ async (conn, mek, m, { reply }) => {
 
 cmd({
     pattern: "date",
+    react: "📅",
     alias: ["dawasa","ada","adha"],
     desc: "Check the current date.",
     category: "utility",
