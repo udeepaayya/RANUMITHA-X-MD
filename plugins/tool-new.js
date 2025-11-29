@@ -262,7 +262,6 @@ async (conn, mek, m, { args, reply }) => {
 
 cmd({
     pattern: "timenow",
-    alias: ["time","velava","velavakeyd","welava"],
     desc: "Check the current local time.",
     category: "utility",
     filename: __filename,
@@ -272,17 +271,17 @@ async (conn, mek, m, { reply }) => {
         // Get current date and time
         const now = new Date();
         
-        // Get local time in Sri Lanka timezone (Asia/Colombo)
+        // Get local time in Pakistan timezone (Asia/Karachi)
         const localTime = now.toLocaleTimeString("en-US", { 
             hour: "2-digit", 
             minute: "2-digit", 
             second: "2-digit", 
             hour12: true,
-            timeZone: "Asia/Colombo" // Setting Sri Lanka's time zone
+            timeZone: "Asia/Karachi" // Setting Pakistan's time zone explicitly
         });
         
         // Send the local time as reply
-        reply(`🕒 Current Local Time in Sri Lanka: ${localTime}`);
+        reply(`🕒 Current Local Time in Pakistan: ${localTime}`);
     } catch (e) {
         console.error("Error in .timenow command:", e);
         reply("❌ An error occurred. Please try again later.");
@@ -291,7 +290,6 @@ async (conn, mek, m, { reply }) => {
 
 cmd({
     pattern: "date",
-    alias: ["2day","today","davasa","adha"],
     desc: "Check the current date.",
     category: "utility",
     filename: __filename,
@@ -301,17 +299,16 @@ async (conn, mek, m, { reply }) => {
         // Get current date
         const now = new Date();
         
-        // Get the formatted date in Sri Lanka timezone
+        // Get the formatted date (e.g., "Monday, January 15, 2025")
         const currentDate = now.toLocaleDateString("en-US", {
             weekday: "long",
             year: "numeric",
             month: "long",
-            day: "numeric",
-            timeZone: "Asia/Colombo" // Setting Sri Lanka's time zone
+            day: "numeric"
         });
         
         // Send the current date as reply
-        reply(`📅 Current Date in Sri Lanka: ${currentDate}`);
+        reply(`📅 Current Date: ${currentDate}`);
     } catch (e) {
         console.error("Error in .date command:", e);
         reply("❌ An error occurred. Please try again later.");
