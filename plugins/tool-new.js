@@ -515,7 +515,7 @@ async (conn, mek, m, { args, reply }) => {
 // 3. DATE + TIME COMBINED
 cmd({
     pattern: "datetime",
-    alias: ["date&time","davasivelavai","dt"],
+    alias: ["date&time","davasivelavai","dt","dateandtime"],
     react: "🏷️",
     desc: "Date + Time",
     category: "utility",
