@@ -515,6 +515,8 @@ async (conn, mek, m, { args, reply }) => {
 // 3. DATE + TIME COMBINED
 cmd({
     pattern: "datetime",
+    alias: ["date&time","davasivelavai","dt"],
+    react: "🏷️",
     desc: "Date + Time",
     category: "utility",
 }, async (conn, mek, m, { reply }) => {
@@ -548,6 +550,8 @@ cmd({
 // 5. CURRENT MONTH
 cmd({
     pattern: "month",
+    alias: ["mase","maase"],
+    react : "📅",
     desc: "Current month",
     category: "utility"
 }, async (conn, mek, m, { reply }) => {
@@ -559,6 +563,8 @@ cmd({
 // 6. WEEK NUMBER
 cmd({
     pattern: "weeknumber",
+    alias: ["weeknub","sathiankaya"],
+    react: "📅",
     desc: "Week of the year",
     category: "utility"
 }, async (conn, mek, m, { reply }) => {
@@ -571,6 +577,8 @@ cmd({
 // 7. YEAR PROGRESS BAR
 cmd({
     pattern: "yearprogress",
+    alias: ["yearbar"],
+    react : "📊",
     desc: "Shows year progress",
     category: "utility"
 }, async (conn, mek, m, { reply }) => {
@@ -586,6 +594,7 @@ cmd({
 // 8. COUNTDOWN
 cmd({
     pattern: "countdown",
+    react: "⏳",
     desc: "Days left for a date",
     category: "utility"
 }, async (conn, mek, m, { reply, args }) => {
@@ -601,6 +610,8 @@ cmd({
 // 9. AGE CALCULATOR
 cmd({
     pattern: "age",
+    alias: ["old","vayasa","agecount"],
+    react: "🎂",
     desc: "Find age",
     category: "utility"
 }, async (conn, mek, m, { reply, args }) => {
@@ -616,10 +627,12 @@ cmd({
 // 10. TIME IN ANY COUNTRY
 cmd({
     pattern: "timein",
+    alias: ["timeeka"],
+    react: "🕒",
     desc: "Time in any country",
     category: "utility"
 }, async (conn, mek, m, { reply, args }) => {
-    if (!args[0]) return reply("📌 Use: .timein india");
+    if (!args[0]) return reply("📌 Use: *.timein japan*");
 
     try {
         const country = args.join(" ");
