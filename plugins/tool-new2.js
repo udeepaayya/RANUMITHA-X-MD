@@ -7,6 +7,7 @@ const fetch = require("node-fetch");
 // =============================
 cmd({
   pattern: "shorturl",
+  alias: ["shortlink"],
   react: "🔗",
   desc: "Shorten any link",
   use: ".short <url>"
