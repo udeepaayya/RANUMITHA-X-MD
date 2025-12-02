@@ -1,59 +1,43 @@
 const { cmd } = require("../command");
-const fs = require("fs");
 
 cmd({
   pattern: "vv2",
-  alias: ["viewonce2", "unlock2"],
-  desc: "Unlock view-once video/photo/voice",
-  category: "tool",
   react: "👁️",
-  use: ".vv2 (reply to a view once message)",
-  filename: __filename,
-}, async (conn, mek, m, { quoted, reply }) => {
+  desc: "Unlock view once media",
+  use: ".vv2 (reply view once)",
+  filename: __filename
+},
+async (conn, mek, m, { quoted, reply }) => {
   try {
 
-    if (!quoted) return reply("🔁 *Reply to a view-once message!*");
+    if (!quoted) return reply("📌 Reply to a *View Once* message!");
 
-    let type = quoted.msg?.type || quoted.mtype;
+    // extract the real message
+    const msg = quoted.message?.viewOnceMessageV2 ||
+                quoted.message?.viewOnceMessageV2Extension ||
+                quoted.msg?.message?.viewOnceMessageV2 ||
+                quoted.msg?.message?.viewOnceMessageV2Extension;
 
-    // --- PHOTO ---
-    if (type === "viewOnceMessageV2" || type === "viewOnceMessageV2Extension") {
-      
-      const msg = quoted.msg || quoted.message;
+    if (!msg) return reply("❌ Not a view-once media message!");
 
-      let mediaType = Object.keys(msg.message)[0]; // imageMessage / videoMessage
+    // find media message inside
+    const inner = msg.message.imageMessage ||
+                  msg.message.videoMessage ||
+                  msg.message.audioMessage;
 
-      let buffer = await conn.downloadMediaMessage({
-        message: msg.message
-      });
+    if (!inner) return reply("⚠️ Media not found inside view-once message!");
 
-      if (mediaType === "imageMessage") {
-        await conn.sendMessage(mek.chat, { image: buffer, caption: "🔓 *Unlocked Photo*" }, { quoted: mek });
-      }
+    // download the media
+    const buffer = await conn.downloadMediaMessage({
+      message: { ...msg }
+    });
 
-      if (mediaType === "videoMessage") {
-        await conn.sendMessage(mek.chat, { video: buffer, caption: "🔓 *Unlocked Video*" }, { quoted: mek });
-      }
-
-      return;
-    }
-
-    // --- VOICE / AUDIO (if protected) ---
-    if (quoted.mtype === "audioMessage") {
-      let buffer = await quoted.download();
-
-      await conn.sendMessage(
-        mek.chat,
-        { audio: buffer, mimetype: "audio/mp4", ptt: true },
-        { quoted: mek }
-      );
-      return;
-    }
-
-    return reply("❌ *This is not a view-once media message!*");
-
-  } catch (e) {
-    console.log(e);
-    reply("⚠️ Error unlocking view-once media.");
-  }
-});
+    // send unlocked media
+    if (msg.message.imageMessage) {
+      await conn.sendMessage(mek.chat, { image: buffer, caption: "🔓 Unlocked Photo" }, { quoted: mek });
+    } else if (msg.message.videoMessage) {
+      await conn.sendMessage(mek.chat, { video: buffer, caption: "🔓 Unlocked Video" }, { quoted: mek });
+    } else if (msg.message.audioMessage) {
+      await conn.sendMessage(mek.chat, { audio: buffer, mimetype: "audio/mp4", ptt: true }, { quoted: mek });
+    } else {
+      return reply("❌ Unknown media
