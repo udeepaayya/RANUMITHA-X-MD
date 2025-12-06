@@ -7,8 +7,8 @@ const movieCache = new NodeCache({ stdTTL: 100, checkperiod: 120 });
 
 
 cmd({
-  pattern: "movie",
-  alias: ["mv", "film"],
+  pattern: "movie2",
+  alias: ["mv2", "film2"],
   desc: "Search Sinhala movies",
   category: "Search",
   react: "🔍",
