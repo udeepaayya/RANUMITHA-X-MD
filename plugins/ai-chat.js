@@ -3,7 +3,7 @@ const axios = require('axios');
 
 cmd({
   pattern: "ai",
-  alias: ["bot", "ranumithaai", "gpt", "gpt4", "bing", "ranuai"],
+  alias: ["bot", "ranumithaai", "gpt", "gpt4", "bing","ranuai"],
   desc: "Chat with an AI model",
   category: "ai",
   react: "🤖",
@@ -21,37 +21,27 @@ async (conn, mek, m, { from, args, q, reply, react }) => {
       return reply("AI failed to respond. Please try again later.");
     }
 
-    // ----------------------------------------
-    // SAFE PROFILE PICTURE FETCH (NO CRASH)
-    // ----------------------------------------
+    // Start measuring ping for fetching profile picture
+    const start = Date.now();
+
+    // Fetch profile picture buffer
     let thumb = Buffer.from([]);
-    const number = "18002428478";
+    const number = "18002428478"; // Use your number without spaces or symbols
     const jid = number + "@s.whatsapp.net";
 
     try {
-      const ppUrl = await conn.profilePictureUrl(jid, "image")
-        .catch(() => null);   // Prevent crash
-
-      if (ppUrl) {
-        const ppResp = await axios.get(ppUrl, { responseType: "arraybuffer" })
-          .catch(() => null); // Prevent crash
-
-        if (ppResp && ppResp.data) {
-          thumb = Buffer.from(ppResp.data, "binary");
-        }
-      }
-
+      const ppUrl = await conn.profilePictureUrl(jid, "image");
+      const ppResp = await axios.get(ppUrl, { responseType: "arraybuffer" });
+      thumb = Buffer.from(ppResp.data, "binary");
     } catch (err) {
-      console.log("Profile picture fetch failed (safe handled)");
+      console.log("❗ Couldn't fetch profile picture:", err.message);
     }
 
-    // ----------------------------------------
-
-    // Create safe contact card
+    // Create contact card vCard object
     const contactCard = {
       key: {
         fromMe: false,
-        participant: "0@s.whatsapp.net",
+        participant: '0@s.whatsapp.net',
         remoteJid: "status@broadcast"
       },
       message: {
@@ -59,7 +49,7 @@ async (conn, mek, m, { from, args, q, reply, react }) => {
           displayName: "GPT 3✅",
           vcard: `BEGIN:VCARD
 VERSION:3.0
-FN: GPT 3
+FN: GPT ✅
 ORG: OpenAI
 TEL;type=CELL;type=VOICE;waid=${number}:+1 800 242 8478
 END:VCARD`,
@@ -68,7 +58,7 @@ END:VCARD`,
       }
     };
 
-    // Send AI Response
+    // Send AI quoted contact card
     await conn.sendMessage(from, {
       text: `🤖 *RANUMITHA-X-MD Ai Response:*\n\n${data.message}`
     }, { quoted: contactCard });
@@ -78,6 +68,6 @@ END:VCARD`,
   } catch (e) {
     console.error("Error in AI command:", e);
     await react("❌");
-    return reply("An error occurred while communicating with the AI.");
+    reply("An error occurred while communicating with the AI.");
   }
 });
